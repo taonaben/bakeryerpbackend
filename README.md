@@ -1,10 +1,4 @@
-Alright, let’s do this properly.
-Below is a **clean, no-nonsense README.md** you can paste straight into the repo.
-It assumes zero context and gets a new dev running without hand-holding.
 
----
-
-```markdown
 # Bakery ERP — Backend (Django + PostgreSQL + Docker)
 
 This repository contains the backend for the **Bakery ERP project**, built with **Django** and **PostgreSQL**, and fully containerized using **Docker**.
@@ -20,28 +14,6 @@ The database schema is shared via migrations; **data is not shared via Git**.
 - Django 4.x
 - PostgreSQL 15
 - Docker & Docker Compose
-
----
-
-## Project Structure
-
-```
-
-bakery-erp/
-│
-├── backend/
-│   ├── Dockerfile
-│   ├── manage.py
-│   ├── requirements.txt
-│   ├── config/        # Django settings, urls, wsgi
-│   └── apps/          # Django apps (inventory, sales, etc.)
-│
-├── .env.example
-├── docker-compose.yml
-├── README.md
-└── .gitignore
-
-````
 
 ---
 
@@ -216,14 +188,6 @@ We do **not** commit database dumps or volumes.
 
 ---
 
-## Notes
-
-* This project follows a **module-first ERP architecture**
-* Inventory is the first fully implemented module
-* Database design comes **before** API design
-* The system is designed to be realistic and extensible
-
----
 
 ## Troubleshooting
 
@@ -241,27 +205,3 @@ docker compose up
 
 ⚠️ This wipes your local database.
 
----
-
-## Next Steps
-
-* Inventory module ERD
-* Core master data models (Company, Warehouse, Product)
-* API design based on business actions, not tables
-
----
-
-**This setup is intentional.
-Follow it strictly to avoid environment drift and team friction.**
-
-```
-
----
-
-If you want, next we can:
-- tighten this README for **academic submission**
-- add a **Makefile** (`make up`, `make migrate`, etc.)
-- or document **fixtures + seed data strategy**
-
-This is solid groundwork.
-```
