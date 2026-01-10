@@ -15,7 +15,7 @@ def generate_employee_code():
 
 
 class User(AbstractUser):
-    """User's core fields, that will be used everywhere"""
+    """User's core fields, that will be used everywhere, Uses the employee code as unique identifier"""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     emp_code = models.CharField(
