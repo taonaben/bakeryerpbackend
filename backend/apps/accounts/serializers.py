@@ -24,20 +24,26 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "last_name",
             "department",
         ]
-
-    read_only_fields = ["emp_code"]
+        read_only_fields = ["emp_code"]
 
     def validate(self, data):
         if data.get("password") != data.get("password2"):
             raise serializers.ValidationError({"password": "Passwords do not match."})
+        
+        # Validate names are not empty
+        first_name = data.get("first_name", "").strip()
+        last_name = data.get("last_name", "").strip()
+        if not first_name or not last_name:
+            raise serializers.ValidationError({"first_name": "First and last names cannot be empty."})
+        
         return data
 
     def create(self, validated_data):
         # Extract profile and related data
         validated_data.pop("password2")
         password = validated_data.pop("password")
-        first_name = validated_data.pop("first_name")
-        last_name = validated_data.pop("last_name")
+        first_name = validated_data.pop("first_name").strip()
+        last_name = validated_data.pop("last_name").strip()
 
         # Generate username from first and last name
         username = first_name[0].lower() + last_name.lower()

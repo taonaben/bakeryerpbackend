@@ -1,36 +1,42 @@
+import logging
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 from .serializers import (
     UserSerializer,
     UserCreateSerializer,
     LoginSerializer,
     LogoutSerializer,
 )
-
 from rest_framework.parsers import JSONParser
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class IsAuthenticatedOrCreate(BasePermission):
     """Allow unauthenticated access for create/register, authenticated for others"""
 
     def has_permission(self, request, view):
-        if view.action in ["create", "register", "list"]:
+        if view.action in ["create", "register"]:
             return True
-        return request.user and request.user.is_authenticated
+        return request.user.is_authenticated
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticatedOrCreate]
+
+    def get_queryset(self):
+        if self.action == "list" and not self.request.user.is_authenticated:
+            return User.objects.none()
+        return User.objects.all()
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -53,6 +59,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_201_CREATED,
             )
+        logger.warning(f"Registration failed for email: {request.data.get('email', 'unknown')} - {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -70,11 +77,17 @@ class LoginView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        emp_code = serializer.validated_data.get("employee_code")
+        emp_code = serializer.validated_data.get("emp_code")
         password = serializer.validated_data.get("password")
 
-        user = get_user_model().objects.filter(emp_code=emp_code).first()
-        if user and user.check_password(password):
+        # Find user by emp_code to get username for authentication
+        try:
+            user_obj = get_user_model().objects.get(emp_code=emp_code)
+            user = authenticate(username=user_obj.username, password=password)
+        except get_user_model().DoesNotExist:
+            user = None
+
+        if user:
             refresh = RefreshToken.for_user(user)
             return Response(
                 {
@@ -112,8 +125,8 @@ class LogoutView(APIView):
                 {"detail": "Logout successful."},
                 status=status.HTTP_200_OK,
             )
-        except Exception as e:
+        except TokenError:
             return Response(
-                {"error": str(e)},
+                {"detail": "Invalid token."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
