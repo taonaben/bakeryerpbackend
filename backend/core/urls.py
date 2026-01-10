@@ -32,7 +32,7 @@ from apps.accounts.urls import urlpatterns as accounts_urls
 
 app_urlpatterns = [
     # path("auth/", include(auth_urls)),
-    path("user/", include(accounts_urls))
+    path("account/", include(accounts_urls))
 ]
 
 third_party_urlpatterns = [
