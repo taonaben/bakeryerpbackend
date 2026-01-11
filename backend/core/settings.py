@@ -95,18 +95,30 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+if DEBUG:
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": os.environ.get("POSTGRES_DB"),
+                "USER": os.environ.get("POSTGRES_USER"), 
+                "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+                "HOST": os.environ.get("POSTGRES_HOST"),
+                "PORT": os.environ.get("POSTGRES_PORT"),
+            }
+        }
+else:
+    try:
+        # Need to import dj_database_url
+        import dj_database_url
+        
+        render_external_db_url = os.environ.get("RENDER_DB_URL")
+        logger.info(f"Render external db url: {render_external_db_url}")
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_DB"),
-        "USER": os.environ.get("POSTGRES_USER"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("POSTGRES_HOST"),
-        "PORT": os.environ.get("POSTGRES_PORT"),
-    }
-}
-
+        # Need to initialize DATABASES before using it
+        DATABASES = {}
+        DATABASES["default"] = dj_database_url.parse(render_external_db_url)
+    except Exception as e:
+        logger.error(f"Error configuring database: {e}")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
