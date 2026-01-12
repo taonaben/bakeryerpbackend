@@ -13,9 +13,9 @@ RUN apt-get update \
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-
 COPY . .
 
-RUN python manage.py collectstatic --noinput || true
+# Make entrypoint script executable
+RUN chmod +x entrypoint.sh
 
-CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]
+ENTRYPOINT ["./entrypoint.sh"]
