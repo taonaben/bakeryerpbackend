@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     # "django_extensions",
     #! Local apps
     "apps.accounts",
+    'apps.inventory',
 ]
 
 MIDDLEWARE = [
