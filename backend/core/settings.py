@@ -61,7 +61,6 @@ INSTALLED_APPS = [
     "drf_spectacular",
     # "django_filters",
     # "django_celery_beat",
-    # "corsheaders",
     # "django_extensions",
     #! Local apps
     "apps.accounts",
@@ -70,7 +69,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # "corsheaders.middleware.CorsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
