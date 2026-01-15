@@ -29,10 +29,12 @@ from drf_spectacular.views import (
     SpectacularRedocView,
 )
 from apps.accounts.urls import urlpatterns as accounts_urls
+from central.urls import urlpatterns as central_urls
 
 app_urlpatterns = [
     # path("auth/", include(auth_urls)),
-    path("account/", include(accounts_urls))
+    path("account/", include(accounts_urls)),
+    path("", include(central_urls)),
 ]
 
 third_party_urlpatterns = [
