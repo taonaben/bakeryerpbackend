@@ -1,0 +1,255 @@
+{
+  "info": {
+    "_postman_id": "b5d00db0-fff1-487f-a513-ec01bbbbfa54",
+    "name": "bakeryerp",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "accounts",
+      "item": [
+        {
+          "name": "Logout user",
+          "id": "198a6a99-6e01-4619-a3d5-958ec9b2842d",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_code}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"refresh\": \"{{refresh_token}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/account/logout/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "account",
+                "logout",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login user",
+          "id": "5473891e-5e92-48b1-96e2-4049f5739171",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"emp_code\": \"226-NDG\",\r\n  \"password\": \"securepass123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/account/login/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "account",
+                "login",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create user",
+          "id": "8f84d7c8-e74c-43af-ae52-1185ae46d0eb",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"munikwataon09@gmail.com\",\r\n  \"first_name\": \"taona\",\r\n  \"last_name\": \"munikwa\",\r\n  \"department\": \"ENG\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{productionurl}}/account/register/",
+              "host": [
+                "{{productionurl}}"
+              ],
+              "path": [
+                "account",
+                "register",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "972b1728-c7a9-48f6-93c1-8698ef6561fd",
+      "auth": {
+        "type": "noauth"
+      }
+    },
+    {
+      "name": "companies",
+      "item": [
+        {
+          "name": "get list of all companies in db",
+          "id": "bc6dc3a6-fb87-49eb-a6e9-1860b6e8073c",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_code}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"refresh\": \"{{refresh_token}}\"\r\n}"
+            },
+            "url": {
+              "raw": "{{baseurl}}/companies",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "companies"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create a new company",
+          "id": "0dd9c41f-055e-480d-9553-687a6bd971c7",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Pie Kings\",\r\n  \"status\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/companies/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "companies",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get company by id",
+          "id": "04fa408f-d145-4438-b0df-0a6a386d2c9e",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "edit company details",
+          "id": "04f26971-effa-4a8e-88da-7b5336a891f2",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Pie Kings\",\r\n  \"status\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/companies/{{piekings_id}}",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "companies",
+                "{{piekings_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "bdca6024-fa9d-461c-b464-7cfd202cc09b"
+    }
+  ],
+  "auth": {
+    "type": "bearer"
+  },
+  "variable": [
+    {
+      "id": "10f9bbd2-294e-41d9-aecd-2ae75b620d1e",
+      "key": "baseurl",
+      "value": ""
+    },
+    {
+      "id": "723ebfa1-bd4e-4a42-b9c1-d678f0226fa1",
+      "key": "access_code",
+      "value": ""
+    },
+    {
+      "id": "6696e97f-49bf-4847-bf0f-6d8a1e648c9c",
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "id": "689c7501-91a2-44b5-98bb-40b284cce7aa",
+      "key": "productionurl",
+      "value": ""
+    },
+    {
+      "id": "2a10587e-1c20-48a1-9707-ceeb2389767f",
+      "key": "piekings_id",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}
