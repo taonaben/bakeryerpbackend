@@ -13,7 +13,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
-from venv import logger
+import logging
+
+logger = logging.getLogger(__name__)
 from corsheaders.defaults import default_headers, default_methods
 from dotenv import load_dotenv
 
@@ -30,9 +32,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "your-default-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "1") == "1"
+DEBUG = os.environ.get("DEBUG", "0") == "1"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 
 # Application definition
@@ -57,7 +59,8 @@ INSTALLED_APPS = [
     # "django_celery_beat",
     # "django_extensions",
     #! Local apps
-    "apps.accounts"
+    "apps.accounts",
+    'apps.inventory',
 ]
 
 MIDDLEWARE = [
@@ -94,18 +97,45 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_DB"),
-        "USER": os.environ.get("POSTGRES_USER"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("POSTGRES_HOST"),
-        "PORT": os.environ.get("POSTGRES_PORT"),
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB"),
+            "USER": os.environ.get("POSTGRES_USER"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+            "HOST": os.environ.get("POSTGRES_HOST"),
+            "PORT": os.environ.get("POSTGRES_PORT"),
+        }
     }
-}
+else:
+    try:
+        import dj_database_url
 
+        render_external_db_url = os.environ.get("RENDER_DB_URL") or os.environ.get(
+            "DATABASE_URL"
+        )
+        logger.info(f"Render external db url: {render_external_db_url!r}")
+
+        # Initialize DATABASES and only parse when a URL is provided
+        if render_external_db_url:
+            DATABASES = {"default": dj_database_url.parse(render_external_db_url)}
+        else:
+            # Fallback to a local sqlite DB so build-time commands (collectstatic) don't fail
+            DATABASES = {
+                "default": {
+                    "ENGINE": "django.db.backends.sqlite3",
+                    "NAME": BASE_DIR / "db.sqlite3",
+                }
+            }
+    except Exception as e:
+        logger.error(f"Error configuring database: {e}")
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
+        }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -147,7 +177,9 @@ CELERY_TASK_SERIALIZER = "json"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
