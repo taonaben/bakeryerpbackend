@@ -14,7 +14,7 @@ class Stock(models.Model):
     warehouse = models.ForeignKey(
         Warehouse, on_delete=models.CASCADE, related_name="stocks"
     )
-    quantity_on_hand = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    quantity_on_hand = models.DecimalField(max_digits=10,  decimal_places=2, default=0)
     last_updated = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

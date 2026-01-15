@@ -29,13 +29,21 @@ class Company(models.Model):
 
 
 class Warehouse(models.Model):
+    
+    WAREHOUSE_TYPE_CHOICES = [
+        ("storage", "Storage"),
+        ("distribution", "Distribution"),
+        ("production", "Production"),
+        ("returns", "Returns"),
+    ]
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, related_name="warehouses"
     )
     name = models.CharField(max_length=255, unique=True)
     status = models.BooleanField(default=True)  # Active or Inactive
-    wh_type = models.CharField(max_length=255, null=True, blank=True)
+    wh_type = models.CharField(choices=WAREHOUSE_TYPE_CHOICES, max_length=50, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -65,7 +73,6 @@ class Product(models.Model):
     unit_of_measure = models.CharField(
         max_length=50, choices=UNIT_CHOICES, null=True, blank=True
     )
-    
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

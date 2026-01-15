@@ -9,8 +9,18 @@ class CompanySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Company
-        fields = ["id", "name", "status", "created_at", "warehouses_count"]
-        read_only_fields = ["id", "created_at", "warehouses_count"]
+        fields = [
+            "id",
+            "name",
+            "status",
+            "created_at",
+            "warehouses_count",
+        ]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "warehouses_count",
+        ]
 
     def get_warehouses_count(self, obj):
         return obj.warehouses.count()
@@ -25,8 +35,8 @@ class WarehouseSerializer(serializers.ModelSerializer):
         model = Warehouse
         fields = [
             "id",
-            "company",
-            "company_name",
+            "company", #company id
+            "company_name", #company name
             "name",
             "status",
             "wh_type",
