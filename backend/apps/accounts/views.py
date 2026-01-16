@@ -50,7 +50,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action in ["create", "register"]:
             return [AllowAny()]
         elif self.action == "list":
-            return [IsAdminUser()]
+            return [AllowAny()]
         elif self.action == "retrieve":
             return [IsAuthenticated()]
         return [IsAdminUser()]  # update, delete, destroy
