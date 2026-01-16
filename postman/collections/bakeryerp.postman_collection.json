@@ -58,7 +58,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"emp_code\": \"226-NDG\",\r\n  \"password\": \"securepass123\"\r\n}",
+              "raw": "{\r\n  \"emp_code\": \"{{current_user_emp_code}}\",\r\n  \"password\": \"securepass123\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -87,7 +87,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"munikwataon09@gmail.com\",\r\n  \"first_name\": \"taona\",\r\n  \"last_name\": \"munikwa\",\r\n  \"department\": \"ENG\"\r\n}",
+              "raw": "{\r\n  \"email\": \"tbaby09@gmail.com\",\r\n  \"first_name\": \"tuff\",\r\n  \"last_name\": \"baby\",\r\n  \"department\": \"ENG\",\r\n  \"password\": \"securepass123\",\r\n\"password2\": \"securepass123\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -95,14 +95,75 @@
               }
             },
             "url": {
-              "raw": "{{productionurl}}/account/register/",
+              "raw": "{{baseurl}}/account/users/register/",
               "host": [
-                "{{productionurl}}"
+                "{{baseurl}}"
               ],
               "path": [
                 "account",
+                "users",
                 "register",
                 ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "retrieve list of users",
+          "id": "a176704b-d10f-4d08-b34c-d7db6475fe77",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_code}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseurl}}/account/users/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "account",
+                "users",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "retrieve single user details",
+          "id": "90f53197-79f6-4f10-9dfb-19651951214f",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_code}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseurl}}/account/users/{{current_user_id}}",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "account",
+                "users",
+                "{{current_user_id}}"
               ]
             }
           },
@@ -118,7 +179,7 @@
       "name": "companies",
       "item": [
         {
-          "name": "get list of all companies in db",
+          "name": "retrieve list of all companies in db",
           "id": "bc6dc3a6-fb87-49eb-a6e9-1860b6e8073c",
           "request": {
             "auth": {
@@ -157,7 +218,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"name\": \"Pie Kings\",\r\n  \"status\": true\r\n}",
+              "raw": "{\r\n  \"name\": \"what's a father?\",\r\n  \"status\": true\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -178,13 +239,20 @@
           "response": []
         },
         {
-          "name": "get company by id",
+          "name": "retrieve company by id",
           "id": "04fa408f-d145-4438-b0df-0a6a386d2c9e",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": ""
+              "raw": "{{baseurl}}/companies/6c6d5fc7-894b-4e96-bc0c-b80fbdb265d4",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "companies",
+                "6c6d5fc7-894b-4e96-bc0c-b80fbdb265d4"
+              ]
             }
           },
           "response": []
@@ -222,34 +290,50 @@
     }
   ],
   "auth": {
-    "type": "bearer"
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_code}}",
+        "type": "string"
+      }
+    ]
   },
   "variable": [
     {
-      "id": "10f9bbd2-294e-41d9-aecd-2ae75b620d1e",
+      "id": "b6cc401a-4f9a-464b-8c6d-f854a1a2b122",
       "key": "baseurl",
       "value": ""
     },
     {
-      "id": "723ebfa1-bd4e-4a42-b9c1-d678f0226fa1",
+      "id": "4bd1ac77-49a1-41e1-9215-eb70cbec0536",
       "key": "access_code",
       "value": ""
     },
     {
-      "id": "6696e97f-49bf-4847-bf0f-6d8a1e648c9c",
+      "id": "df5c0bf1-29e0-43dc-a99a-be9a29a3d987",
       "key": "refresh_token",
       "value": ""
     },
     {
-      "id": "689c7501-91a2-44b5-98bb-40b284cce7aa",
+      "id": "4b0e4d7c-65ac-45ce-a6a5-f351bca2fc42",
       "key": "productionurl",
       "value": ""
     },
     {
-      "id": "2a10587e-1c20-48a1-9707-ceeb2389767f",
+      "id": "75b71718-937d-4656-980e-f04bea93c4bd",
       "key": "piekings_id",
-      "value": "",
-      "type": "default"
+      "value": ""
+    },
+    {
+      "id": "3bddf6b8-fbe5-43bd-8ef5-90c904bb1ce2",
+      "key": "current_user_emp_code",
+      "value": ""
+    },
+    {
+      "id": "6256c2f9-3574-4427-82c4-467e9686525c",
+      "key": "current_user_id",
+      "value": ""
     }
   ]
 }
