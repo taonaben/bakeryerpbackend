@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.utils.text import slugify
 from apps.accounts import models
+import uuid
 
 User = get_user_model()
 
@@ -29,13 +31,15 @@ class UserCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data.get("password") != data.get("password2"):
             raise serializers.ValidationError({"password": "Passwords do not match."})
-        
+
         # Validate names are not empty
         first_name = data.get("first_name", "").strip()
         last_name = data.get("last_name", "").strip()
         if not first_name or not last_name:
-            raise serializers.ValidationError({"first_name": "First and last names cannot be empty."})
-        
+            raise serializers.ValidationError(
+                {"first_name": "First and last names cannot be empty."}
+            )
+
         return data
 
     def create(self, validated_data):
@@ -45,19 +49,28 @@ class UserCreateSerializer(serializers.ModelSerializer):
         first_name = validated_data.pop("first_name").strip()
         last_name = validated_data.pop("last_name").strip()
 
-        # Generate username from first and last name
-        username = first_name[0].lower() + last_name.lower()
+        # Generate username from first and last name with uniqueness guarantee
+        base_username = f"{first_name[0].lower()}{last_name.lower()}".replace(" ", "")
+        username = base_username
+        counter = 1
+
+        # Ensure username is unique
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}{counter}"
+            counter += 1
 
         # Create user
-        user = User.objects.create_user(
-            username=username,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            **validated_data
-        )
-
-        return user
+        try:
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                **validated_data,
+            )
+            return user
+        except Exception as e:
+            raise serializers.ValidationError(f"Failed to create user: {str(e)}")
 
 
 class UserSerializer(serializers.ModelSerializer):

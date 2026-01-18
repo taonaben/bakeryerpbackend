@@ -58,7 +58,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"emp_code\": \"{{current_user_emp_code}}\",\r\n  \"password\": \"securepass123\"\r\n}",
+              "raw": "{\r\n  \"emp_code\": \"XJ1-5S6\",\r\n  \"password\": \"securepass123\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -66,9 +66,9 @@
               }
             },
             "url": {
-              "raw": "{{baseurl}}/account/login/",
+              "raw": "{{productionurl}}/account/login/",
               "host": [
-                "{{baseurl}}"
+                "{{productionurl}}"
               ],
               "path": [
                 "account",
@@ -87,7 +87,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"tbaby09@gmail.com\",\r\n  \"first_name\": \"tuff\",\r\n  \"last_name\": \"baby\",\r\n  \"department\": \"ENG\",\r\n  \"password\": \"securepass123\",\r\n\"password2\": \"securepass123\"\r\n}",
+              "raw": "{\r\n  \"email\": \"@gmail.com\",\r\n  \"password\": \"securepass123\",\r\n  \"password2\": \"securepass123\",\r\n  \"first_name\": \"tuff\",\r\n  \"last_name\": \"baby\",\r\n  \"department\": \"ENG\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -95,9 +95,9 @@
               }
             },
             "url": {
-              "raw": "{{baseurl}}/account/users/register/",
+              "raw": "{{productionurl}}/account/users/register/",
               "host": [
-                "{{baseurl}}"
+                "{{productionurl}}"
               ],
               "path": [
                 "account",
