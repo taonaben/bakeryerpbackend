@@ -33,6 +33,19 @@ class StockViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(warehouse_id=warehouse_id)
         return queryset
 
+    @action(detail=False, methods=["get"])
+    def by_product_sku(self, request):
+        """Retrieve stock items for a specific product SKU"""
+        sku = request.query_params.get("sku", None)
+        if sku is not None:
+            stocks = Stock.objects.filter(product__sku=sku)
+            serializer = self.get_serializer(stocks, many=True)
+            return Response(serializer.data)
+        return Response(
+            {"detail": "sku parameter is required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
 
 class BatchViewSet(viewsets.ModelViewSet):
     queryset = Batch.objects.all()
@@ -48,7 +61,7 @@ class BatchViewSet(viewsets.ModelViewSet):
         warehouse_id = self.request.query_params.get("warehouse_id", None)
         if product_id is not None:
             queryset = queryset.filter(product_id=product_id)
-        if warehouse_id is not None:
+        elif warehouse_id is not None:
             queryset = queryset.filter(warehouse_id=warehouse_id)
         return queryset
 
@@ -63,10 +76,15 @@ class StockMovementViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Filter stock movements by date range if provided"""
         queryset = StockMovement.objects.all()
+        warehouse_id = self.request.query_params.get("warehouse_id")
+
         start_date = self.request.query_params.get("start_date", None)
         end_date = self.request.query_params.get("end_date", None)
-        if start_date is not None and end_date is not None:
-            queryset = queryset.filter(date__range=[start_date, end_date])
+        if warehouse_id is not None:
+            queryset = queryset.filter(batch__warehouse_id=warehouse_id)
+
+            if start_date is not None and end_date is not None:
+                queryset = queryset.filter(created_at__range=[start_date, end_date])
         return queryset
 
     def create(self, request, *args, **kwargs):
