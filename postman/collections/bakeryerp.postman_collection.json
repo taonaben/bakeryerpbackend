@@ -287,6 +287,45 @@
         }
       ],
       "id": "bdca6024-fa9d-461c-b464-7cfd202cc09b"
+    },
+    {
+      "name": "inventory",
+      "item": [
+        {
+          "name": "Batches",
+          "item": [],
+          "id": "83ed6d27-141d-4e38-b6e4-077b22f6eb6a"
+        },
+        {
+          "name": "Stock movement",
+          "item": [],
+          "id": "558eba92-2660-4b63-96a0-7fb2dd65ed81"
+        },
+        {
+          "name": "Stock",
+          "item": [],
+          "id": "d9f49cf0-af2c-4830-8f04-fe29583a043c"
+        },
+        {
+          "name": "Products",
+          "item": [
+            {
+              "name": "New Request",
+              "id": "dacb70ee-393a-4757-a797-924464cf4f0c",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": ""
+                }
+              },
+              "response": []
+            }
+          ],
+          "id": "2146d953-2f67-4e88-a928-4d5447fbe8c7"
+        }
+      ],
+      "id": "2d0c5c09-8300-4c08-8f7a-1fa07a294d86"
     }
   ],
   "auth": {

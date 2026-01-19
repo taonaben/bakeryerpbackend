@@ -29,7 +29,13 @@ class Stock(models.Model):
 
 class Batch(models.Model):
     """Represents a specific lot of a product in a warehouse"""
+    
+    def generate_batch_number():
+        """Generate a unique batch number."""
+        return str(uuid.uuid4()).split('-')[0].upper()
 
+    
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="batches"
@@ -37,7 +43,7 @@ class Batch(models.Model):
     warehouse = models.ForeignKey(
         Warehouse, on_delete=models.CASCADE, related_name="batches"
     )
-    batch_number = models.CharField(max_length=100)
+    batch_number = models.CharField(max_length=100, default=generate_batch_number, unique=True)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     manufacture_date = models.DateField(null=True, blank=True)
     expiry_date = models.DateField(null=True, blank=True)

@@ -30,11 +30,13 @@ from drf_spectacular.views import (
 )
 from apps.accounts.urls import urlpatterns as accounts_urls
 from central.urls import urlpatterns as central_urls
+from apps.inventory.urls import urlpatterns as inventory_urls
 
 app_urlpatterns = [
     # path("auth/", include(auth_urls)),
     path("account/", include(accounts_urls)),
     path("", include(central_urls)),
+    path("inventory/", include(inventory_urls)),
 ]
 
 third_party_urlpatterns = [
