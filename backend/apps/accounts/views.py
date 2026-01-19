@@ -33,6 +33,20 @@ class IsAuthenticatedOrCreate(BasePermission):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing user accounts and registration.
+    
+    Supports user registration, viewing, and management operations.
+    
+    Permissions:\n
+        - create/register: Allow any (public registration)\n
+        - list: Allow any (public access)\n
+        - retrieve: Authenticated users only\n
+        - update/delete: Admin users only\n
+    Custom actions:\n
+        - register: Create new user account with profile details
+    """
+    
     serializer_class = UserSerializer
     # permission_classes = [IsAuthenticatedOrCreate]
 
@@ -81,26 +95,19 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class LoginView(generics.GenericAPIView):
     """
-    Handle user login and return JWT tokens.
-
-    Request body:
-    {
-        "emp_code": "ABC-123",
-        "password": "your_password"
-    }
-
-    Response:
-    {
-        "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-        "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-        "user": {
-            "id": "uuid",
-            "username": "john",
-            "emp_code": "ABC-123"
-        }
-    }
+    Handle user authentication and JWT token generation.
+    
+    Authenticates users using employee code and password.
+    
+    Request body:\n
+        - emp_code: Employee code (required)\n
+        - password: User password (required)\n
+    Response:\n
+        - refresh: JWT refresh token\n
+        - access: JWT access token\n
+        - user: Basic user information (id, username, emp_code)
     """
-
+    
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
     parser_classes = [JSONParser]
@@ -145,19 +152,16 @@ class LoginView(generics.GenericAPIView):
 
 class LogoutView(generics.GenericAPIView):
     """
-    Handle user logout by blacklisting their refresh token.
-
-    Request body:
-    {
-        "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
-    }
-
-    Response:
-    {
-        "detail": "Logout successful."
-    }
+    Handle user logout by blacklisting JWT refresh tokens.
+    
+    Requires authentication to access this endpoint.
+    
+    Request body:\n
+        - refresh: JWT refresh token to blacklist (required)\n
+    Response:\n
+        - detail: Success or error message
     """
-
+    
     serializer_class = LogoutSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser]
