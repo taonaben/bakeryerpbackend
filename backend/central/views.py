@@ -6,7 +6,15 @@ from .serializers import CompanySerializer, WarehouseSerializer, ProductSerializ
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
-    """ViewSet for Company CRUD operations"""
+    """
+    ViewSet for managing companies in the ERP system.
+    
+    Supports full CRUD operations for company entities.
+    
+    Custom actions:\n
+        - warehouses: Get all warehouses for a specific company\n
+        - active: Get all active companies (status=True)
+    """
 
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
@@ -28,7 +36,16 @@ class CompanyViewSet(viewsets.ModelViewSet):
 
 
 class WarehouseViewSet(viewsets.ModelViewSet):
-    """ViewSet for Warehouse CRUD operations"""
+    """
+    ViewSet for managing warehouses within companies.
+    
+    Supports full CRUD operations for warehouse entities.
+    
+    Query parameters:\n
+        - company_id: Filter warehouses by company ID\n
+    Custom actions:\n
+        - active: Get all active warehouses (status=True)
+    """
 
     queryset = Warehouse.objects.all()
     serializer_class = WarehouseSerializer
@@ -50,7 +67,18 @@ class WarehouseViewSet(viewsets.ModelViewSet):
 
 
 class ProductViewSet(viewsets.ModelViewSet):
-    """ViewSet for Product CRUD operations"""
+    """
+    ViewSet for managing products in the inventory system.
+    
+    Supports full CRUD operations for product entities.
+    
+    Query parameters:\n
+        - category: Filter products by category\n
+        - company_id: Associate product with company (used in create)\n
+    Custom actions:\n
+        - by_category: Get all unique product categories\n
+        - by_sku: Get product by SKU (use SKU as pk parameter)
+    """
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -62,6 +90,19 @@ class ProductViewSet(viewsets.ModelViewSet):
         if category is not None:
             queryset = queryset.filter(category=category)
         return queryset
+
+    def create(self, request, *args, **kwargs):
+        company = self.request.query_params.get("company_id", None)
+        if company is not None:
+            request.data["company"] = company
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        product = serializer.save(company_id=company)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     @action(detail=False, methods=["get"])
     def by_category(self, request):

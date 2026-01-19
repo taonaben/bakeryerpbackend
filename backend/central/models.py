@@ -55,6 +55,7 @@ class Warehouse(models.Model):
 
 
 class Product(models.Model):
+    """Master product catalog - one instance per product type"""
 
     UNIT_CHOICES = [
         ("kg", "Kilogram"),
@@ -67,17 +68,29 @@ class Product(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    sku = models.CharField(max_length=100, unique=True)
-    name = models.CharField(max_length=255)
+    sku = models.CharField(max_length=100, unique=True, blank=True)
+    name = models.CharField(max_length=255, unique=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="products")
     category = models.CharField(max_length=255, null=True, blank=True)
     unit_of_measure = models.CharField(
         max_length=50, choices=UNIT_CHOICES, null=True, blank=True
     )
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "Product"
         verbose_name_plural = "Products"
 
+    def save(self, *args, **kwargs):
+        if not self.sku:
+            from central.services.sku_generator import SKUGenerator
+            self.sku = SKUGenerator.generate_sku(
+                name=self.name,
+                category=self.category,
+                unit_of_measure=self.unit_of_measure
+            )
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.name} ({self.company.name})"
+        return f"{self.name} ({self.sku})"

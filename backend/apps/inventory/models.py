@@ -7,6 +7,13 @@ from django.db.models import F
 class Stock(models.Model):
     """Represents current inventory levels of a product in a warehouse"""
 
+    STATUS_CHOICES = [
+        ("EMPTY", "Empty"),
+        ("ALMOST_OUT", "Almost Out"),
+        ("GOOD", "Good"),
+        ("FULL", "Full"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="stocks"
@@ -15,6 +22,7 @@ class Stock(models.Model):
         Warehouse, on_delete=models.CASCADE, related_name="stocks"
     )
     quantity_on_hand = models.DecimalField(max_digits=10,  decimal_places=2, default=0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="EMPTY")
     last_updated = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -23,13 +31,30 @@ class Stock(models.Model):
         verbose_name_plural = "Stocks"
         unique_together = ("product", "warehouse")
 
+    def calculate_status(self):
+        """Calculate stock status based on quantity"""
+        if self.quantity_on_hand <= 0:
+            return "EMPTY"
+        elif self.quantity_on_hand <= 10:  # Almost out threshold
+            return "ALMOST_OUT"
+        elif self.quantity_on_hand <= 100:  # Good threshold
+            return "GOOD"
+        else:
+            return "FULL"
+
     def __str__(self):
         return f"{self.product.name} - {self.quantity_on_hand}{self.product.unit_of_measure} in {self.warehouse.name}"
 
 
 class Batch(models.Model):
     """Represents a specific lot of a product in a warehouse"""
+    
+    def generate_batch_number():
+        """Generate a unique batch number."""
+        return str(uuid.uuid4()).split('-')[0].upper()
 
+    
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="batches"
@@ -37,7 +62,7 @@ class Batch(models.Model):
     warehouse = models.ForeignKey(
         Warehouse, on_delete=models.CASCADE, related_name="batches"
     )
-    batch_number = models.CharField(max_length=100)
+    batch_number = models.CharField(max_length=100, default=generate_batch_number, unique=True)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     manufacture_date = models.DateField(null=True, blank=True)
     expiry_date = models.DateField(null=True, blank=True)
@@ -73,58 +98,6 @@ class StockMovement(models.Model):
     )  # PO number, invoice, etc.
     notes = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    def save(self, *args, **kwargs):
-        """Override save to automatically adjust stock"""
-        # Validate movement doesn't exceed batch quantity
-        if self.quantity > self.batch.quantity:
-            raise ValueError(f"Movement quantity {self.quantity} exceeds batch quantity {self.batch.quantity}")
-        
-        # For OUT movements, ensure stock won't go negative
-        if self.movement_type == "OUT":
-            stock = Stock.objects.filter(
-                product=self.batch.product, 
-                warehouse=self.batch.warehouse
-            ).first()
-            if stock and (stock.quantity_on_hand - self.quantity) < 0:
-                raise ValueError("Insufficient stock for this movement")
-        
-        super().save(*args, **kwargs)
-        self.adjust_stock()
-    
-    def adjust_stock(self):
-        """Atomically adjust stock levels based on movement type"""
-        quantity_delta = self.get_quantity_delta()
-        
-        if quantity_delta == 0:
-            return
-        
-        # Atomic update using F() to prevent race conditions
-        Stock.objects.filter(
-            product=self.batch.product,
-            warehouse=self.batch.warehouse
-        ).update(quantity_on_hand=F('quantity_on_hand') + quantity_delta)
-        
-        # If Stock doesn't exist, create it
-        if not Stock.objects.filter(
-            product=self.batch.product,
-            warehouse=self.batch.warehouse
-        ).exists():
-            Stock.objects.create(
-                product=self.batch.product,
-                warehouse=self.batch.warehouse,
-                quantity_on_hand=quantity_delta
-            )
-    
-    def get_quantity_delta(self):
-        """Determine quantity change based on movement type"""
-        if self.movement_type in ("IN", "RETURN"):
-            return self.quantity
-        elif self.movement_type == "OUT":
-            return -self.quantity
-        elif self.movement_type == "ADJUSTMENT":
-            return self.quantity  # Can be positive or negative
-        return 0
 
     class Meta:
         verbose_name = "Stock Movement"

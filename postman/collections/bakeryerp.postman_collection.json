@@ -58,7 +58,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"emp_code\": \"XJ1-5S6\",\r\n  \"password\": \"securepass123\"\r\n}",
+              "raw": "{\r\n  \"emp_code\": \"{{current_user_emp_code}}\",\r\n  \"password\": \"securepass123\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -66,9 +66,9 @@
               }
             },
             "url": {
-              "raw": "{{productionurl}}/account/login/",
+              "raw": "{{baseurl}}/account/login/",
               "host": [
-                "{{productionurl}}"
+                "{{baseurl}}"
               ],
               "path": [
                 "account",
@@ -176,117 +176,515 @@
       }
     },
     {
-      "name": "companies",
+      "name": "Core",
       "item": [
         {
-          "name": "retrieve list of all companies in db",
-          "id": "bc6dc3a6-fb87-49eb-a6e9-1860b6e8073c",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_code}}",
-                  "type": "string"
+          "name": "companies",
+          "item": [
+            {
+              "name": "retrieve list of all companies in db",
+              "id": "bc6dc3a6-fb87-49eb-a6e9-1860b6e8073c",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_code}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"refresh\": \"{{refresh_token}}\"\r\n}"
+                },
+                "url": {
+                  "raw": "{{baseurl}}/companies",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "companies"
+                  ]
                 }
-              ]
+              },
+              "response": []
             },
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"refresh\": \"{{refresh_token}}\"\r\n}"
+            {
+              "name": "Create a new company",
+              "id": "0dd9c41f-055e-480d-9553-687a6bd971c7",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"what's a father?\",\r\n  \"status\": true\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/companies/",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "companies",
+                    ""
+                  ]
+                }
+              },
+              "response": []
             },
-            "url": {
-              "raw": "{{baseurl}}/companies",
-              "host": [
-                "{{baseurl}}"
-              ],
-              "path": [
-                "companies"
-              ]
+            {
+              "name": "retrieve company by id",
+              "id": "04fa408f-d145-4438-b0df-0a6a386d2c9e",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/companies/6c6d5fc7-894b-4e96-bc0c-b80fbdb265d4",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "6c6d5fc7-894b-4e96-bc0c-b80fbdb265d4"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "edit company details",
+              "id": "04f26971-effa-4a8e-88da-7b5336a891f2",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Pie Kings\",\r\n  \"status\": true\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/companies/{{piekings_id}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "{{piekings_id}}"
+                  ]
+                }
+              },
+              "response": []
             }
-          },
-          "response": []
+          ],
+          "id": "bdca6024-fa9d-461c-b464-7cfd202cc09b"
         },
         {
-          "name": "Create a new company",
-          "id": "0dd9c41f-055e-480d-9553-687a6bd971c7",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"what's a father?\",\r\n  \"status\": true\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+          "name": "Warehouses",
+          "item": [
+            {
+              "name": "Retrieve warehouses in company",
+              "id": "5687f91b-85ea-44f5-9b37-8a1c9a3b0636",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/warehouses/?company_id={{piekings_id}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "warehouses",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "company_id",
+                      "value": "{{piekings_id}}",
+                      "uuid": "81306a82-3b6e-4cd9-8be1-50dabd9c7835"
+                    }
+                  ]
                 }
-              }
+              },
+              "response": []
             },
-            "url": {
-              "raw": "{{baseurl}}/companies/",
-              "host": [
-                "{{baseurl}}"
-              ],
-              "path": [
-                "companies",
-                ""
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "retrieve company by id",
-          "id": "04fa408f-d145-4438-b0df-0a6a386d2c9e",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseurl}}/companies/6c6d5fc7-894b-4e96-bc0c-b80fbdb265d4",
-              "host": [
-                "{{baseurl}}"
-              ],
-              "path": [
-                "companies",
-                "6c6d5fc7-894b-4e96-bc0c-b80fbdb265d4"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "edit company details",
-          "id": "04f26971-effa-4a8e-88da-7b5336a891f2",
-          "request": {
-            "method": "PATCH",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"Pie Kings\",\r\n  \"status\": true\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+            {
+              "name": "Create a warehouse",
+              "id": "fefd019e-11d7-4544-a6e5-36ba1fc00015",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"company\": \"{{piekings_id}}\",\r\n  \"name\": \"wh-001\",\r\n  \"status\": true,\r\n  \"wh_type\": \"storage\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/warehouses/?company_id={{piekings_id}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "warehouses",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "company_id",
+                      "value": "{{piekings_id}}"
+                    }
+                  ]
                 }
-              }
+              },
+              "response": []
             },
-            "url": {
-              "raw": "{{baseurl}}/companies/{{piekings_id}}",
-              "host": [
-                "{{baseurl}}"
-              ],
-              "path": [
-                "companies",
-                "{{piekings_id}}"
-              ]
+            {
+              "name": "Retrieve all active warehouses",
+              "id": "23f48b75-6651-4cbb-8b3b-a18d5df6139a",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/warehouses/active/?company_id={{piekings_id}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "warehouses",
+                    "active",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "company_id",
+                      "value": "{{piekings_id}}",
+                      "uuid": "193bb0c9-5a8d-476c-b6f5-b4d2e22e663b"
+                    }
+                  ]
+                }
+              },
+              "response": []
             }
-          },
-          "response": []
+          ],
+          "id": "cc03a505-facf-40b1-8928-c2a6e0295eeb"
         }
       ],
-      "id": "bdca6024-fa9d-461c-b464-7cfd202cc09b"
+      "id": "18ded583-e172-47b5-a6fa-f519b5bcb5e5"
+    },
+    {
+      "name": "inventory",
+      "item": [
+        {
+          "name": "Batches",
+          "item": [
+            {
+              "name": "Get all batches",
+              "id": "671f007b-a13c-4a7d-8a2d-fefcd4d6fc43",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/inventory/batches?warehouse_id=6889cc24-4666-45e1-86d1-19f8d1d70994",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "inventory",
+                    "batches"
+                  ],
+                  "query": [
+                    {
+                      "key": "warehouse_id",
+                      "value": "6889cc24-4666-45e1-86d1-19f8d1d70994",
+                      "uuid": "2d93c568-926e-4e09-9548-9a6410879823"
+                    },
+                    {
+                      "key": "product_id",
+                      "value": "51c41c08-6124-4d44-98d1-aa1c4bddf39d",
+                      "type": "text",
+                      "uuid": "da602c19-404b-4f4d-b6bd-94e0a101e62a",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create batch",
+              "id": "1ff6e0ca-6ead-40bd-a679-4438500c4c14",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"product\": \"51c41c08-6124-4d44-98d1-aa1c4bddf39d\",\r\n  \"warehouse\": \"6889cc24-4666-45e1-86d1-19f8d1d70994\",\r\n  \"quantity\": 50,\r\n  \"manufacture_date\": \"2025-12-15\",\r\n  \"expiry_date\": \"2025-12-19\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/inventory/batches",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "inventory",
+                    "batches"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "id": "83ed6d27-141d-4e38-b6e4-077b22f6eb6a"
+        },
+        {
+          "name": "Stock movement",
+          "item": [
+            {
+              "name": "Retrieve stock movement history",
+              "id": "69c5b711-4643-4ed2-8085-c97e8638a1ad",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id=6889cc24-4666-45e1-86d1-19f8d1d70994",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "inventory",
+                    "stock_movements"
+                  ],
+                  "query": [
+                    {
+                      "key": "warehouse_id",
+                      "value": "6889cc24-4666-45e1-86d1-19f8d1d70994",
+                      "uuid": "13a3ac4b-5937-4874-ae4e-4655c591a8cf"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create a stock movement",
+              "id": "13db5cfd-abd0-49e4-8c66-d9783674d9f7",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"batch\": \"c98469b2-0f00-4439-9632-b54c01fd045b\",\r\n  \"movement_type\": \"OUT\",\r\n  \"quantity\": \"20\",\r\n  \"reference_number\": \"ref-001\",\r\n  \"notes\": \"first batch to product\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id=6889cc24-4666-45e1-86d1-19f8d1d70994",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "inventory",
+                    "stock_movements"
+                  ],
+                  "query": [
+                    {
+                      "key": "warehouse_id",
+                      "value": "6889cc24-4666-45e1-86d1-19f8d1d70994",
+                      "uuid": "2ef2f06d-a1ca-47d3-a9bf-b5427dac8e38"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "id": "558eba92-2660-4b63-96a0-7fb2dd65ed81"
+        },
+        {
+          "name": "Stock",
+          "item": [
+            {
+              "name": "Everything in inventory",
+              "id": "eb38d3ec-087f-4319-8068-6d4aadd0e7a0",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/inventory/stocks",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "inventory",
+                    "stocks"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Retrive stock by product sku",
+              "id": "8efe058e-7b40-45b3-a212-17a355061ce5",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/inventory/stocks/by_product_sku?sku=FLR-FLOU-KG-001",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "inventory",
+                    "stocks",
+                    "by_product_sku"
+                  ],
+                  "query": [
+                    {
+                      "key": "sku",
+                      "value": "FLR-FLOU-KG-001",
+                      "uuid": "99d34e98-46d5-4640-8380-3791c6225edc"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "id": "d9f49cf0-af2c-4830-8f04-fe29583a043c"
+        },
+        {
+          "name": "Products",
+          "item": [
+            {
+              "name": "Create product",
+              "id": "dacb70ee-393a-4757-a797-924464cf4f0c",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"processed pork\",\r\n  \"category\": \"meat\",\r\n  \"unit_of_measure\": \"kg\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/products/?company_id={{piekings_id}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "products",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "company_id",
+                      "value": "{{piekings_id}}",
+                      "uuid": "29e2b70c-287d-4d67-94a8-33200376bdf9"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve products",
+              "id": "dd9cc3bf-9a46-4c6d-8d04-fd307cba60fa",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/products/?company_id={{piekings_id}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "products",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "company_id",
+                      "value": "{{piekings_id}}",
+                      "uuid": "67215a96-57f2-4ba6-b68f-fd03ad4e5a46"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List of categories",
+              "id": "1086bed6-f67b-46de-b8ca-9b5a28342628",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/products/by_category/",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "products",
+                    "by_category",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve by sku",
+              "id": "5a3d060f-b37e-49d4-be9a-0ce8b308d2d7",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/products/FLR-FLOU-KG-001/by_sku",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "products",
+                    "FLR-FLOU-KG-001",
+                    "by_sku"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "id": "2146d953-2f67-4e88-a928-4d5447fbe8c7"
+        }
+      ],
+      "id": "2d0c5c09-8300-4c08-8f7a-1fa07a294d86"
     }
   ],
   "auth": {
