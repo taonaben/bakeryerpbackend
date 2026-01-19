@@ -58,7 +58,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"emp_code\": \"XJ1-5S6\",\r\n  \"password\": \"securepass123\"\r\n}",
+              "raw": "{\r\n  \"emp_code\": \"{{current_user_emp_code}}\",\r\n  \"password\": \"securepass123\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -66,9 +66,9 @@
               }
             },
             "url": {
-              "raw": "{{productionurl}}/account/login/",
+              "raw": "{{baseurl}}/account/login/",
               "host": [
-                "{{productionurl}}"
+                "{{baseurl}}"
               ],
               "path": [
                 "account",
@@ -310,13 +310,62 @@
           "name": "Products",
           "item": [
             {
-              "name": "New Request",
+              "name": "Create product",
               "id": "dacb70ee-393a-4757-a797-924464cf4f0c",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"processed pork\",\r\n  \"category\": \"meat\",\r\n  \"unit_of_measure\": \"kg\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/products/?company_id={{piekings_id}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "products",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "company_id",
+                      "value": "{{piekings_id}}",
+                      "uuid": "29e2b70c-287d-4d67-94a8-33200376bdf9"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve products",
+              "id": "dd9cc3bf-9a46-4c6d-8d04-fd307cba60fa",
               "request": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": ""
+                  "raw": "{{baseurl}}/products/?company_id={{piekings_id}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "products",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "company_id",
+                      "value": "{{piekings_id}}",
+                      "uuid": "67215a96-57f2-4ba6-b68f-fd03ad4e5a46"
+                    }
+                  ]
                 }
               },
               "response": []

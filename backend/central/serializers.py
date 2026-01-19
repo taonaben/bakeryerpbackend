@@ -58,9 +58,10 @@ class ProductSerializer(serializers.ModelSerializer):
             "id",
             "sku",
             "name",
+            "company",
             "category",
             "unit_of_measure",
             "unit_of_measure_display",
             "created_at",
         ]
-        read_only_fields = ["id", "created_at"]
+        read_only_fields = ["id", "created_at", "sku", 'company']

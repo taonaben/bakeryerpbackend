@@ -63,6 +63,17 @@ class ProductViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(category=category)
         return queryset
 
+    def create(self, request, *args, **kwargs):
+        company = self.request.query_params.get("company_id", None)
+        if company is not None:
+            request.data["company"] = company
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        product = serializer.save(company_id=company)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     @action(detail=False, methods=["get"])
     def by_category(self, request):
         """Get all unique product categories"""
