@@ -221,7 +221,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"name\": \"what's a father?\",\r\n  \"status\": true\r\n}",
+                  "raw": "{\r\n  \"name\": \"Woben pies\",\r\n  \"status\": true\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -229,13 +229,12 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseurl}}/companies/",
+                  "raw": "{{baseurl}}/companies",
                   "host": [
                     "{{baseurl}}"
                   ],
                   "path": [
-                    "companies",
-                    ""
+                    "companies"
                   ]
                 }
               },
@@ -301,18 +300,17 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/warehouses/?company_id={{piekings_id}}",
+                  "raw": "{{baseurl}}/warehouses?company_id={{woben_pies}}",
                   "host": [
                     "{{baseurl}}"
                   ],
                   "path": [
-                    "warehouses",
-                    ""
+                    "warehouses"
                   ],
                   "query": [
                     {
                       "key": "company_id",
-                      "value": "{{piekings_id}}",
+                      "value": "{{woben_pies}}",
                       "uuid": "81306a82-3b6e-4cd9-8be1-50dabd9c7835"
                     }
                   ]
@@ -328,7 +326,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"company\": \"{{piekings_id}}\",\r\n  \"name\": \"wh-001\",\r\n  \"status\": true,\r\n  \"wh_type\": \"storage\"\r\n}",
+                  "raw": "{\r\n  \"company\": \"{{woben_pies}}\",\r\n  \"name\": \"wh-001\",\r\n  \"status\": true,\r\n  \"wh_type\": \"storage\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -336,18 +334,18 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseurl}}/warehouses/?company_id={{piekings_id}}",
+                  "raw": "{{baseurl}}/warehouses?company_id={{piekings_id}}",
                   "host": [
                     "{{baseurl}}"
                   ],
                   "path": [
-                    "warehouses",
-                    ""
+                    "warehouses"
                   ],
                   "query": [
                     {
                       "key": "company_id",
-                      "value": "{{piekings_id}}"
+                      "value": "{{piekings_id}}",
+                      "uuid": "e42cb3ee-72f7-4ed9-ab35-6f9bcfe2737c"
                     }
                   ]
                 }
@@ -400,7 +398,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/inventory/batches?warehouse_id=6889cc24-4666-45e1-86d1-19f8d1d70994",
+                  "raw": "{{baseurl}}/inventory/batches?warehouse_id=eb33011f-e9b1-4634-976e-ab72f7c02165",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -411,7 +409,7 @@
                   "query": [
                     {
                       "key": "warehouse_id",
-                      "value": "6889cc24-4666-45e1-86d1-19f8d1d70994",
+                      "value": "eb33011f-e9b1-4634-976e-ab72f7c02165",
                       "uuid": "2d93c568-926e-4e09-9548-9a6410879823"
                     },
                     {
@@ -434,7 +432,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"product\": \"51c41c08-6124-4d44-98d1-aa1c4bddf39d\",\r\n  \"warehouse\": \"6889cc24-4666-45e1-86d1-19f8d1d70994\",\r\n  \"quantity\": 50,\r\n  \"manufacture_date\": \"2025-12-15\",\r\n  \"expiry_date\": \"2025-12-19\"\r\n}",
+                  "raw": "{\r\n  \"product\": \"cef8c040-6d73-42ad-923a-f1312dcf539c\",\r\n  \"warehouse\": \"eb33011f-e9b1-4634-976e-ab72f7c02165\",\r\n  \"quantity\": 50,\r\n  \"manufacture_date\": \"2025-12-15\",\r\n  \"expiry_date\": \"2025-12-19\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -467,7 +465,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id=6889cc24-4666-45e1-86d1-19f8d1d70994",
+                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id=eb33011f-e9b1-4634-976e-ab72f7c02165",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -478,7 +476,7 @@
                   "query": [
                     {
                       "key": "warehouse_id",
-                      "value": "6889cc24-4666-45e1-86d1-19f8d1d70994",
+                      "value": "eb33011f-e9b1-4634-976e-ab72f7c02165",
                       "uuid": "13a3ac4b-5937-4874-ae4e-4655c591a8cf"
                     }
                   ]
@@ -494,7 +492,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"batch\": \"c98469b2-0f00-4439-9632-b54c01fd045b\",\r\n  \"movement_type\": \"OUT\",\r\n  \"quantity\": \"20\",\r\n  \"reference_number\": \"ref-001\",\r\n  \"notes\": \"first batch to product\"\r\n}",
+                  "raw": "{\r\n  \"batch\": \"48866bc2-2d5d-451e-80d3-aa603eed39cf\",\r\n  \"movement_type\": \"OUT\",\r\n  \"quantity\": \"10\",\r\n  \"reference_number\": \"ref-001\",\r\n  \"notes\": \"\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -502,7 +500,7 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id=6889cc24-4666-45e1-86d1-19f8d1d70994",
+                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id=eb33011f-e9b1-4634-976e-ab72f7c02165",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -513,7 +511,7 @@
                   "query": [
                     {
                       "key": "warehouse_id",
-                      "value": "6889cc24-4666-45e1-86d1-19f8d1d70994",
+                      "value": "eb33011f-e9b1-4634-976e-ab72f7c02165",
                       "uuid": "2ef2f06d-a1ca-47d3-a9bf-b5427dac8e38"
                     }
                   ]
@@ -587,7 +585,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"name\": \"processed pork\",\r\n  \"category\": \"meat\",\r\n  \"unit_of_measure\": \"kg\"\r\n}",
+                  "raw": "{\r\n  \"name\": \"sugar\",\r\n  \"category\": \"sugar\",\r\n  \"unit_of_measure\": \"kg\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -595,18 +593,17 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseurl}}/products/?company_id={{piekings_id}}",
+                  "raw": "{{baseurl}}/products?company_id={{woben_pies}}",
                   "host": [
                     "{{baseurl}}"
                   ],
                   "path": [
-                    "products",
-                    ""
+                    "products"
                   ],
                   "query": [
                     {
                       "key": "company_id",
-                      "value": "{{piekings_id}}",
+                      "value": "{{woben_pies}}",
                       "uuid": "29e2b70c-287d-4d67-94a8-33200376bdf9"
                     }
                   ]
@@ -621,18 +618,17 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/products/?company_id={{piekings_id}}",
+                  "raw": "{{baseurl}}/products?company_id={{woben_pies}}",
                   "host": [
                     "{{baseurl}}"
                   ],
                   "path": [
-                    "products",
-                    ""
+                    "products"
                   ],
                   "query": [
                     {
                       "key": "company_id",
-                      "value": "{{piekings_id}}",
+                      "value": "{{woben_pies}}",
                       "uuid": "67215a96-57f2-4ba6-b68f-fd03ad4e5a46"
                     }
                   ]
@@ -647,14 +643,13 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/products/by_category/",
+                  "raw": "{{baseurl}}/products/by_category",
                   "host": [
                     "{{baseurl}}"
                   ],
                   "path": [
                     "products",
-                    "by_category",
-                    ""
+                    "by_category"
                   ]
                 }
               },
@@ -699,39 +694,45 @@
   },
   "variable": [
     {
-      "id": "b6cc401a-4f9a-464b-8c6d-f854a1a2b122",
+      "id": "fa26fdf5-8fd8-47b6-99af-cd265fa4a992",
       "key": "baseurl",
       "value": ""
     },
     {
-      "id": "4bd1ac77-49a1-41e1-9215-eb70cbec0536",
+      "id": "ac9ca564-7530-4cc9-b162-0adc2cea2a09",
       "key": "access_code",
       "value": ""
     },
     {
-      "id": "df5c0bf1-29e0-43dc-a99a-be9a29a3d987",
+      "id": "1c586cb6-7a2a-442f-b726-51528f56a2ec",
       "key": "refresh_token",
       "value": ""
     },
     {
-      "id": "4b0e4d7c-65ac-45ce-a6a5-f351bca2fc42",
+      "id": "47e39443-9ae0-4bc2-b37a-f2010c51e610",
       "key": "productionurl",
       "value": ""
     },
     {
-      "id": "75b71718-937d-4656-980e-f04bea93c4bd",
+      "id": "80008d46-e451-41e3-b623-299bdf5cb213",
       "key": "piekings_id",
       "value": ""
     },
     {
-      "id": "3bddf6b8-fbe5-43bd-8ef5-90c904bb1ce2",
+      "id": "7852e0e7-841c-4419-a68f-8abaa2182a54",
       "key": "current_user_emp_code",
       "value": ""
     },
     {
-      "id": "6256c2f9-3574-4427-82c4-467e9686525c",
+      "id": "c1894e0b-0dc7-4576-9cfb-80da34e5cfa7",
       "key": "current_user_id",
       "value": ""
+    },
+    {
+      "id": "bb56ff9c-0a94-4490-8109-0d44e758d309",
+      "key": "woben_pies",
+      "value": "",
+      "type": "default"
     }
   ]
 }
