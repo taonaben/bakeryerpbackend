@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from .models import Stock, StockMovement, Batch
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+
 
 from .serializers import StockSerializer, StockMovementSerializer, BatchSerializer
 
@@ -19,6 +21,17 @@ class CustomPagination(PageNumberPagination):
 
 
 class StockViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for viewing stock levels of products in warehouses.
+    
+    Read-only access to current inventory levels.
+    
+    Query parameters:\n
+        - warehouse_id: Filter stocks by warehouse ID\n
+    Custom actions:\n
+        - by_product_sku: Get stock for specific product SKU (requires 'sku' parameter)
+    """
+    
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
     pagination_class = CustomPagination
@@ -48,12 +61,40 @@ class StockViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class BatchViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing batches of products in inventory's warehouses.
+
+    Allows filtering by product or warehouse.
+
+    Query parameters:\n
+        - product_id: Filter batches by product ID\n
+        - warehouse_id: Filter batches by warehouse ID
+    """
+
     queryset = Batch.objects.all()
     serializer_class = BatchSerializer
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated]
     tags = ["Batches"]
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="product_id",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filter batches by product ID",
+            ),
+            OpenApiParameter(
+                name="warehouse_id",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filter batches by warehouse ID",
+            ),
+        ]
+    )
     def get_queryset(self):
         """Filter batches by product or warehouse if provided"""
         queryset = Batch.objects.all()
@@ -67,6 +108,19 @@ class BatchViewSet(viewsets.ModelViewSet):
 
 
 class StockMovementViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing stock movements and inventory transactions.
+    
+    Supports creating, viewing, updating, and deleting stock movements.
+    
+    Query parameters:\n
+        - warehouse_id: Filter movements by warehouse ID\n
+        - start_date: Filter movements from this date (YYYY-MM-DD)\n
+        - end_date: Filter movements until this date (YYYY-MM-DD)\n
+    Custom actions:\n
+        - by_stock: Get movements for specific stock item (requires 'stock_id' parameter)
+    """
+    
     queryset = StockMovement.objects.all()
     serializer_class = StockMovementSerializer
     pagination_class = CustomPagination
@@ -89,13 +143,7 @@ class StockMovementViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Create a new stock movement"""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        batch_id = self.request.query_params.get("batch_id", None)
-        if batch_id is not None:
-            serializer.save(batch_id=batch_id)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return super().create(request, *args, **kwargs)
 
     @action(detail=False, methods=["get"])
     def by_stock(self, request):

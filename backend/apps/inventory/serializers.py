@@ -10,11 +10,12 @@ class StockSerializer(serializers.ModelSerializer):
             "product",
             "warehouse",
             "quantity_on_hand",
+            "status",
             "last_updated",
             "created_at",
         ]
         
-        read_only_fields = ["id", "last_updated", "created_at"]
+        read_only_fields = ["id", "status", "last_updated", "created_at"]
 
 class BatchSerializer(serializers.ModelSerializer):
     class Meta:
