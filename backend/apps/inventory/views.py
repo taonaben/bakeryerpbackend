@@ -7,6 +7,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from .models import Stock, StockMovement, Batch
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from .filters import StockFilter, StockMovementFilter, BatchFilter
 
 
 from .serializers import StockSerializer, StockMovementSerializer, BatchSerializer
@@ -23,28 +24,21 @@ class CustomPagination(PageNumberPagination):
 class StockViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet for viewing stock levels of products in warehouses.
-    
+
     Read-only access to current inventory levels.
-    
+
     Query parameters:\n
         - warehouse_id: Filter stocks by warehouse ID\n
     Custom actions:\n
         - by_product_sku: Get stock for specific product SKU (requires 'sku' parameter)
     """
-    
+
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated]
+    filterset_class = StockFilter
     tags = ["Stocks"]
-
-    def get_queryset(self):
-        """Filter stocks by warehouse if provided"""
-        queryset = Stock.objects.all()
-        warehouse_id = self.request.query_params.get("warehouse_id", None)
-        if warehouse_id is not None:
-            queryset = queryset.filter(warehouse_id=warehouse_id)
-        return queryset
 
     @action(detail=False, methods=["get"])
     def by_product_sku(self, request):
@@ -75,6 +69,7 @@ class BatchViewSet(viewsets.ModelViewSet):
     serializer_class = BatchSerializer
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated]
+    filterset_class = BatchFilter
     tags = ["Batches"]
 
     @extend_schema(
@@ -100,9 +95,10 @@ class BatchViewSet(viewsets.ModelViewSet):
         queryset = Batch.objects.all()
         product_id = self.request.query_params.get("product_id", None)
         warehouse_id = self.request.query_params.get("warehouse_id", None)
+
         if product_id is not None:
             queryset = queryset.filter(product_id=product_id)
-        elif warehouse_id is not None:
+        if warehouse_id is not None:
             queryset = queryset.filter(warehouse_id=warehouse_id)
         return queryset
 
@@ -110,9 +106,9 @@ class BatchViewSet(viewsets.ModelViewSet):
 class StockMovementViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing stock movements and inventory transactions.
-    
+
     Supports creating, viewing, updating, and deleting stock movements.
-    
+
     Query parameters:\n
         - warehouse_id: Filter movements by warehouse ID\n
         - start_date: Filter movements from this date (YYYY-MM-DD)\n
@@ -120,30 +116,28 @@ class StockMovementViewSet(viewsets.ModelViewSet):
     Custom actions:\n
         - by_stock: Get movements for specific stock item (requires 'stock_id' parameter)
     """
-    
+
     queryset = StockMovement.objects.all()
     serializer_class = StockMovementSerializer
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated]
+    filterset_class = StockMovementFilter
     tags = ["Stock Movements"]
 
     def get_queryset(self):
-        """Filter stock movements by date range if provided"""
+        """Filter stock movements by warehouse and date range if provided"""
         queryset = StockMovement.objects.all()
         warehouse_id = self.request.query_params.get("warehouse_id")
-
         start_date = self.request.query_params.get("start_date", None)
         end_date = self.request.query_params.get("end_date", None)
+
         if warehouse_id is not None:
             queryset = queryset.filter(batch__warehouse_id=warehouse_id)
 
-            if start_date is not None and end_date is not None:
-                queryset = queryset.filter(created_at__range=[start_date, end_date])
-        return queryset
+        if start_date is not None and end_date is not None:
+            queryset = queryset.filter(created_at__range=[start_date, end_date])
 
-    def create(self, request, *args, **kwargs):
-        """Create a new stock movement"""
-        return super().create(request, *args, **kwargs)
+        return queryset
 
     @action(detail=False, methods=["get"])
     def by_stock(self, request):

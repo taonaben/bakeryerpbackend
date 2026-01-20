@@ -35,9 +35,9 @@ class IsAuthenticatedOrCreate(BasePermission):
 class UserViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing user accounts and registration.
-    
+
     Supports user registration, viewing, and management operations.
-    
+
     Permissions:\n
         - create/register: Allow any (public registration)\n
         - list: Allow any (public access)\n
@@ -46,7 +46,7 @@ class UserViewSet(viewsets.ModelViewSet):
     Custom actions:\n
         - register: Create new user account with profile details
     """
-    
+
     serializer_class = UserSerializer
     # permission_classes = [IsAuthenticatedOrCreate]
 
@@ -67,7 +67,8 @@ class UserViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         elif self.action == "retrieve":
             return [IsAuthenticated()]
-        return [IsAdminUser()]  # update, delete, destroy
+        # return [IsAdminUser()]  # update, delete, destroy
+        return [AllowAny()]  # Temporary for testing
 
     @action(detail=False, methods=["post"])
     def register(self, request):
@@ -96,9 +97,9 @@ class UserViewSet(viewsets.ModelViewSet):
 class LoginView(generics.GenericAPIView):
     """
     Handle user authentication and JWT token generation.
-    
+
     Authenticates users using employee code and password.
-    
+
     Request body:\n
         - emp_code: Employee code (required)\n
         - password: User password (required)\n
@@ -107,7 +108,7 @@ class LoginView(generics.GenericAPIView):
         - access: JWT access token\n
         - user: Basic user information (id, username, emp_code)
     """
-    
+
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
     parser_classes = [JSONParser]
@@ -153,15 +154,15 @@ class LoginView(generics.GenericAPIView):
 class LogoutView(generics.GenericAPIView):
     """
     Handle user logout by blacklisting JWT refresh tokens.
-    
+
     Requires authentication to access this endpoint.
-    
+
     Request body:\n
         - refresh: JWT refresh token to blacklist (required)\n
     Response:\n
         - detail: Success or error message
     """
-    
+
     serializer_class = LogoutSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser]

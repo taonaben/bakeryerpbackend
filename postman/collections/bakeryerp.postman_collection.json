@@ -6,6 +6,31 @@
   },
   "item": [
     {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Check app health",
+          "id": "d846b06a-6980-4385-b366-165887c16f7d",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseurl}}/health/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "health",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "5f2930ee-6a01-4bb6-89bb-b388f3ecc713"
+    },
+    {
       "name": "accounts",
       "item": [
         {
@@ -87,7 +112,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"@gmail.com\",\r\n  \"password\": \"securepass123\",\r\n  \"password2\": \"securepass123\",\r\n  \"first_name\": \"tuff\",\r\n  \"last_name\": \"baby\",\r\n  \"department\": \"ENG\"\r\n}",
+              "raw": "{\r\n  \"email\": \"tbaby@gmail.com\",\r\n  \"password\": \"securepass123\",\r\n  \"password2\": \"securepass123\",\r\n  \"first_name\": \"tuff\",\r\n  \"last_name\": \"baby\",\r\n  \"department\": \"ENG\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -95,9 +120,9 @@
               }
             },
             "url": {
-              "raw": "{{productionurl}}/account/users/register/",
+              "raw": "{{baseurl}}/account/users/register/",
               "host": [
-                "{{productionurl}}"
+                "{{baseurl}}"
               ],
               "path": [
                 "account",
@@ -126,14 +151,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseurl}}/account/users/",
+              "raw": "{{baseurl}}/account/users",
               "host": [
                 "{{baseurl}}"
               ],
               "path": [
                 "account",
-                "users",
-                ""
+                "users"
               ]
             }
           },
@@ -532,13 +556,30 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/inventory/stocks",
+                  "raw": "{{baseurl}}/inventory/stocks?quantity_on_hand__gt=40&quantity_on_hand__lt=51",
                   "host": [
                     "{{baseurl}}"
                   ],
                   "path": [
                     "inventory",
                     "stocks"
+                  ],
+                  "query": [
+                    {
+                      "key": "quantity_on_hand>10",
+                      "value": null,
+                      "disabled": true
+                    },
+                    {
+                      "key": "quantity_on_hand__gt",
+                      "value": "40"
+                    },
+                    {
+                      "key": "quantity_on_hand__lt",
+                      "value": "51",
+                      "type": "text",
+                      "uuid": "7325f8d8-325c-4f09-88d9-513318ca9440"
+                    }
                   ]
                 }
               },
