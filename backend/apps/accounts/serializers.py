@@ -24,7 +24,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "password2",
             "first_name",
             "last_name",
-            "department",
+            "role",
         ]
         read_only_fields = ["emp_code"]
 
@@ -85,7 +85,7 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "username",
-            "department",
+            "role",
             "is_active",
             "is_staff",
             "date_joined",

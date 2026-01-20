@@ -18,6 +18,10 @@ from .serializers import (
     LogoutSerializer,
 )
 from rest_framework.parsers import JSONParser
+from .permissions import (
+    ModulePermission,
+)
+
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -30,6 +34,10 @@ class IsAuthenticatedOrCreate(BasePermission):
         if view.action in ["create", "register"]:
             return True
         return request.user.is_authenticated
+
+
+class UsersPermission(ModulePermission):
+    module = "users"
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -64,11 +72,13 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action in ["create", "register"]:
             return [AllowAny()]
         elif self.action == "list":
-            return [AllowAny()]
+            # return [ UsersPermission()]
+            return [AllowAny()]  # Temporary open list view
+        elif self.action in ["destroy", "update", "partial_update"]:
+            return [IsAdminUser()]
         elif self.action == "retrieve":
-            return [IsAuthenticated()]
-        # return [IsAdminUser()]  # update, delete, destroy
-        return [AllowAny()]  # Temporary for testing
+            return [IsAuthenticated(), UsersPermission()]
+        return [IsAuthenticated(), UsersPermission()]
 
     @action(detail=False, methods=["post"])
     def register(self, request):
