@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "django_filters",
     # "django_celery_beat",
     # "django_extensions",
+    "djoser",
     #! Local apps
     "apps.accounts",
     "apps.inventory",

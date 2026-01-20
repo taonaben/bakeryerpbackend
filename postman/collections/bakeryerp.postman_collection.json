@@ -91,14 +91,13 @@
               }
             },
             "url": {
-              "raw": "{{baseurl}}/account/login/",
+              "raw": "{{baseurl}}/account/login",
               "host": [
                 "{{baseurl}}"
               ],
               "path": [
                 "account",
-                "login",
-                ""
+                "login"
               ]
             }
           },
@@ -112,7 +111,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"tbaby@gmail.com\",\r\n  \"password\": \"securepass123\",\r\n  \"password2\": \"securepass123\",\r\n  \"first_name\": \"tuff\",\r\n  \"last_name\": \"baby\",\r\n  \"department\": \"ENG\"\r\n}",
+              "raw": "{\r\n  \"email\": \"salesrep@gmail.com\",\r\n  \"password\": \"securepass123\",\r\n  \"password2\": \"securepass123\",\r\n  \"first_name\": \"sales\",\r\n  \"last_name\": \"rep\",\r\n  \"role\": \"sales_rep\",\r\n  \"department\": \"ENG\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -120,15 +119,14 @@
               }
             },
             "url": {
-              "raw": "{{baseurl}}/account/users/register/",
+              "raw": "{{baseurl}}/account/users/register",
               "host": [
                 "{{baseurl}}"
               ],
               "path": [
                 "account",
                 "users",
-                "register",
-                ""
+                "register"
               ]
             }
           },
@@ -556,7 +554,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/inventory/stocks?quantity_on_hand__gt=40&quantity_on_hand__lt=51",
+                  "raw": "{{baseurl}}/inventory/stocks?quantity_on_hand__range=40,51",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -571,14 +569,9 @@
                       "disabled": true
                     },
                     {
-                      "key": "quantity_on_hand__gt",
-                      "value": "40"
-                    },
-                    {
-                      "key": "quantity_on_hand__lt",
-                      "value": "51",
-                      "type": "text",
-                      "uuid": "7325f8d8-325c-4f09-88d9-513318ca9440"
+                      "key": "quantity_on_hand__range",
+                      "value": "40,51",
+                      "uuid": "6691d973-e075-48d6-b433-25e95bd83d9c"
                     }
                   ]
                 }

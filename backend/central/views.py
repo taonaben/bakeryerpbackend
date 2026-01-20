@@ -4,7 +4,14 @@ from rest_framework.response import Response
 from .models import Company, Warehouse, Product
 from .serializers import CompanySerializer, WarehouseSerializer, ProductSerializer
 from .filters import WarehouseFilter, ProductFilter
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
+filter_backends = [
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+        filters.SearchFilter,
+    ]
 
 class CompanyViewSet(viewsets.ModelViewSet):
     """
@@ -19,6 +26,9 @@ class CompanyViewSet(viewsets.ModelViewSet):
 
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
+    filter_backends = filter_backends
+    ordering_fields = ["name", "created_at"]
+    search_fields = ["name", "address", "email"]
 
     @action(detail=True, methods=["get"])
     def warehouses(self, request, pk=None):
@@ -51,6 +61,9 @@ class WarehouseViewSet(viewsets.ModelViewSet):
     queryset = Warehouse.objects.all()
     serializer_class = WarehouseSerializer
     filterset_class = WarehouseFilter
+    filter_backends = filter_backends
+    ordering_fields = ["name", "location"]
+    search_fields = ["name", "location", "wh_type"]
 
     def get_queryset(self):
         """Filter warehouses by company if provided"""
@@ -85,6 +98,9 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filterset_class = ProductFilter
+    filter_backends = filter_backends
+    ordering_fields = ["name", "sku", "created_at"]
+    search_fields = ["name", "sku", "category"]
 
     def get_queryset(self):
         """Filter products by category if provided"""

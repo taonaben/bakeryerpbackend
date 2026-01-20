@@ -79,6 +79,12 @@ class UserViewSet(viewsets.ModelViewSet):
         elif self.action == "retrieve":
             return [IsAuthenticated(), UsersPermission()]
         return [IsAuthenticated(), UsersPermission()]
+    
+    @action(detail=False, methods=["get"])
+    def me(self, request):
+        """Retrieve details of the currently authenticated user"""
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["post"])
     def register(self, request):
@@ -131,7 +137,6 @@ class LoginView(generics.GenericAPIView):
         emp_code = serializer.validated_data.get("emp_code")
         password = serializer.validated_data.get("password")
 
-        # Find user by emp_code to get username for authentication
         try:
             user_obj = User.objects.get(emp_code=emp_code)
             user = authenticate(username=user_obj.username, password=password)

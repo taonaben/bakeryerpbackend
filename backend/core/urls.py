@@ -16,7 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include, re_path
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import (
@@ -50,6 +50,10 @@ third_party_urlpatterns = [
     # optional ui:
     path("api/schema/swagger-ui/", SpectacularSwaggerView.as_view(), name="swagger-ui"),
     path("api/schema/redoc/", SpectacularRedocView.as_view(), name="redoc"),
+    
+    # Djoser URLs
+    # re_path(r"^account/", include("djoser.urls")),
+    # re_path(r"^auth/", include("djoser.urls.jwt")),
 ]
 
 
