@@ -3,14 +3,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Company, Warehouse, Product
 from .serializers import CompanySerializer, WarehouseSerializer, ProductSerializer
+from .filters import WarehouseFilter, ProductFilter
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing companies in the ERP system.
-    
+
     Supports full CRUD operations for company entities.
-    
+
     Custom actions:\n
         - warehouses: Get all warehouses for a specific company\n
         - active: Get all active companies (status=True)
@@ -38,9 +39,9 @@ class CompanyViewSet(viewsets.ModelViewSet):
 class WarehouseViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing warehouses within companies.
-    
+
     Supports full CRUD operations for warehouse entities.
-    
+
     Query parameters:\n
         - company_id: Filter warehouses by company ID\n
     Custom actions:\n
@@ -49,6 +50,7 @@ class WarehouseViewSet(viewsets.ModelViewSet):
 
     queryset = Warehouse.objects.all()
     serializer_class = WarehouseSerializer
+    filterset_class = WarehouseFilter
 
     def get_queryset(self):
         """Filter warehouses by company if provided"""
@@ -69,9 +71,9 @@ class WarehouseViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing products in the inventory system.
-    
+
     Supports full CRUD operations for product entities.
-    
+
     Query parameters:\n
         - category: Filter products by category\n
         - company_id: Associate product with company (used in create)\n
@@ -82,6 +84,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filterset_class = ProductFilter
 
     def get_queryset(self):
         """Filter products by category if provided"""

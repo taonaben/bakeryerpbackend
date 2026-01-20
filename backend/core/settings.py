@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     # "silk",
     "drf_spectacular",
-    # "django_filters",
+    "django_filters",
     # "django_celery_beat",
     # "django_extensions",
     #! Local apps
