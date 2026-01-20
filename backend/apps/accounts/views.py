@@ -79,6 +79,12 @@ class UserViewSet(viewsets.ModelViewSet):
         elif self.action == "retrieve":
             return [IsAuthenticated(), UsersPermission()]
         return [IsAuthenticated(), UsersPermission()]
+    
+    @action(detail=False, methods=["get"])
+    def me(self, request):
+        """Retrieve details of the currently authenticated user"""
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["post"])
     def register(self, request):
