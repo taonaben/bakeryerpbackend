@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from .models import Stock, StockMovement, Batch
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from .filters import StockFilter, StockMovementFilter, BatchFilter
-
+from apps.accounts.permissions import ModulePermission
 
 from .serializers import StockSerializer, StockMovementSerializer, BatchSerializer
 
@@ -19,6 +19,10 @@ class CustomPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = "page_size"
     max_page_size = 100
+
+
+class InventoryPermission(ModulePermission):
+    module = "inventory"
 
 
 class StockViewSet(viewsets.ReadOnlyModelViewSet):
@@ -36,7 +40,7 @@ class StockViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
     pagination_class = CustomPagination
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, InventoryPermission]
     filterset_class = StockFilter
     tags = ["Stocks"]
 
@@ -68,7 +72,7 @@ class BatchViewSet(viewsets.ModelViewSet):
     queryset = Batch.objects.all()
     serializer_class = BatchSerializer
     pagination_class = CustomPagination
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, InventoryPermission]
     filterset_class = BatchFilter
     tags = ["Batches"]
 
@@ -120,7 +124,7 @@ class StockMovementViewSet(viewsets.ModelViewSet):
     queryset = StockMovement.objects.all()
     serializer_class = StockMovementSerializer
     pagination_class = CustomPagination
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, InventoryPermission]
     filterset_class = StockMovementFilter
     tags = ["Stock Movements"]
 

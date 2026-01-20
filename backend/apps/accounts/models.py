@@ -17,20 +17,28 @@ def generate_employee_code():
 class User(AbstractUser):
     """User's core fields, that will be used everywhere, Uses the employee code as unique identifier"""
 
+    ROLE_CHOICES = [
+        ("warehouse_staff", "Warehouse Staff"),
+        ("production_operator", "Production Operator"),
+        ("production_supervisor", "Production Supervisor"),
+        ("inventory_controller", "Inventory Controller"),
+        ("planner", "Planner"),
+        ("sales_rep", "Sales Rep"),
+        ("purchasing_officer", "Purchasing Officer"),
+        ("accountant", "Accountant"),
+        ("quality_officer", "Quality Officer"),
+        ("manager", "Manager"),
+        ("owner_director", "Owner / Director"),
+        ("system_admin", "System Admin"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     emp_code = models.CharField(
         max_length=7, unique=True, default=generate_employee_code
     )
     email = models.EmailField(unique=True)
-    department = models.CharField(
-        choices=[
-            ("HR", "Human Resources"),
-            ("ENG", "Engineering"),
-            ("MKT", "Marketing"),
-        ],
-        max_length=3,
-        null=True,
-        blank=True,
+    role = models.CharField(
+        max_length=30, choices=ROLE_CHOICES, null=False, blank=False, 
     )
 
     groups = models.ManyToManyField(
