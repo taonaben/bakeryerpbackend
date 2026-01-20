@@ -131,7 +131,6 @@ class LoginView(generics.GenericAPIView):
         emp_code = serializer.validated_data.get("emp_code")
         password = serializer.validated_data.get("password")
 
-        # Find user by emp_code to get username for authentication
         try:
             user_obj = User.objects.get(emp_code=emp_code)
             user = authenticate(username=user_obj.username, password=password)

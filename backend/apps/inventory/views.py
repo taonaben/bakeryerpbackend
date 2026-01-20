@@ -9,6 +9,8 @@ from .models import Stock, StockMovement, Batch
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from .filters import StockFilter, StockMovementFilter, BatchFilter
 from apps.accounts.permissions import ModulePermission
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .serializers import StockSerializer, StockMovementSerializer, BatchSerializer
 
@@ -23,6 +25,13 @@ class CustomPagination(PageNumberPagination):
 
 class InventoryPermission(ModulePermission):
     module = "inventory"
+
+
+filter_backends = [
+    DjangoFilterBackend,
+    filters.OrderingFilter,
+    filters.SearchFilter,
+]
 
 
 class StockViewSet(viewsets.ReadOnlyModelViewSet):
@@ -42,6 +51,9 @@ class StockViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated, InventoryPermission]
     filterset_class = StockFilter
+    filter_backends = filter_backends
+    ordering_fields = ["quantity", "product__name"]
+    search_fields = ["product__name", "product__sku"]
     tags = ["Stocks"]
 
     @action(detail=False, methods=["get"])
@@ -74,6 +86,9 @@ class BatchViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated, InventoryPermission]
     filterset_class = BatchFilter
+    filter_backends = filter_backends
+    ordering_fields = ["created_at", "product__name"]
+    search_fields = ["product__name", "batch_number"]
     tags = ["Batches"]
 
     @extend_schema(
@@ -126,6 +141,9 @@ class StockMovementViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated, InventoryPermission]
     filterset_class = StockMovementFilter
+    filter_backends = filter_backends
+    ordering_fields = ["created_at", "quantity"]
+    search_fields = ["reference_number", "notes"]
     tags = ["Stock Movements"]
 
     def get_queryset(self):
