@@ -514,7 +514,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"batch\": \"48866bc2-2d5d-451e-80d3-aa603eed39cf\",\r\n  \"movement_type\": \"OUT\",\r\n  \"quantity\": \"10\",\r\n  \"reference_number\": \"ref-001\",\r\n  \"notes\": \"\"\r\n}",
+                  "raw": "{\r\n  \"batch\": \"48866bc2-2d5d-451e-80d3-aa603eed39cf\",\r\n  \"movement_type\": \"OUT\",\r\n  \"quantity\": \"10\",\r\n  \"reference_number\": \"ref-002\",\r\n  \"notes\": \"\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"

@@ -30,6 +30,11 @@ class Stock(models.Model):
         verbose_name = "Stock"
         verbose_name_plural = "Stocks"
         unique_together = ("product", "warehouse")
+        indexes = [
+            models.Index(fields=['warehouse', 'status'], name='stock_warehouse_status_idx'),
+            models.Index(fields=['product', 'quantity_on_hand'], name='stock_product_qty_idx'),
+            models.Index(fields=['last_updated'], name='stock_updated_idx'),
+        ]
 
     def calculate_status(self):
         """Calculate stock status based on quantity"""
@@ -72,6 +77,11 @@ class Batch(models.Model):
         verbose_name = "Batch"
         verbose_name_plural = "Batches"
         unique_together = ("product", "warehouse", "batch_number")
+        indexes = [
+            models.Index(fields=['warehouse', 'expiry_date'], name='batch_warehouse_expiry_idx'),
+            models.Index(fields=['product', 'expiry_date'], name='batch_product_expiry_idx'),
+            models.Index(fields=['batch_number'], name='batch_number_idx'),
+        ]
 
     def __str__(self):
         return (
@@ -103,6 +113,11 @@ class StockMovement(models.Model):
         verbose_name = "Stock Movement"
         verbose_name_plural = "Stock Movements"
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=['batch', 'created_at'], name='movement_batch_date_idx'),
+            models.Index(fields=['movement_type', 'created_at'], name='movement_type_date_idx'),
+            models.Index(fields=['reference_number'], name='movement_ref_idx'),
+        ]
 
     def __str__(self):
         return f"{self.movement_type}: {self.quantity} of {self.batch.product.name} on {self.created_at}"

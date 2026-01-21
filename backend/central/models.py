@@ -21,6 +21,9 @@ class Company(models.Model):
         verbose_name = "Company"
         # Plural display name in Django admin
         verbose_name_plural = "Companies"
+        indexes = [
+            models.Index(fields=['status'], name='company_status_idx'),
+        ]
 
     # String representation of the company object
     def __str__(self):
@@ -49,6 +52,10 @@ class Warehouse(models.Model):
     class Meta:
         verbose_name = "Warehouse"
         verbose_name_plural = "Warehouses"
+        indexes = [
+            models.Index(fields=['company', 'status'], name='warehouse_company_status_idx'),
+            models.Index(fields=['wh_type'], name='warehouse_type_idx'),
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.company.name})"
@@ -81,6 +88,11 @@ class Product(models.Model):
     class Meta:
         verbose_name = "Product"
         verbose_name_plural = "Products"
+        indexes = [
+            models.Index(fields=['company', 'is_active'], name='product_company_active_idx'),
+            models.Index(fields=['category'], name='product_category_idx'),
+            models.Index(fields=['sku'], name='product_sku_idx'),
+        ]
 
     def save(self, *args, **kwargs):
         if not self.sku:

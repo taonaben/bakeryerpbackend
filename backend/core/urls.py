@@ -54,6 +54,9 @@ third_party_urlpatterns = [
     # Djoser URLs
     # re_path(r"^account/", include("djoser.urls")),
     # re_path(r"^auth/", include("djoser.urls.jwt")),
+    
+    # silk
+    path("silk/", include("silk.urls", namespace="silk")),
 ]
 
 
