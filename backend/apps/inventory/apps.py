@@ -7,4 +7,4 @@ class InventoryConfig(AppConfig):
     label = "inventory"
 
     def ready(self):
-        import apps.inventory.signals
+        from . import signals
