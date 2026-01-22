@@ -11,61 +11,68 @@ def check_inventory_alerts(sender, instance, created, **kwargs):
     if not created:
         return
 
-    product = instance.batch.product
-    warehouse = instance.batch.warehouse
-
-    # Get current stock level
     try:
-        stock = Stock.objects.get(product=product, warehouse=warehouse)
-    except Stock.DoesNotExist:
-        return
+        with transaction.atomic():
+            product = instance.batch.product
+            warehouse = instance.batch.warehouse
 
-    current_qty = stock.quantity_on_hand
+            # Get current stock level
+            try:
+                stock = Stock.objects.select_for_update().get(product=product, warehouse=warehouse)
+            except Stock.DoesNotExist:
+                return
 
-    # Check for reorder policy
-    try:
-        policy = ProductReorderPolicy.objects.get(
-            product=product, warehouse=warehouse, is_active=True
-        )
-    except ProductReorderPolicy.DoesNotExist:
-        policy = None
+            current_qty = stock.quantity_on_hand
 
-    # Determine alert type and create if needed
-    alert_type = None
-    message = None
+            # Check for reorder policy
+            try:
+                policy = ProductReorderPolicy.objects.get(
+                    product=product, warehouse=warehouse, is_active=True
+                )
+            except ProductReorderPolicy.DoesNotExist:
+                policy = None
 
-    if current_qty <= 0:
-        alert_type = "OUT_OF_STOCK"
-        message = f"{product.name} is out of stock in {warehouse.name}"
-    elif policy and current_qty <= policy.min_stock_level:
-        alert_type = "LOW_STOCK"
-        message = f"{product.name} in {warehouse.name} has reached minimum stock level ({current_qty}{product.unit_of_measure} <= {policy.min_stock_level}{product.unit_of_measure})"
+            # Determine alert type and create if needed
+            alert_type = None
+            message = None
 
-    # Handle alerts based on stock level
-    if alert_type:
-        # Create alert if needed and doesn't already exist
-        existing_alert = InventoryAlert.objects.filter(
-            product=product, warehouse=warehouse, alert_type=alert_type, status="OPEN"
-        ).first()
+            if current_qty <= 0:
+                alert_type = "OUT_OF_STOCK"
+                message = f"{product.name} is out of stock in {warehouse.name}"
+            elif policy and current_qty <= policy.min_stock_level:
+                alert_type = "LOW_STOCK"
+                message = f"{product.name} in {warehouse.name} has reached minimum stock level ({current_qty}{product.unit_of_measure} <= {policy.min_stock_level}{product.unit_of_measure})"
 
-        if not existing_alert:
-            InventoryAlert.objects.create(
-                product=product,
-                warehouse=warehouse,
-                reorder_policy=policy,
-                alert_type=alert_type,
-                message=message,
-                current_quantity=current_qty,
-                triggered_by="STOCK_MOVEMENT",
-            )
-    else:
-        # Stock is replenished, resolve any open alerts for this product/warehouse
-        InventoryAlert.objects.filter(
-            product=product,
-            warehouse=warehouse,
-            status__in=["OPEN", "ACKNOWLEDGED"],
-            alert_type__in=["LOW_STOCK", "OUT_OF_STOCK"]
-        ).update(
-            status="RESOLVED",
-            resolved_at=timezone.now()
-        )
+            # Handle alerts based on stock level
+            if alert_type:
+                # Create alert if needed and doesn't already exist
+                existing_alert = InventoryAlert.objects.filter(
+                    product=product, warehouse=warehouse, alert_type=alert_type, status="OPEN"
+                ).first()
+
+                if not existing_alert:
+                    InventoryAlert.objects.create(
+                        product=product,
+                        warehouse=warehouse,
+                        reorder_policy=policy,
+                        alert_type=alert_type,
+                        message=message,
+                        current_quantity=current_qty,
+                        triggered_by="STOCK_MOVEMENT",
+                    )
+            else:
+                # Stock is replenished, resolve any open alerts for this product/warehouse
+                InventoryAlert.objects.filter(
+                    product=product,
+                    warehouse=warehouse,
+                    status__in=["OPEN", "ACKNOWLEDGED"],
+                    alert_type__in=["LOW_STOCK", "OUT_OF_STOCK"]
+                ).update(
+                    status="RESOLVED",
+                    resolved_at=timezone.now()
+                )
+    except Exception as e:
+        # Log error but don't crash the application
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in check_inventory_alerts: {e}")

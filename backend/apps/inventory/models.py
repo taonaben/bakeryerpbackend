@@ -259,8 +259,8 @@ class InventoryAlert(models.Model):
         verbose_name_plural = "Inventory Alerts"
         indexes = [
             models.Index(
-                fields=["product", "warehouse",],
-                name="inv_alert_product_resolved_idx",
+                fields=["product", "warehouse"],
+                name="inv_alert_product_whouse_idx",
             ),
             models.Index(
                 fields=["status"],

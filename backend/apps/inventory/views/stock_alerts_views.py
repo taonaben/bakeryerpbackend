@@ -29,11 +29,15 @@ class InventoryAlertViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         """Filter inventory alerts by warehouse if provided"""
-        queryset = InventoryAlert.objects.all()
+        queryset = InventoryAlert.objects.select_related('product', 'warehouse', 'reorder_policy').all()
         warehouse_id = self.request.query_params.get("warehouse_id")
 
         if warehouse_id is not None:
-            queryset = queryset.filter(warehouse_id=warehouse_id)
+            try:
+                warehouse_id = warehouse_id.strip()
+                queryset = queryset.filter(warehouse_id=warehouse_id)
+            except (ValueError, TypeError):
+                queryset = queryset.none()
 
         return queryset
 
