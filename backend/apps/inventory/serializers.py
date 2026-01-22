@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Stock, StockMovement, Batch
+from .models import Stock, StockMovement, Batch, ProductReorderPolicy, InventoryAlert
 
 
 class StockSerializer(serializers.ModelSerializer):
@@ -47,3 +47,41 @@ class StockMovementSerializer(serializers.ModelSerializer):
         ]
         
         read_only_fields = ["id", "created_at"]
+        
+        
+class ProductReorderPolicySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductReorderPolicy
+        fields = [
+            "id",
+            "product",
+            "warehouse",
+            "min_stock_level",
+            "reorder_qty",
+            "lead_time_days",
+            "safety_stock_qty",
+            "is_active",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+        
+class InventoryAlertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryAlert
+        fields = [
+            "id",
+            "product",
+            "warehouse",
+            "reorder_policy",
+            "alert_type",
+            "message",
+            "status",
+            "current_quantity",
+            "triggered_by",
+            "acknowledged_at",
+            "acknowledged_by",
+            "created_at",
+            "resolved_at",
+            "resolved_by",
+        ]
+        read_only_fields = ["id", "created_at", "message", "triggered_by", "current_quantity"]

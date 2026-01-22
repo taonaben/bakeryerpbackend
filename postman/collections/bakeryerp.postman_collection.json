@@ -83,7 +83,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"emp_code\": \"{{current_user_emp_code}}\",\r\n  \"password\": \"securepass123\"\r\n}",
+              "raw": "{\r\n  \"emp_code\": \"{{local_user_code}}\",\r\n  \"password\": \"securepass123\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -219,10 +219,6 @@
                 },
                 "method": "GET",
                 "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"refresh\": \"{{refresh_token}}\"\r\n}"
-                },
                 "url": {
                   "raw": "{{baseurl}}/companies",
                   "host": [
@@ -322,7 +318,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/warehouses?company_id={{woben_pies}}",
+                  "raw": "{{baseurl}}/warehouses?company_id={{piekings_id}}",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -332,7 +328,7 @@
                   "query": [
                     {
                       "key": "company_id",
-                      "value": "{{woben_pies}}",
+                      "value": "{{piekings_id}}",
                       "uuid": "81306a82-3b6e-4cd9-8be1-50dabd9c7835"
                     }
                   ]
@@ -348,7 +344,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"company\": \"{{woben_pies}}\",\r\n  \"name\": \"wh-001\",\r\n  \"status\": true,\r\n  \"wh_type\": \"storage\"\r\n}",
+                  "raw": "{\r\n  \"company\": \"{{woben_pies}}\",\r\n  \"name\": \"wh-003\",\r\n  \"status\": true,\r\n  \"wh_type\": \"production\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -356,7 +352,7 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseurl}}/warehouses?company_id={{piekings_id}}",
+                  "raw": "{{baseurl}}/warehouses?company_id={{woben_pies}}",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -366,7 +362,7 @@
                   "query": [
                     {
                       "key": "company_id",
-                      "value": "{{piekings_id}}",
+                      "value": "{{woben_pies}}",
                       "uuid": "e42cb3ee-72f7-4ed9-ab35-6f9bcfe2737c"
                     }
                   ]
@@ -514,7 +510,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"batch\": \"48866bc2-2d5d-451e-80d3-aa603eed39cf\",\r\n  \"movement_type\": \"OUT\",\r\n  \"quantity\": \"10\",\r\n  \"reference_number\": \"ref-002\",\r\n  \"notes\": \"\"\r\n}",
+                  "raw": "{\r\n  \"batch\": \"48866bc2-2d5d-451e-80d3-aa603eed39cf\",\r\n  \"movement_type\": \"OUT\",\r\n  \"quantity\": \"21\",\r\n  \"reference_number\": \"ref-002\",\r\n  \"notes\": \"\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -522,7 +518,7 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id=eb33011f-e9b1-4634-976e-ab72f7c02165",
+                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id=48866bc2-2d5d-451e-80d3-aa603eed39cf",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -533,7 +529,7 @@
                   "query": [
                     {
                       "key": "warehouse_id",
-                      "value": "eb33011f-e9b1-4634-976e-ab72f7c02165",
+                      "value": "48866bc2-2d5d-451e-80d3-aa603eed39cf",
                       "uuid": "2ef2f06d-a1ca-47d3-a9bf-b5427dac8e38"
                     }
                   ]
@@ -554,7 +550,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/inventory/stocks?quantity_on_hand__range=40,51",
+                  "raw": "{{baseurl}}/inventory/stocks",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -571,7 +567,8 @@
                     {
                       "key": "quantity_on_hand__range",
                       "value": "40,51",
-                      "uuid": "6691d973-e075-48d6-b433-25e95bd83d9c"
+                      "uuid": "6691d973-e075-48d6-b433-25e95bd83d9c",
+                      "disabled": true
                     }
                   ]
                 }
@@ -652,7 +649,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/products?company_id={{woben_pies}}",
+                  "raw": "{{baseurl}}/products?company_id={{piekings_id}}",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -662,7 +659,7 @@
                   "query": [
                     {
                       "key": "company_id",
-                      "value": "{{woben_pies}}",
+                      "value": "{{piekings_id}}",
                       "uuid": "67215a96-57f2-4ba6-b68f-fd03ad4e5a46"
                     }
                   ]
@@ -708,9 +705,66 @@
                 }
               },
               "response": []
+            },
+            {
+              "name": "create a new product policy",
+              "id": "e08cdd0a-05d6-4f72-92ea-64f070ebf81b",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"product\": \"{{flour_id}}\",\r\n  \"warehouse\": \"{{wh_1_pie_kings}}\",\r\n  \"min_stock_level\": \"10\",\r\n  \"reorder_qty\": \"50\",\r\n  \"lead_time_days\": 3,\r\n  \"safety_stock_qty\": \"30\",\r\n  \"is_active\": true\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/reorder_policies",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "reorder_policies"
+                  ]
+                }
+              },
+              "response": []
             }
           ],
           "id": "2146d953-2f67-4e88-a928-4d5447fbe8c7"
+        },
+        {
+          "name": "Alerts",
+          "item": [
+            {
+              "name": "retrieve all inventory alerts",
+              "id": "5feb0396-ddd9-4562-b8ce-3fb61490f8cf",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": ""
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "New Request",
+              "id": "bcdf8b2b-0fa5-4818-aaa8-d65c95740409",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": ""
+                }
+              },
+              "response": []
+            }
+          ],
+          "id": "e506d604-b7ea-46bd-a4ba-373d99e4af66"
         }
       ],
       "id": "2d0c5c09-8300-4c08-8f7a-1fa07a294d86"
@@ -728,43 +782,70 @@
   },
   "variable": [
     {
-      "id": "fa26fdf5-8fd8-47b6-99af-cd265fa4a992",
+      "id": "bd55bb37-5dcc-43cd-b5d1-dba52686bac5",
       "key": "baseurl",
       "value": ""
     },
     {
-      "id": "ac9ca564-7530-4cc9-b162-0adc2cea2a09",
+      "id": "1e9be2de-de63-440d-a22e-d4735c2fdf46",
       "key": "access_code",
       "value": ""
     },
     {
-      "id": "1c586cb6-7a2a-442f-b726-51528f56a2ec",
+      "id": "935ad8b3-32fb-4807-8005-57091b5c25c2",
       "key": "refresh_token",
       "value": ""
     },
     {
-      "id": "47e39443-9ae0-4bc2-b37a-f2010c51e610",
+      "id": "651f105d-33cc-4e49-8647-fbd53d0052a7",
       "key": "productionurl",
       "value": ""
     },
     {
-      "id": "80008d46-e451-41e3-b623-299bdf5cb213",
+      "id": "55834428-c95a-42fc-8713-38f69db7b17c",
       "key": "piekings_id",
       "value": ""
     },
     {
-      "id": "7852e0e7-841c-4419-a68f-8abaa2182a54",
-      "key": "current_user_emp_code",
+      "id": "b4b598d9-bb6d-4d40-a204-5749610a6f54",
+      "key": "production_user_code",
       "value": ""
     },
     {
-      "id": "c1894e0b-0dc7-4576-9cfb-80da34e5cfa7",
+      "id": "8cfa17f2-6941-4cec-8263-6d86453b6a72",
       "key": "current_user_id",
       "value": ""
     },
     {
-      "id": "bb56ff9c-0a94-4490-8109-0d44e758d309",
+      "id": "b95d6579-1d67-4a62-b30e-3dc835abea16",
       "key": "woben_pies",
+      "value": ""
+    },
+    {
+      "id": "ff3b3f9d-a92d-43d3-9c94-b21dc0e0642a",
+      "key": "wh1_woben_pies",
+      "value": ""
+    },
+    {
+      "id": "b9d2a9b1-2530-410f-90ac-007c5b47d284",
+      "key": "local_user_code",
+      "value": ""
+    },
+    {
+      "id": "a577f071-0f62-4f46-bcd0-44a606d45f29",
+      "key": "flour_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "69305bd1-32a0-45b1-83c3-6b8f55c638a1",
+      "key": "sugar_id_local",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "3dafa140-3ebf-4bda-aa78-2085a5b7a624",
+      "key": "wh_1_pie_kings",
       "value": "",
       "type": "default"
     }
