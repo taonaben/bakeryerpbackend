@@ -4,7 +4,7 @@ from .views.stock_views import StockViewSet
 from .views.stock_movement_views import StockMovementViewSet
 from .views.batch_views import BatchViewSet
 from .views.stock_alerts_views import InventoryAlertViewSet, ProductReorderPolicyViewSet
-from .views.policy_movement_views import create_stock_movement_with_policy
+from .views.policy_movement_views import create_movement_with_policy_view
 
 router = DefaultRouter(trailing_slash=False)
 router.register(r"stocks", StockViewSet, basename="stock")
@@ -15,5 +15,5 @@ router.register(r"alerts", InventoryAlertViewSet, basename="inventory_alert")
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("movements/create-with-policy", create_stock_movement_with_policy, name="create_movement_with_policy"),
+    path("movements/create-with-policy", create_movement_with_policy_view, name="create_movement_with_policy"),
 ]

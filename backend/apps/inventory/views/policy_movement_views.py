@@ -10,7 +10,7 @@ from ..serializers import StockMovementSerializer
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_stock_movement_with_policy(request):
+def create_movement_with_policy_view(request):
     """
     Create a stock movement using retrieval policy (FIFO/LIFO/FEFO).
     Automatically selects and distributes across batches as needed.
@@ -33,7 +33,7 @@ def create_stock_movement_with_policy(request):
             product=product,
             warehouse=warehouse,
             movement_type=request.data["movement_type"],
-            quantity=request.data["quantity"],
+            quantity=float(request.data["quantity"]),
             reference=request.data.get("reference_number"),
             notes=request.data.get("notes"),
         )

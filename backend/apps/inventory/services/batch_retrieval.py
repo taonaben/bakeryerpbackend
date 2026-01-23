@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from decimal import Decimal
 from ..models import Batch, StockMovement, StockMovementBatch, ProductPolicy
 
 
@@ -8,6 +9,8 @@ def create_stock_movement_with_policy(product, warehouse, movement_type, quantit
     Create a single stock movement following the product's retrieval policy.
     Automatically distributes quantity across multiple batches if needed.
     """
+    # Convert quantity to Decimal for consistent arithmetic
+    quantity = Decimal(str(quantity))
     # Get retrieval policy
     try:
         policy = ProductPolicy.objects.get(

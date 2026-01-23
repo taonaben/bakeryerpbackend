@@ -1,11 +1,17 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import transaction
-from ..models import StockMovement, Stock, ProductPolicy, InventoryAlert
+from ..models import (
+    StockMovement,
+    Stock,
+    ProductPolicy,
+    InventoryAlert,
+    StockMovementBatch,
+)
 from django.utils import timezone
 
 
-@receiver(post_save, sender=StockMovement)
+@receiver(post_save, sender=StockMovementBatch)
 def check_inventory_alerts(sender, instance, created, **kwargs):
     """Check and create inventory alerts based on stock levels after movement"""
     if not created:

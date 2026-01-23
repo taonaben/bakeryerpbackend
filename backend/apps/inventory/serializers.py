@@ -1,5 +1,12 @@
 from rest_framework import serializers
-from .models import Stock, StockMovement, Batch, ProductPolicy, InventoryAlert, StockMovementBatch
+from .models import (
+    Stock,
+    StockMovement,
+    Batch,
+    ProductPolicy,
+    InventoryAlert,
+    StockMovementBatch,
+)
 
 
 class StockSerializer(serializers.ModelSerializer):
@@ -37,15 +44,17 @@ class BatchSerializer(serializers.ModelSerializer):
 
 class StockMovementBatchSerializer(serializers.ModelSerializer):
     batch = BatchSerializer(read_only=True)
-    
+
     class Meta:
         model = StockMovementBatch
         fields = ["batch", "quantity"]
 
 
 class StockMovementSerializer(serializers.ModelSerializer):
-    batches_detail = StockMovementBatchSerializer(source='stockmovementbatch_set', many=True, read_only=True)
-    
+    batches_detail = StockMovementBatchSerializer(
+        source="stockmovementbatch_set", many=True, read_only=True
+    )
+
     class Meta:
         model = StockMovement
         fields = [
@@ -71,6 +80,7 @@ class ProductReorderPolicySerializer(serializers.ModelSerializer):
             "min_stock_level",
             "reorder_qty",
             "lead_time_days",
+            "retrieval_method",
             "safety_stock_qty",
             "is_active",
             "created_at",
