@@ -36,9 +36,14 @@ DEBUG = os.environ.get("DEBUG", "0") == "1"
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
+    for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if host.strip()
 ]
+
+# Add this fallback for production
+if not DEBUG and not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['*']  # Temporary - replace with your actual domain
+
 
 
 # Application definition
@@ -54,14 +59,10 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "drf_yasg",
-    "channels",
-    "channels_redis",
     "rest_framework_simplejwt.token_blacklist",
     "silk",
     "drf_spectacular",
     "django_filters",
-    # "django_celery_beat",
-    # "django_extensions",
     "djoser",
     #! Local apps
     "apps.accounts",
