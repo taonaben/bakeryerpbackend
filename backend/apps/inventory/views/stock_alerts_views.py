@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from django.utils import timezone
-from ..models import InventoryAlert, ProductReorderPolicy
+from ..models import InventoryAlert, ProductPolicy
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from ..filters import StockFilter, StockMovementFilter, BatchFilter
 from ..serializers import InventoryAlertSerializer, ProductReorderPolicySerializer
@@ -29,7 +29,9 @@ class InventoryAlertViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         """Filter inventory alerts by warehouse if provided"""
-        queryset = InventoryAlert.objects.select_related('product', 'warehouse', 'reorder_policy').all()
+        queryset = InventoryAlert.objects.select_related(
+            "product", "warehouse", "reorder_policy"
+        ).all()
         warehouse_id = self.request.query_params.get("warehouse_id")
 
         if warehouse_id is not None:
@@ -112,7 +114,7 @@ class ProductReorderPolicyViewSet(viewsets.ModelViewSet):
     ViewSet for managing product reorder policies.
     """
 
-    queryset = ProductReorderPolicy.objects.all()
+    queryset = ProductPolicy.objects.all()
     serializer_class = ProductReorderPolicySerializer
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated, InventoryPermission]

@@ -42,7 +42,7 @@ class StockMovementViewSet(viewsets.ModelViewSet):
         end_date = self.request.query_params.get("end_date", None)
 
         if warehouse_id is not None:
-            queryset = queryset.filter(batch__warehouse_id=warehouse_id)
+            queryset = queryset.filter(batches__warehouse_id=warehouse_id).distinct()
 
         if start_date is not None and end_date is not None:
             queryset = queryset.filter(created_at__range=[start_date, end_date])
@@ -54,7 +54,7 @@ class StockMovementViewSet(viewsets.ModelViewSet):
         """Retrieve stock movements for a specific stock item"""
         stock_id = request.query_params.get("stock_id", None)
         if stock_id is not None:
-            movements = StockMovement.objects.filter(stock_id=stock_id)
+            movements = StockMovement.objects.filter(batches__product__stocks__id=stock_id).distinct()
             serializer = self.get_serializer(movements, many=True)
             return Response(serializer.data)
         return Response(

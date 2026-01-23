@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import transaction
-from ..models import StockMovement, Stock, ProductReorderPolicy, InventoryAlert
+from ..models import StockMovement, Stock, ProductPolicy, InventoryAlert
 from django.utils import timezone
 
 
@@ -18,7 +18,9 @@ def check_inventory_alerts(sender, instance, created, **kwargs):
 
             # Get current stock level
             try:
-                stock = Stock.objects.select_for_update().get(product=product, warehouse=warehouse)
+                stock = Stock.objects.select_for_update().get(
+                    product=product, warehouse=warehouse
+                )
             except Stock.DoesNotExist:
                 return
 
@@ -26,10 +28,10 @@ def check_inventory_alerts(sender, instance, created, **kwargs):
 
             # Check for reorder policy
             try:
-                policy = ProductReorderPolicy.objects.get(
+                policy = ProductPolicy.objects.get(
                     product=product, warehouse=warehouse, is_active=True
                 )
-            except ProductReorderPolicy.DoesNotExist:
+            except ProductPolicy.DoesNotExist:
                 policy = None
 
             # Determine alert type and create if needed
@@ -47,7 +49,10 @@ def check_inventory_alerts(sender, instance, created, **kwargs):
             if alert_type:
                 # Create alert if needed and doesn't already exist
                 existing_alert = InventoryAlert.objects.filter(
-                    product=product, warehouse=warehouse, alert_type=alert_type, status="OPEN"
+                    product=product,
+                    warehouse=warehouse,
+                    alert_type=alert_type,
+                    status="OPEN",
                 ).first()
 
                 if not existing_alert:
@@ -66,13 +71,11 @@ def check_inventory_alerts(sender, instance, created, **kwargs):
                     product=product,
                     warehouse=warehouse,
                     status__in=["OPEN", "ACKNOWLEDGED"],
-                    alert_type__in=["LOW_STOCK", "OUT_OF_STOCK"]
-                ).update(
-                    status="RESOLVED",
-                    resolved_at=timezone.now()
-                )
+                    alert_type__in=["LOW_STOCK", "OUT_OF_STOCK"],
+                ).update(status="RESOLVED", resolved_at=timezone.now())
     except Exception as e:
         # Log error but don't crash the application
         import logging
+
         logger = logging.getLogger(__name__)
         logger.error(f"Error in check_inventory_alerts: {e}")

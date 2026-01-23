@@ -26,11 +26,9 @@ class StockMovementFilter(django_filters.FilterSet):
     class Meta:
         model = StockMovement
         fields = {
-            "batch__warehouse_id": ["exact"],
-            "batch__product__sku": ["exact", "icontains"],
             "movement_type": ["exact"],
             "notes": ["icontains"],
-            "quantity": ["exact", "gt", "lt", "gte", "lte"],
+            "total_quantity": ["exact", "gt", "lt", "gte", "lte"],
             "created_at": ["exact", "gt", "lt", "gte", "lte"],
         }
 
