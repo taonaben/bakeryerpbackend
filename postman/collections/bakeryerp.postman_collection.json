@@ -575,7 +575,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n\r\n\"product_id\": \"{{flour_id}}\",\r\n\r\n\"warehouse_id\": \"{{wh_1_pie_kings}}\",\r\n\r\n\"movement_type\": \"OUT\",\r\n\r\n\"quantity\": \"90\"\r\n\r\n\r\n}",
+                  "raw": "{\r\n\r\n\"product_id\": \"{{flour_id}}\",\r\n\r\n\"warehouse_id\": \"{{wh_1_pie_kings}}\",\r\n\r\n\"movement_type\": \"OUT\",\r\n\r\n\"quantity\": 2\r\n\r\n\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -773,7 +773,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"product\": \"{{flour_id}}\",\r\n  \"warehouse\": \"{{wh_1_pie_kings}}\",\r\n  \"min_stock_level\": \"10\",\r\n  \"reorder_qty\": \"50\",\r\n  \"lead_time_days\": 3,\r\n  \"safety_stock_qty\": \"30\",\r\n  \"is_active\": true\r\n}",
+                  "raw": "{\r\n  \"product\": \"{{flour_id}}\",\r\n  \"warehouse\": \"{{wh_1_pie_kings}}\",\r\n  \"min_stock_level\": \"10\",\r\n  \"reorder_qty\": \"50\",\r\n  \"lead_time_days\": 3,\r\n  \"retrieval_method\": \"FIFO\",\r\n  \"safety_stock_qty\": \"30\",\r\n  \"is_active\": true\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -799,7 +799,13 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": ""
+                  "raw": "{{baseurl}}/reorder_policies",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "reorder_policies"
+                  ]
                 }
               },
               "response": []
