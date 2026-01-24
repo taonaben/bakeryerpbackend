@@ -24,6 +24,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "password2",
             "first_name",
             "last_name",
+            "company",
             "role",
         ]
         read_only_fields = ["emp_code"]
@@ -76,6 +77,10 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for user details"""
 
+    company_name = serializers.CharField(
+        source="company.name", read_only=True
+    )
+    
     class Meta:
         model = User
         fields = [
@@ -85,6 +90,8 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "username",
+            "company",
+            "company_name",
             "role",
             "is_active",
             "is_staff",

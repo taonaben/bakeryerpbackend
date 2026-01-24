@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from central.models import Company
 import uuid
 import string
 import random
@@ -38,7 +39,13 @@ class User(AbstractUser):
     )
     email = models.EmailField(unique=True)
     role = models.CharField(
-        max_length=30, choices=ROLE_CHOICES, null=False, blank=False, 
+        max_length=30,
+        choices=ROLE_CHOICES,
+        null=False,
+        blank=False,
+    )
+    company = models.ForeignKey(
+        Company, null=True, blank=True, on_delete=models.SET_NULL, related_name="users"
     )
 
     groups = models.ManyToManyField(
@@ -58,8 +65,8 @@ class User(AbstractUser):
         verbose_name = "User"
         verbose_name_plural = "Users"
         indexes = [
-            models.Index(fields=['role'], name='user_role_idx'),
-            models.Index(fields=['emp_code'], name='user_emp_code_idx'),
+            models.Index(fields=["role"], name="user_role_idx"),
+            models.Index(fields=["emp_code"], name="user_emp_code_idx"),
         ]
 
     def __str__(self):
