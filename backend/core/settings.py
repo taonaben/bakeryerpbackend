@@ -122,14 +122,23 @@ else:
     try:
         import dj_database_url
 
-        render_external_db_url = os.environ.get("RENDER_DB_URL") or os.environ.get(
-            "DATABASE_URL"
-        )
-        logger.info(f"Render external db url: {render_external_db_url!r}")
+        # render_external_db_url = os.environ.get("RENDER_DB_URL") or os.environ.get(
+        #     "DATABASE_URL"
+        # )
+        
+        aiven_db_url = os.environ.get("AIVEN_DB_URL")
+        
+        logger.info(f"Aiven db url: {aiven_db_url!r}")
 
         # Initialize DATABASES and only parse when a URL is provided
-        if render_external_db_url:
-            DATABASES = {"default": dj_database_url.parse(render_external_db_url)}
+        
+        # if render_external_db_url:
+        #     DATABASES = {"default": dj_database_url.parse(render_external_db_url)}
+            
+        if  aiven_db_url:
+            DATABASES = {"default": dj_database_url.parse(aiven_db_url)}
+
+            
         else:
             # Fallback to a local sqlite DB so build-time commands (collectstatic) don't fail
             DATABASES = {
