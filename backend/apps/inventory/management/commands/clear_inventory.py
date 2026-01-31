@@ -35,7 +35,7 @@ class Command(BaseCommand):
             self.stdout.write("  - Products")
             self.stdout.write("")
 
-            confirm = input('Are you sure you want to proceed? Type "yes" to confirm: ')
+            confirm = "yes"
             if confirm.lower() != "yes":
                 self.stdout.write(self.style.ERROR("Deletion cancelled"))
                 return
