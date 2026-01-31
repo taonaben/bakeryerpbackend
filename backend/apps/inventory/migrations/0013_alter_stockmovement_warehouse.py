@@ -16,6 +16,8 @@ class Migration(migrations.Migration):
             model_name="stockmovement",
             name="warehouse",
             field=models.ForeignKey(
+                blank=True,
+                null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="stock_movements",
                 to="central.warehouse",
