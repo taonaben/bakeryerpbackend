@@ -42,8 +42,7 @@ ALLOWED_HOSTS = [
 
 # Add this fallback for production
 if not DEBUG and not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ['*']  # Temporary - replace with your actual domain
-
+    ALLOWED_HOSTS = ["*"]  # Temporary - replace with your actual domain
 
 
 # Application definition
@@ -101,61 +100,57 @@ TEMPLATES = [
         },
     },
 ]
-
 WSGI_APPLICATION = "core.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-if DEBUG:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("POSTGRES_DB"),
-            "USER": os.environ.get("POSTGRES_USER"),
-            "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-            "HOST": os.environ.get("POSTGRES_HOST"),
-            "PORT": os.environ.get("POSTGRES_PORT"),
-        }
-    }
-else:
+
+# Check if we're on Render (production) or have a DATABASE_URL
+render_external_db_url = os.environ.get("RENDER_DB_URL") or os.environ.get(
+    "DATABASE_URL"
+)
+
+if render_external_db_url:
+    # Production: Use the external database URL (Render, Aiven, etc.)
     try:
         import dj_database_url
 
-        render_external_db_url = os.environ.get("RENDER_DB_URL") or os.environ.get(
-            "DATABASE_URL"
-        )
-        
-        # aiven_db_url = os.environ.get("AIVEN_DB_URL")
-        
-        # logger.info(f"Aiven db url: {aiven_db_url!r}")
-
-        # Initialize DATABASES and only parse when a URL is provided
-        
-        if render_external_db_url:
-            DATABASES = {"default": dj_database_url.parse(render_external_db_url)}
-            
-        # if  aiven_db_url:
-        #     DATABASES = {"default": dj_database_url.parse(aiven_db_url)}
-
-            
-        else:
-            # Fallback to a local sqlite DB so build-time commands (collectstatic) don't fail
+        if DEBUG:
             DATABASES = {
                 "default": {
-                    "ENGINE": "django.db.backends.sqlite3",
-                    "NAME": BASE_DIR / "db.sqlite3",
+                    "ENGINE": "django.db.backends.postgresql",
+                    "NAME": os.environ.get("POSTGRES_DB"),
+                    "USER": os.environ.get("POSTGRES_USER"),
+                    "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+                    "HOST": os.environ.get("POSTGRES_HOST"),
+                    "PORT": os.environ.get("POSTGRES_PORT"),
                 }
             }
+        else:
+            DATABASES = {"default": dj_database_url.parse(render_external_db_url)}
+            
     except Exception as e:
         logger.error(f"Error configuring database: {e}")
+        # Fallback to sqlite for build-time commands
         DATABASES = {
             "default": {
                 "ENGINE": "django.db.backends.sqlite3",
                 "NAME": BASE_DIR / "db.sqlite3",
             }
         }
-
+else:
+    # Local development: Use PostgreSQL with individual env vars
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB", "mydb"),
+            "USER": os.environ.get("POSTGRES_USER", "myuser"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "mypassword"),
+            "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        }
+    }
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -257,7 +252,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React
     "http://127.0.0.1:3000",
     "http://localhost:8080",  # Vue or Flutter web
-    "https://bakeryerpbackend.onrender.com"
+    "https://bakeryerpbackend.onrender.com",
     # "https://council-portal.onrender.com",
 ]
 
@@ -274,7 +269,7 @@ CORS_ALLOW_CREDENTIALS = True
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
 
-APPEND_SLASH=False
+APPEND_SLASH = False
 
 # Static files for production
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
@@ -282,7 +277,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Security settings for production
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # CACHES = {
