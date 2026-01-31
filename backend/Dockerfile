@@ -14,5 +14,9 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 
+RUN chmod +x entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
+
 # Add this to see import errors:
 RUN python -c "import django; django.setup()" || echo "Django setup failed - check imports"
