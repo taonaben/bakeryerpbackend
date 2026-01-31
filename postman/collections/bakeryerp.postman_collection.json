@@ -220,6 +220,45 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "edit user details",
+          "id": "7a2fc23d-5dec-4a63-8d82-e55500a3833f",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_code}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"company\": \"ec2eb06b-0899-45b2-9c21-664da558289b\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/account/users/21527c8f-d087-4ae4-95c5-8d0d1eb7b37d",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "account",
+                "users",
+                "21527c8f-d087-4ae4-95c5-8d0d1eb7b37d"
+              ]
+            }
+          },
+          "response": []
         }
       ],
       "id": "972b1728-c7a9-48f6-93c1-8698ef6561fd",
@@ -823,25 +862,19 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": ""
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "New Request",
-              "id": "bcdf8b2b-0fa5-4818-aaa8-d65c95740409",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseurl}}/inventory/alerts",
+                  "raw": "{{baseurl}}/inventory/alerts?warehouse_id={{wh_1_pie_kings}}",
                   "host": [
                     "{{baseurl}}"
                   ],
                   "path": [
                     "inventory",
                     "alerts"
+                  ],
+                  "query": [
+                    {
+                      "key": "warehouse_id",
+                      "value": "{{wh_1_pie_kings}}"
+                    }
                   ]
                 }
               },

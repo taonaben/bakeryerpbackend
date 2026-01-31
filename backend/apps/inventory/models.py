@@ -2,8 +2,8 @@ from django.db import models
 import uuid
 from central.models import Product, Warehouse
 from django.db.models import F
-from apps.accounts.models import User
-
+# from django.contrib.auth import get_user_model
+from django.conf import settings
 
 class Stock(models.Model):
     """Represents current inventory levels of a product in a warehouse"""
@@ -109,7 +109,16 @@ class StockMovement(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    batches = models.ManyToManyField(Batch, through='StockMovementBatch', related_name="movements")
+    warehouse = models.ForeignKey(
+        Warehouse,
+        on_delete=models.CASCADE,
+        related_name="stock_movements",
+        null=True,
+        blank=True,
+    )
+    batches = models.ManyToManyField(
+        Batch, through="StockMovementBatch", related_name="movements"
+    )
     movement_type = models.CharField(max_length=50, choices=MOVEMENT_TYPE_CHOICES)
     total_quantity = models.DecimalField(max_digits=10, decimal_places=2)
     reference_number = models.CharField(
@@ -135,22 +144,22 @@ class StockMovement(models.Model):
 
 class StockMovementBatch(models.Model):
     """Through model for StockMovement and Batch relationship"""
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     stock_movement = models.ForeignKey(StockMovement, on_delete=models.CASCADE)
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    
+
     class Meta:
-        unique_together = ('stock_movement', 'batch')
-        
+        unique_together = ("stock_movement", "batch")
+
     def __str__(self):
         return f"{self.quantity} from {self.batch.batch_number}"
 
 
 class ProductPolicy(models.Model):
     """Defines all policies for products in warehouses"""
-    
+
     RETRIEVAL_CHOICES = [
         ("FIFO", "First In First Out"),
         ("LIFO", "Last In First Out"),
@@ -181,14 +190,14 @@ class ProductPolicy(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
-        User,
+       settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="reorder_policies",
     )
     updated_by = models.ForeignKey(
-        User,
+    settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -260,7 +269,7 @@ class InventoryAlert(models.Model):
     triggered_by = models.CharField(max_length=50, choices=TRIGGER_CHOICES)
     acknowledged_at = models.DateTimeField(null=True, blank=True)
     acknowledged_by = models.ForeignKey(
-        User,
+     settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -271,7 +280,7 @@ class InventoryAlert(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
     resolved_by = models.ForeignKey(
-        User,
+      settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

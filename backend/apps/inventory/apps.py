@@ -6,5 +6,5 @@ class InventoryConfig(AppConfig):
     name = "apps.inventory"
     label = "inventory"
 
-    def ready(self):
-        from . import signals
+    # def ready(self):
+    #     from . import signals

@@ -1,3 +1,4 @@
+from urllib import request
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -8,10 +9,11 @@ from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 
 filter_backends = [
-        DjangoFilterBackend,
-        filters.OrderingFilter,
-        filters.SearchFilter,
-    ]
+    DjangoFilterBackend,
+    filters.OrderingFilter,
+    filters.SearchFilter,
+]
+
 
 class CompanyViewSet(viewsets.ModelViewSet):
     """
@@ -29,6 +31,13 @@ class CompanyViewSet(viewsets.ModelViewSet):
     filter_backends = filter_backends
     ordering_fields = ["name", "created_at"]
     search_fields = ["name", "address", "email"]
+
+    def get_queryset(self):
+        """Filter companies to only those owned by the requesting user"""
+        user = self.request.user
+        if user.is_authenticated and hasattr(user, "company"):
+            return Company.objects.filter(id=user.company_id)
+        return Company.objects.none()
 
     @action(detail=True, methods=["get"])
     def warehouses(self, request, pk=None):

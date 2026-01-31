@@ -59,6 +59,7 @@ class StockMovementSerializer(serializers.ModelSerializer):
         model = StockMovement
         fields = [
             "id",
+            "warehouse",
             "movement_type",
             "total_quantity",
             "reference_number",

@@ -75,11 +75,11 @@ class UserViewSet(viewsets.ModelViewSet):
             # return [ UsersPermission()]
             return [AllowAny()]  # Temporary open list view
         elif self.action in ["destroy", "update", "partial_update"]:
-            return [IsAdminUser()]
+            return [IsAuthenticated()]
         elif self.action == "retrieve":
             return [IsAuthenticated(), UsersPermission()]
         return [IsAuthenticated(), UsersPermission()]
-    
+
     @action(detail=False, methods=["get"])
     def me(self, request):
         """Retrieve details of the currently authenticated user"""
