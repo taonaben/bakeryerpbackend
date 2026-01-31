@@ -190,6 +190,75 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "get new access token",
+          "id": "9f78de11-4a39-4d20-b5c1-2dd94eedd6db",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"refresh\": \"{{refresh_token}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/token/refresh/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "token",
+                "refresh",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "edit user details",
+          "id": "7a2fc23d-5dec-4a63-8d82-e55500a3833f",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_code}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"company\": \"ec2eb06b-0899-45b2-9c21-664da558289b\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/account/users/21527c8f-d087-4ae4-95c5-8d0d1eb7b37d",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "account",
+                "users",
+                "21527c8f-d087-4ae4-95c5-8d0d1eb7b37d"
+              ]
+            }
+          },
+          "response": []
         }
       ],
       "id": "972b1728-c7a9-48f6-93c1-8698ef6561fd",
@@ -416,7 +485,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/inventory/batches?warehouse_id=eb33011f-e9b1-4634-976e-ab72f7c02165",
+                  "raw": "{{baseurl}}/inventory/batches?warehouse_id={{wh_1_pie_kings}}",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -426,16 +495,16 @@
                   ],
                   "query": [
                     {
-                      "key": "warehouse_id",
-                      "value": "eb33011f-e9b1-4634-976e-ab72f7c02165",
-                      "uuid": "2d93c568-926e-4e09-9548-9a6410879823"
-                    },
-                    {
                       "key": "product_id",
                       "value": "51c41c08-6124-4d44-98d1-aa1c4bddf39d",
                       "type": "text",
                       "uuid": "da602c19-404b-4f4d-b6bd-94e0a101e62a",
                       "disabled": true
+                    },
+                    {
+                      "key": "warehouse_id",
+                      "value": "{{wh_1_pie_kings}}",
+                      "uuid": "f6b080de-2606-4570-9c05-20e9854a34ed"
                     }
                   ]
                 }
@@ -450,7 +519,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"product\": \"cef8c040-6d73-42ad-923a-f1312dcf539c\",\r\n  \"warehouse\": \"eb33011f-e9b1-4634-976e-ab72f7c02165\",\r\n  \"quantity\": 50,\r\n  \"manufacture_date\": \"2025-12-15\",\r\n  \"expiry_date\": \"2025-12-19\"\r\n}",
+                  "raw": "{\r\n  \"product\": \"{{flour_id}}\",\r\n  \"warehouse\": \"{{wh_1_pie_kings}}\",\r\n  \"quantity\": 40,\r\n  \"manufacture_date\": \"2025-12-15\",\r\n  \"expiry_date\": \"2026-12-19\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -483,7 +552,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id=eb33011f-e9b1-4634-976e-ab72f7c02165",
+                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id={{wh_1_pie_kings}}",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -494,7 +563,7 @@
                   "query": [
                     {
                       "key": "warehouse_id",
-                      "value": "eb33011f-e9b1-4634-976e-ab72f7c02165",
+                      "value": "{{wh_1_pie_kings}}",
                       "uuid": "13a3ac4b-5937-4874-ae4e-4655c591a8cf"
                     }
                   ]
@@ -510,7 +579,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"batch\": \"48866bc2-2d5d-451e-80d3-aa603eed39cf\",\r\n  \"movement_type\": \"OUT\",\r\n  \"quantity\": \"21\",\r\n  \"reference_number\": \"ref-002\",\r\n  \"notes\": \"\"\r\n}",
+                  "raw": "{\r\n  \"batch\": \"08dd65ea-455f-47b6-ae39-17d19dde86d9\",\r\n  \"movement_type\": \"RETURN\",\r\n  \"quantity\": \"59\",\r\n  \"reference_number\": \"ref-003\",\r\n  \"notes\": \"\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -518,7 +587,7 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id=48866bc2-2d5d-451e-80d3-aa603eed39cf",
+                  "raw": "{{baseurl}}/inventory/stock_movements?warehouse_id={{wh_1_pie_kings}}",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -529,9 +598,38 @@
                   "query": [
                     {
                       "key": "warehouse_id",
-                      "value": "48866bc2-2d5d-451e-80d3-aa603eed39cf",
+                      "value": "{{wh_1_pie_kings}}",
                       "uuid": "2ef2f06d-a1ca-47d3-a9bf-b5427dac8e38"
                     }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create movement using smart picking strategies",
+              "id": "e897dd34-4065-4a19-9b60-98e0e34d4cbe",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n\r\n\"product_id\": \"{{flour_id}}\",\r\n\r\n\"warehouse_id\": \"{{wh_1_pie_kings}}\",\r\n\r\n\"movement_type\": \"OUT\",\r\n\r\n\"quantity\": 2\r\n\r\n\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/inventory/movements/create-with-policy",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "inventory",
+                    "movements",
+                    "create-with-policy"
                   ]
                 }
               },
@@ -714,13 +812,31 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"product\": \"{{flour_id}}\",\r\n  \"warehouse\": \"{{wh_1_pie_kings}}\",\r\n  \"min_stock_level\": \"10\",\r\n  \"reorder_qty\": \"50\",\r\n  \"lead_time_days\": 3,\r\n  \"safety_stock_qty\": \"30\",\r\n  \"is_active\": true\r\n}",
+                  "raw": "{\r\n  \"product\": \"{{flour_id}}\",\r\n  \"warehouse\": \"{{wh_1_pie_kings}}\",\r\n  \"min_stock_level\": \"10\",\r\n  \"reorder_qty\": \"50\",\r\n  \"lead_time_days\": 3,\r\n  \"retrieval_method\": \"FIFO\",\r\n  \"safety_stock_qty\": \"30\",\r\n  \"is_active\": true\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
                     }
                   }
                 },
+                "url": {
+                  "raw": "{{baseurl}}/reorder_policies",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "reorder_policies"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve product policies",
+              "id": "8f99a73c-56f5-4926-9358-36c9bf5cb88f",
+              "request": {
+                "method": "GET",
+                "header": [],
                 "url": {
                   "raw": "{{baseurl}}/reorder_policies",
                   "host": [
@@ -746,19 +862,20 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": ""
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "New Request",
-              "id": "bcdf8b2b-0fa5-4818-aaa8-d65c95740409",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": ""
+                  "raw": "{{baseurl}}/inventory/alerts?warehouse_id={{wh_1_pie_kings}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "inventory",
+                    "alerts"
+                  ],
+                  "query": [
+                    {
+                      "key": "warehouse_id",
+                      "value": "{{wh_1_pie_kings}}"
+                    }
+                  ]
                 }
               },
               "response": []

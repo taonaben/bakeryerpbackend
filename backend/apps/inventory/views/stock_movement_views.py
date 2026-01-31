@@ -42,19 +42,34 @@ class StockMovementViewSet(viewsets.ModelViewSet):
         end_date = self.request.query_params.get("end_date", None)
 
         if warehouse_id is not None:
-            queryset = queryset.filter(batch__warehouse_id=warehouse_id)
+            queryset = queryset.filter(batches__warehouse_id=warehouse_id).distinct()
 
         if start_date is not None and end_date is not None:
             queryset = queryset.filter(created_at__range=[start_date, end_date])
 
         return queryset
 
+    def create(self, request, *args, **kwargs):
+        warehouse_id = request.data.get("warehouse")
+        if not warehouse_id:
+            return Response(
+                {"detail": "warehouse field is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+            
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     @action(detail=False, methods=["get"])
     def by_stock(self, request):
         """Retrieve stock movements for a specific stock item"""
         stock_id = request.query_params.get("stock_id", None)
         if stock_id is not None:
-            movements = StockMovement.objects.filter(stock_id=stock_id)
+            movements = StockMovement.objects.filter(batches__product__stocks__id=stock_id).distinct()
             serializer = self.get_serializer(movements, many=True)
             return Response(serializer.data)
         return Response(

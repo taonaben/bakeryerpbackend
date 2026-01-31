@@ -5,7 +5,7 @@ from .models import Company, Warehouse, Product
 class CompanySerializer(serializers.ModelSerializer):
     """Serializer for Company model"""
 
-    warehouses_count = serializers.SerializerMethodField()
+    warehouses_count = serializers.SerializerMethodField() 
 
     class Meta:
         model = Company

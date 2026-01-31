@@ -2,8 +2,8 @@ from django.db import models
 import uuid
 from central.models import Product, Warehouse
 from django.db.models import F
-from apps.accounts.models import User
-
+from django.contrib.auth import get_user_model
+from django.conf import settings
 
 class Stock(models.Model):
     """Represents current inventory levels of a product in a warehouse"""
@@ -109,9 +109,18 @@ class StockMovement(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name="movements")
+    warehouse = models.ForeignKey(
+        Warehouse,
+        on_delete=models.CASCADE,
+        related_name="stock_movements",
+        null=True,
+        blank=True,
+    )
+    batches = models.ManyToManyField(
+        Batch, through="StockMovementBatch", related_name="movements"
+    )
     movement_type = models.CharField(max_length=50, choices=MOVEMENT_TYPE_CHOICES)
-    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    total_quantity = models.DecimalField(max_digits=10, decimal_places=2)
     reference_number = models.CharField(
         max_length=100, null=True, blank=True
     )  # PO number, invoice, etc.
@@ -124,20 +133,38 @@ class StockMovement(models.Model):
         ordering = ["-created_at"]
         indexes = [
             models.Index(
-                fields=["batch", "created_at"], name="movement_batch_date_idx"
-            ),
-            models.Index(
                 fields=["movement_type", "created_at"], name="movement_type_date_idx"
             ),
             models.Index(fields=["reference_number"], name="movement_ref_idx"),
         ]
 
     def __str__(self):
-        return f"{self.movement_type}: {self.quantity} of {self.batch.product.name} on {self.created_at}"
+        return f"{self.movement_type}: {self.total_quantity} on {self.created_at}"
 
 
-class ProductReorderPolicy(models.Model):
-    """Defines reorder policies for products in warehouses"""
+class StockMovementBatch(models.Model):
+    """Through model for StockMovement and Batch relationship"""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    stock_movement = models.ForeignKey(StockMovement, on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        unique_together = ("stock_movement", "batch")
+
+    def __str__(self):
+        return f"{self.quantity} from {self.batch.batch_number}"
+
+
+class ProductPolicy(models.Model):
+    """Defines all policies for products in warehouses"""
+
+    RETRIEVAL_CHOICES = [
+        ("FIFO", "First In First Out"),
+        ("LIFO", "Last In First Out"),
+        ("FEFO", "First Expired First Out"),
+    ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(
@@ -152,24 +179,25 @@ class ProductReorderPolicy(models.Model):
     reorder_qty = models.DecimalField(
         max_digits=10, decimal_places=2, default=0
     )  # Quantity to reorder
-    lead_time_days = models.IntegerField(
-        default=0
-    )  # Supplier lead time in days
+    lead_time_days = models.IntegerField(default=0)  # Supplier lead time in days
     safety_stock_qty = models.DecimalField(
         max_digits=10, decimal_places=2, default=0
     )  # Safety stock quantity
+    retrieval_method = models.CharField(
+        max_length=20, choices=RETRIEVAL_CHOICES, default="FIFO"
+    )  # Stock retrieval method
     is_active = models.BooleanField(default=True)  # Is this policy active
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
-        User,
+       settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="reorder_policies",
     )
     updated_by = models.ForeignKey(
-        User,
+    settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -190,6 +218,11 @@ class ProductReorderPolicy(models.Model):
                 name="reorder_product_point_idx",
             ),
         ]
+
+    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    #     if not self.product.expiry_tracking:
+    #         self.retrieval_method = "FIFO"  # Default to FIFO if expiry tracking is off
+    #     return super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return f"Reorder Policy for {self.product.name} in {self.warehouse.name}"
@@ -223,8 +256,8 @@ class InventoryAlert(models.Model):
         Warehouse, on_delete=models.CASCADE, related_name="inventory_alerts"
     )
     reorder_policy = models.ForeignKey(
-        ProductReorderPolicy,
-        on_delete=models.DO_NOTHING,
+        ProductPolicy,
+        on_delete=models.SET_NULL,
         related_name="inventory_alerts",
         null=True,
         blank=True,
@@ -236,7 +269,7 @@ class InventoryAlert(models.Model):
     triggered_by = models.CharField(max_length=50, choices=TRIGGER_CHOICES)
     acknowledged_at = models.DateTimeField(null=True, blank=True)
     acknowledged_by = models.ForeignKey(
-        User,
+     settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -247,7 +280,7 @@ class InventoryAlert(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
     resolved_by = models.ForeignKey(
-        User,
+      settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -259,8 +292,8 @@ class InventoryAlert(models.Model):
         verbose_name_plural = "Inventory Alerts"
         indexes = [
             models.Index(
-                fields=["product", "warehouse",],
-                name="inv_alert_product_resolved_idx",
+                fields=["product", "warehouse"],
+                name="inv_alert_product_whouse_idx",
             ),
             models.Index(
                 fields=["status"],

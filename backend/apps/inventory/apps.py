@@ -7,4 +7,10 @@ class InventoryConfig(AppConfig):
     label = "inventory"
 
     def ready(self):
-        from . import signals
+        try:
+            import apps.inventory.signals.stock_update
+            import apps.inventory.signals.stock_alerts
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to import signals: {e}")

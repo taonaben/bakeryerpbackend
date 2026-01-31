@@ -58,6 +58,16 @@ def get_current_batch_quantity(product, warehouse):
         warehouse=warehouse
     ).aggregate(total=Sum('quantity'))['total'] or 0
 
+def get_current_stock_quantity(product, warehouse):
+    """Get current stock quantity for a product in a warehouse"""
+    from .models import Stock
+    
+    stock = Stock.objects.filter(
+        product=product,
+        warehouse=warehouse
+    ).first()
+    
+    return stock.quantity_on_hand if stock else 0
 
 def check_expiring_batches():
     """Check for batches expiring within 7 days and create alerts"""
