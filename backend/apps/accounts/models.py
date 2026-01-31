@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.db import models
 import uuid
 import string
 import random
@@ -45,7 +44,11 @@ class User(AbstractUser):
         blank=False,
     )
     company = models.ForeignKey(
-        "central.Company", null=True, blank=True, on_delete=models.SET_NULL, related_name="users"
+        'central.Company',  # <-- STRING REFERENCE (not direct import)
+        null=True, 
+        blank=True, 
+        on_delete=models.SET_NULL, 
+        related_name="users"
     )
 
     groups = models.ManyToManyField(

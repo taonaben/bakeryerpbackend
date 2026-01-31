@@ -5,7 +5,6 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# system deps
 RUN apt-get update \
     && apt-get install -y gcc libpq-dev \
     && apt-get clean
@@ -14,3 +13,6 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
+
+# Add this to see import errors:
+RUN python -c "import django; django.setup()" || echo "Django setup failed - check imports"
