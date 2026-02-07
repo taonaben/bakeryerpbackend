@@ -83,7 +83,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"emp_code\": \"{{local_user_code}}\",\r\n  \"password\": \"securepass123\"\r\n}",
+              "raw": "{\r\n  \"emp_code\": \"{{production_user_code}}\",\r\n  \"password\": \"securepass123\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -239,7 +239,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"company\": \"ec2eb06b-0899-45b2-9c21-664da558289b\"\r\n}",
+              "raw": "{\r\n    \"company\": \"{{woben_pies}}\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -247,14 +247,14 @@
               }
             },
             "url": {
-              "raw": "{{baseurl}}/account/users/21527c8f-d087-4ae4-95c5-8d0d1eb7b37d",
+              "raw": "{{baseurl}}/account/users/9d5bc895-d18e-4c20-817e-5376ae2366cc",
               "host": [
                 "{{baseurl}}"
               ],
               "path": [
                 "account",
                 "users",
-                "21527c8f-d087-4ae4-95c5-8d0d1eb7b37d"
+                "9d5bc895-d18e-4c20-817e-5376ae2366cc"
               ]
             }
           },
@@ -413,7 +413,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"company\": \"{{woben_pies}}\",\r\n  \"name\": \"wh-003\",\r\n  \"status\": true,\r\n  \"wh_type\": \"production\"\r\n}",
+                  "raw": "{\r\n  \"company\": \"{{piekings_id}}\",\r\n  \"name\": \"wh-002\",\r\n  \"status\": true,\r\n  \"wh_type\": \"production\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -421,7 +421,7 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseurl}}/warehouses?company_id={{woben_pies}}",
+                  "raw": "{{baseurl}}/warehouses?company_id={{piekings_id}}",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -431,7 +431,7 @@
                   "query": [
                     {
                       "key": "company_id",
-                      "value": "{{woben_pies}}",
+                      "value": "{{piekings_id}}",
                       "uuid": "e42cb3ee-72f7-4ed9-ab35-6f9bcfe2737c"
                     }
                   ]
@@ -519,7 +519,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"product\": \"{{flour_id}}\",\r\n  \"warehouse\": \"{{wh_1_pie_kings}}\",\r\n  \"quantity\": 40,\r\n  \"manufacture_date\": \"2025-12-15\",\r\n  \"expiry_date\": \"2026-12-19\"\r\n}",
+                  "raw": "{\r\n  \"product\": \"6c34ccbf-5330-44a0-b180-1f7a83e8c9ac\",\r\n  \"warehouse\": \"{{wh1_woben_pies}}\",\r\n  \"quantity\": 50,\r\n  \"manufacture_date\": \"2026-01-16\",\r\n  \"expiry_date\": \"2026-02-25\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -714,7 +714,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"name\": \"sugar\",\r\n  \"category\": \"sugar\",\r\n  \"unit_of_measure\": \"kg\"\r\n}",
+                  "raw": "{\r\n  \"name\": \"processed meat\",\r\n  \"category\": \"persishable\",\r\n  \"unit_of_measure\": \"kg\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -747,7 +747,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseurl}}/products?company_id={{piekings_id}}",
+                  "raw": "{{baseurl}}/products?company_id={{woben_pies}}",
                   "host": [
                     "{{baseurl}}"
                   ],
@@ -757,7 +757,7 @@
                   "query": [
                     {
                       "key": "company_id",
-                      "value": "{{piekings_id}}",
+                      "value": "{{woben_pies}}",
                       "uuid": "67215a96-57f2-4ba6-b68f-fd03ad4e5a46"
                     }
                   ]
