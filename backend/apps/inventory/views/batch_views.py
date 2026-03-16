@@ -29,7 +29,8 @@ class BatchViewSet(viewsets.ModelViewSet):
     filterset_class = BatchFilter
     filter_backends = filter_backends
     ordering_fields = ["created_at", "product__name"]
-    search_fields = ["product__name", "batch_number"]
+    search_fields = ["product__name", "batch_number"]# blah
+
     tags = ["Batches"]
 
     @extend_schema(
