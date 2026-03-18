@@ -16,7 +16,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"username\": \"babyface\",\r\n    \"email\": \"babyface@gmail.com\",\r\n    \"password\": \"securepass123\",\r\n    \"password2\": \"securepass123\",\r\n    \"first_name\": \"taona\",\r\n    \"last_name\": \"munikwa\"\r\n}",
+              "raw": "{\r\n    \"username\": \"babyface\",\r\n    \"email\": \"babyface@gmail.com\",\r\n    \"password\": \"securepass123\",\r\n    \"password2\": \"securepass123\",\r\n    \"first_name\": \"taona\",\r\n    \"last_name\": \"munikwa\"\r\n}\r\n",
               "options": {
                 "raw": {
                   "language": "json"
@@ -60,6 +60,9 @@
           "name": "Login user",
           "id": "7c551208-1274-447b-a68e-b7551f5c95ad",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [],
             "body": {
@@ -79,6 +82,99 @@
               "path": [
                 "users",
                 "login",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "request otp",
+          "id": "c1020b83-dab3-4dc1-a512-42c273b4640b",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"munikwataona09@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/auth/request-otp/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "auth",
+                "request-otp",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "verify otp",
+          "id": "d9deb860-1cf7-41f7-a2e5-71b280e0de75",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"taonbenjamin180903@gmail.com\", \"token\": 746600}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/auth/verify-otp/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "auth",
+                "verify-otp",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "logout user",
+          "id": "886cd224-60a0-4ffc-9c0c-9f84ec6fd6c8",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"refresh\": \"{{refresh_token}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/auth/logout/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "auth",
+                "logout",
                 ""
               ]
             }
@@ -206,7 +302,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": ""
+              "raw": "{{baseurl}}/channels/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "channels",
+                ""
+              ]
             }
           },
           "response": []
