@@ -17,7 +17,7 @@ class Formula(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    revision = models.IntegerField()
+    revision = models.PositiveIntegerField()
     batch_size = models.FloatField()
     yield_percentage = models.FloatField()
     status = models.CharField(
@@ -40,7 +40,7 @@ class FormulaLine(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     formula = models.ForeignKey(Formula, related_name="lines", on_delete=models.CASCADE)
-    sequence = models.IntegerField()
+    sequence = models.PositiveIntegerField()
     line_type = models.CharField(max_length=50, choices=line_type_choices)
     product = models.ForeignKey(
         Product, null=True, blank=True, on_delete=models.SET_NULL

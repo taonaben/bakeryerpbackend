@@ -31,6 +31,7 @@ from drf_spectacular.views import (
 from apps.accounts.urls import urlpatterns as accounts_urls
 from central.urls import urlpatterns as central_urls
 from apps.inventory.urls import urlpatterns as inventory_urls
+from apps.formulation.urls import urlpatterns as formulation_urls
 from health.urls import urlpatterns as health_urls
 
 app_urlpatterns = [
@@ -39,6 +40,7 @@ app_urlpatterns = [
     path("account/", include(accounts_urls)),
     path("", include(central_urls)),
     path("inventory/", include(inventory_urls)),
+    path("formulation/", include(formulation_urls)),
 ]
 
 third_party_urlpatterns = [
@@ -50,11 +52,9 @@ third_party_urlpatterns = [
     # optional ui:
     path("api/schema/swagger-ui/", SpectacularSwaggerView.as_view(), name="swagger-ui"),
     path("api/schema/redoc/", SpectacularRedocView.as_view(), name="redoc"),
-    
     # Djoser URLs
     # re_path(r"^account/", include("djoser.urls")),
     # re_path(r"^auth/", include("djoser.urls.jwt")),
-    
     # silk
     path("silk/", include("silk.urls", namespace="silk")),
 ]
