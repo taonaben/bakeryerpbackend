@@ -32,6 +32,7 @@ from apps.accounts.urls import urlpatterns as accounts_urls
 from central.urls import urlpatterns as central_urls
 from apps.inventory.urls import urlpatterns as inventory_urls
 from apps.formulation.urls import urlpatterns as formulation_urls
+from apps.production.urls import urlpatterns as production_urls
 from health.urls import urlpatterns as health_urls
 
 app_urlpatterns = [
@@ -41,6 +42,7 @@ app_urlpatterns = [
     path("", include(central_urls)),
     path("inventory/", include(inventory_urls)),
     path("formulation/", include(formulation_urls)),
+    path("production/", include(production_urls)),
 ]
 
 third_party_urlpatterns = [

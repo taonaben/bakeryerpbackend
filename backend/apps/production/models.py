@@ -25,8 +25,8 @@ class ProductionOrder(models.Model):
     status = models.CharField(
         max_length=50, choices=production_status_choices, default="scheduled"
     )
-    scheduled_start_date = models.DateTimeField()
-    scheduled_end_date = models.DateTimeField()
+    scheduled_start = models.DateTimeField()
+    scheduled_end = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

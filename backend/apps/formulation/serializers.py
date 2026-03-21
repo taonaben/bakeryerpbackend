@@ -36,6 +36,7 @@ class FormulaSerializer(serializers.ModelSerializer):
         model = Formula
         fields = [
             "id",
+            "name",
             "product",
             "revision",
             "batch_size",
@@ -53,6 +54,7 @@ class FormulaCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Formula
         fields = [
+            "name",
             "product",
             "revision",
             "batch_size",
@@ -70,6 +72,6 @@ class FormulaCreateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        from backend.apps.formulation.services.formula_services import FormulaService
+        from .services.formula_services import FormulaService
 
         return FormulaService.create_with_lines(validated_data)

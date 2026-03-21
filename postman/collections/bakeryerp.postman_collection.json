@@ -83,7 +83,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"emp_code\": \"{{production_user_code}}\",\r\n  \"password\": \"securepass123\"\r\n}",
+              "raw": "{\r\n  \"emp_code\": \"{{local_user_code}}\",\r\n  \"password\": \"securepass123\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -468,6 +468,155 @@
             }
           ],
           "id": "cc03a505-facf-40b1-8928-c2a6e0295eeb"
+        },
+        {
+          "name": "Products",
+          "item": [
+            {
+              "name": "Create product",
+              "id": "dacb70ee-393a-4757-a797-924464cf4f0c",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"waste trimmings\",\r\n  \"category\": \"byproduct\",\r\n  \"unit_of_measure\": \"kg\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/products?company_id={{piekings_id}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "company_id",
+                      "value": "{{piekings_id}}",
+                      "uuid": "29e2b70c-287d-4d67-94a8-33200376bdf9"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve products",
+              "id": "dd9cc3bf-9a46-4c6d-8d04-fd307cba60fa",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/products?company_id={{piekings_id}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "company_id",
+                      "value": "{{piekings_id}}",
+                      "uuid": "67215a96-57f2-4ba6-b68f-fd03ad4e5a46"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List of categories",
+              "id": "1086bed6-f67b-46de-b8ca-9b5a28342628",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/products/by_category",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "products",
+                    "by_category"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve by sku",
+              "id": "5a3d060f-b37e-49d4-be9a-0ce8b308d2d7",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/products/FLR-FLOU-KG-001/by_sku",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "products",
+                    "FLR-FLOU-KG-001",
+                    "by_sku"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create a new product policy",
+              "id": "e08cdd0a-05d6-4f72-92ea-64f070ebf81b",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"product\": \"{{flour_id}}\",\r\n  \"warehouse\": \"{{wh_1_pie_kings}}\",\r\n  \"min_stock_level\": \"10\",\r\n  \"reorder_qty\": \"50\",\r\n  \"lead_time_days\": 3,\r\n  \"retrieval_method\": \"FIFO\",\r\n  \"safety_stock_qty\": \"30\",\r\n  \"is_active\": true\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/reorder_policies",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "reorder_policies"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve product policies",
+              "id": "8f99a73c-56f5-4926-9358-36c9bf5cb88f",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/reorder_policies",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "reorder_policies"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "id": "2146d953-2f67-4e88-a928-4d5447fbe8c7"
         }
       ],
       "id": "18ded583-e172-47b5-a6fa-f519b5bcb5e5"
@@ -484,6 +633,15 @@
               "request": {
                 "method": "GET",
                 "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n       \"warehouse_id\": \"{{\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{baseurl}}/inventory/batches?warehouse_id={{wh_1_pie_kings}}",
                   "host": [
@@ -504,7 +662,7 @@
                     {
                       "key": "warehouse_id",
                       "value": "{{wh_1_pie_kings}}",
-                      "uuid": "f6b080de-2606-4570-9c05-20e9854a34ed"
+                      "uuid": "ca9aef17-4d7b-45d0-a3e0-e4388ae4cc5d"
                     }
                   ]
                 }
@@ -704,155 +862,6 @@
           "id": "d9f49cf0-af2c-4830-8f04-fe29583a043c"
         },
         {
-          "name": "Products",
-          "item": [
-            {
-              "name": "Create product",
-              "id": "dacb70ee-393a-4757-a797-924464cf4f0c",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"name\": \"processed meat\",\r\n  \"category\": \"persishable\",\r\n  \"unit_of_measure\": \"kg\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseurl}}/products?company_id={{woben_pies}}",
-                  "host": [
-                    "{{baseurl}}"
-                  ],
-                  "path": [
-                    "products"
-                  ],
-                  "query": [
-                    {
-                      "key": "company_id",
-                      "value": "{{woben_pies}}",
-                      "uuid": "29e2b70c-287d-4d67-94a8-33200376bdf9"
-                    }
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Retrieve products",
-              "id": "dd9cc3bf-9a46-4c6d-8d04-fd307cba60fa",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseurl}}/products?company_id={{woben_pies}}",
-                  "host": [
-                    "{{baseurl}}"
-                  ],
-                  "path": [
-                    "products"
-                  ],
-                  "query": [
-                    {
-                      "key": "company_id",
-                      "value": "{{woben_pies}}",
-                      "uuid": "67215a96-57f2-4ba6-b68f-fd03ad4e5a46"
-                    }
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "List of categories",
-              "id": "1086bed6-f67b-46de-b8ca-9b5a28342628",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseurl}}/products/by_category",
-                  "host": [
-                    "{{baseurl}}"
-                  ],
-                  "path": [
-                    "products",
-                    "by_category"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Retrieve by sku",
-              "id": "5a3d060f-b37e-49d4-be9a-0ce8b308d2d7",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseurl}}/products/FLR-FLOU-KG-001/by_sku",
-                  "host": [
-                    "{{baseurl}}"
-                  ],
-                  "path": [
-                    "products",
-                    "FLR-FLOU-KG-001",
-                    "by_sku"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "create a new product policy",
-              "id": "e08cdd0a-05d6-4f72-92ea-64f070ebf81b",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"product\": \"{{flour_id}}\",\r\n  \"warehouse\": \"{{wh_1_pie_kings}}\",\r\n  \"min_stock_level\": \"10\",\r\n  \"reorder_qty\": \"50\",\r\n  \"lead_time_days\": 3,\r\n  \"retrieval_method\": \"FIFO\",\r\n  \"safety_stock_qty\": \"30\",\r\n  \"is_active\": true\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseurl}}/reorder_policies",
-                  "host": [
-                    "{{baseurl}}"
-                  ],
-                  "path": [
-                    "reorder_policies"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Retrieve product policies",
-              "id": "8f99a73c-56f5-4926-9358-36c9bf5cb88f",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseurl}}/reorder_policies",
-                  "host": [
-                    "{{baseurl}}"
-                  ],
-                  "path": [
-                    "reorder_policies"
-                  ]
-                }
-              },
-              "response": []
-            }
-          ],
-          "id": "2146d953-2f67-4e88-a928-4d5447fbe8c7"
-        },
-        {
           "name": "Alerts",
           "item": [
             {
@@ -885,6 +894,84 @@
         }
       ],
       "id": "2d0c5c09-8300-4c08-8f7a-1fa07a294d86"
+    },
+    {
+      "name": "production",
+      "item": [
+        {
+          "name": "formulation",
+          "item": [
+            {
+              "name": "create formula",
+              "id": "e918c616-9843-401f-bd75-b10197318a68",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"product\": \"{{sausage_roll_id}}\",\r\n  \"revision\": 1,\r\n  \"batch_size\": 1000,\r\n  \"yield_percentage\": 98,\r\n  \"status\": \"draft\",\r\n  \"lines\": [\r\n    {\r\n      \"sequence\": 1,\r\n      \"line_type\": \"PROCESS\",\r\n      \"text\": \"Meat Preparation\"\r\n    },\r\n    {\r\n      \"sequence\": 2,\r\n      \"line_type\": \"MATERIAL\",\r\n      \"product\": \"{{pork_loin_id}}\",\r\n      \"quantity\": 200\r\n    },\r\n    {\r\n      \"sequence\": 3,\r\n      \"line_type\": \"MATERIAL\",\r\n      \"product\": \"{{pork_shoulder_id}}\",\r\n      \"quantity\": 300\r\n    },\r\n    {\r\n      \"sequence\": 4,\r\n      \"line_type\": \"MATERIAL\",\r\n      \"product\": \"{{pork_fat_id}}\",\r\n      \"quantity\": 100\r\n    },\r\n    {\r\n      \"sequence\": 5,\r\n      \"line_type\": \"MATERIAL\",\r\n      \"product\": \"{{salt_id}}\",\r\n      \"quantity\": 10\r\n    },\r\n    {\r\n      \"sequence\": 6,\r\n      \"line_type\": \"MATERIAL\",\r\n      \"product\": \"{{spices_id}}\",\r\n      \"quantity\": 5\r\n    },\r\n    {\r\n      \"sequence\": 7,\r\n      \"line_type\": \"MATERIAL\",\r\n      \"product\": \"{{rusk_id}}\",\r\n      \"quantity\": 50\r\n    },\r\n    {\r\n      \"sequence\": 8,\r\n      \"line_type\": \"MATERIAL\",\r\n      \"product\": \"{{ice_id}}\",\r\n      \"quantity\": 30\r\n    },\r\n    {\r\n      \"sequence\": 9,\r\n      \"line_type\": \"INSTRUCTION\",\r\n      \"text\": \"Mince meat and mix with all ingredients until consistent paste is achieved\"\r\n    },\r\n\r\n    {\r\n      \"sequence\": 10,\r\n      \"line_type\": \"PROCESS\",\r\n      \"text\": \"Pastry Preparation\"\r\n    },\r\n    {\r\n      \"sequence\": 11,\r\n      \"line_type\": \"MATERIAL\",\r\n      \"product\": \"{{flour_id}}\",\r\n      \"quantity\": 400\r\n    },\r\n    {\r\n      \"sequence\": 12,\r\n      \"line_type\": \"MATERIAL\",\r\n      \"product\": \"{{margarine_id}}\",\r\n      \"quantity\": 200\r\n    },\r\n    {\r\n      \"sequence\": 13,\r\n      \"line_type\": \"INSTRUCTION\",\r\n      \"text\": \"Fold and laminate dough to create layered puff pastry\"\r\n    },\r\n\r\n    {\r\n      \"sequence\": 14,\r\n      \"line_type\": \"PROCESS\",\r\n      \"text\": \"Assembly Line\"\r\n    },\r\n    {\r\n      \"sequence\": 15,\r\n      \"line_type\": \"INSTRUCTION\",\r\n      \"text\": \"Roll pastry sheets onto conveyor\"\r\n    },\r\n    {\r\n      \"sequence\": 16,\r\n      \"line_type\": \"INSTRUCTION\",\r\n      \"text\": \"Extrude sausage meat evenly along pastry\"\r\n    },\r\n    {\r\n      \"sequence\": 17,\r\n      \"line_type\": \"INSTRUCTION\",\r\n      \"text\": \"Wrap pastry around filling and seal using egg wash\"\r\n    },\r\n    {\r\n      \"sequence\": 18,\r\n      \"line_type\": \"INSTRUCTION\",\r\n      \"text\": \"Cut into uniform sausage roll portions\"\r\n    },\r\n\r\n    {\r\n      \"sequence\": 19,\r\n      \"line_type\": \"PROCESS\",\r\n      \"text\": \"Baking\"\r\n    },\r\n    {\r\n      \"sequence\": 20,\r\n      \"line_type\": \"INSTRUCTION\",\r\n      \"text\": \"Bake in oven at 180°C until golden brown\"\r\n    },\r\n\r\n    {\r\n      \"sequence\": 21,\r\n      \"line_type\": \"BYPRODUCT\",\r\n      \"product\": \"{{waste_trimmings}}\",\r\n      \"quantity\": 20\r\n    },\r\n\r\n    {\r\n      \"sequence\": 22,\r\n      \"line_type\": \"TEXT\",\r\n      \"text\": \"Cool and package finished sausage rolls for distribution\"\r\n    }\r\n  ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/formulation/formulas/create-with-lines",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "formulation",
+                    "formulas",
+                    "create-with-lines"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "retrieve formulas",
+              "id": "12f72906-3c49-4578-831f-ed889097e7e7",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/formulation/formulas",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "formulation",
+                    "formulas"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "id": "8d479bc0-b4cd-4397-8e9b-fed739dc1670"
+        },
+        {
+          "name": "production",
+          "item": [
+            {
+              "name": "create production order",
+              "id": "3b52eed8-ab63-4fa9-bb13-6bb0e1947afa",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": ""
+                }
+              },
+              "response": []
+            }
+          ],
+          "id": "6ed58cf1-7a57-4ca2-86b7-1724ede824fb"
+        }
+      ],
+      "id": "e08fd34a-9fc0-4aaf-94b8-7236ce2eba23"
     }
   ],
   "auth": {
@@ -899,70 +986,136 @@
   },
   "variable": [
     {
-      "id": "bd55bb37-5dcc-43cd-b5d1-dba52686bac5",
+      "id": "9065b860-aace-4f9a-b753-8c8966648fb7",
       "key": "baseurl",
       "value": ""
     },
     {
-      "id": "1e9be2de-de63-440d-a22e-d4735c2fdf46",
+      "id": "eadaf599-7390-4a27-a6a8-71bbe61bba40",
       "key": "access_code",
       "value": ""
     },
     {
-      "id": "935ad8b3-32fb-4807-8005-57091b5c25c2",
+      "id": "71385948-8c25-4f7a-bddb-d0919806aace",
       "key": "refresh_token",
       "value": ""
     },
     {
-      "id": "651f105d-33cc-4e49-8647-fbd53d0052a7",
+      "id": "50d17b82-d7b3-4456-aa6c-38775dd55b64",
       "key": "productionurl",
       "value": ""
     },
     {
-      "id": "55834428-c95a-42fc-8713-38f69db7b17c",
+      "id": "315de8fb-5ff1-434e-b0c8-89a7f6535e00",
       "key": "piekings_id",
       "value": ""
     },
     {
-      "id": "b4b598d9-bb6d-4d40-a204-5749610a6f54",
+      "id": "6645cb64-0c69-45f8-a28e-95db46189aa7",
       "key": "production_user_code",
       "value": ""
     },
     {
-      "id": "8cfa17f2-6941-4cec-8263-6d86453b6a72",
+      "id": "45e58e44-1e98-442d-a266-d8a84e147705",
       "key": "current_user_id",
       "value": ""
     },
     {
-      "id": "b95d6579-1d67-4a62-b30e-3dc835abea16",
+      "id": "b9bb6add-91eb-4e8d-9fd0-732ee5f70c75",
       "key": "woben_pies",
       "value": ""
     },
     {
-      "id": "ff3b3f9d-a92d-43d3-9c94-b21dc0e0642a",
+      "id": "76b3a4ee-b906-4273-af96-740a48f66829",
       "key": "wh1_woben_pies",
       "value": ""
     },
     {
-      "id": "b9d2a9b1-2530-410f-90ac-007c5b47d284",
+      "id": "308c7ac5-8391-451b-bf42-be2bc246f315",
       "key": "local_user_code",
       "value": ""
     },
     {
-      "id": "a577f071-0f62-4f46-bcd0-44a606d45f29",
+      "id": "eab29e71-b537-4fe7-b1ce-59c0d4422fa3",
       "key": "flour_id",
       "value": "",
       "type": "default"
     },
     {
-      "id": "69305bd1-32a0-45b1-83c3-6b8f55c638a1",
+      "id": "8bf8c702-2733-49c7-8318-fbba058f7e9f",
       "key": "sugar_id_local",
       "value": "",
       "type": "default"
     },
     {
-      "id": "3dafa140-3ebf-4bda-aa78-2085a5b7a624",
+      "id": "f733c45c-1a2e-425d-a3c4-299f9764980a",
       "key": "wh_1_pie_kings",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "4b647c5e-7815-4763-ad90-319492d05399",
+      "key": "sausage_roll_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "6dfed263-70cf-4c71-ae98-dec0de77a918",
+      "key": "pork_loin_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "9e45c962-d2e2-4ec1-86eb-3ac024ad7afd",
+      "key": "pork_shoulder_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "4fc42b6b-3678-4ea0-ab96-7700eeafde39",
+      "key": "pork_fat_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "dac7fc20-e87d-4e46-a652-30d2c1d6edd7",
+      "key": "salt_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "1d7b6a9c-fc9b-42ff-b5cf-59eeff615afa",
+      "key": "spices_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "dd8c9cd2-1191-49eb-835a-b7553de9b532",
+      "key": "rusk_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "8d351514-8da1-4e88-ab75-d4781df6faaf",
+      "key": "ice_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "e52e4946-9fe9-4a63-807a-0c5644772273",
+      "key": "margarine_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "b507a3e0-296a-43ac-a179-3e76a8deffb4",
+      "key": "waste_trimmings",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "e2651b44-36b1-433d-a917-f61eac077d69",
+      "key": "sausage_roll_formula_id",
       "value": "",
       "type": "default"
     }

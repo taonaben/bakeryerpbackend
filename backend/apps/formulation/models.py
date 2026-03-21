@@ -16,6 +16,7 @@ class Formula(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     revision = models.PositiveIntegerField()
     batch_size = models.FloatField()
@@ -45,7 +46,7 @@ class FormulaLine(models.Model):
     product = models.ForeignKey(
         Product, null=True, blank=True, on_delete=models.SET_NULL
     )
-    quantity = models.FloatField()
+    quantity = models.FloatField(blank=True, null=True)
     text = models.TextField(blank=True, null=True)
 
     def __str__(self):

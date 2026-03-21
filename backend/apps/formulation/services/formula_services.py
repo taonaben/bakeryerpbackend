@@ -20,7 +20,7 @@ class FormulaService:
                 sequence=line["sequence"],
                 line_type=line["line_type"],
                 product=line.get("product"),
-                quantity=line["quantity"],
+                quantity=line.get("quantity"),
                 text=line.get("text"),
             )
             for line in lines_data
