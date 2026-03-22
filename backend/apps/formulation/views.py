@@ -37,3 +37,24 @@ class FormulaViewSet(viewsets.ModelViewSet):
         formula = serializer.save()
 
         return Response(FormulaSerializer(formula).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=["post"], url_path="activate/(?P<formula_id>[^/.]+)")
+    def activate(self, request, formula_id=None):
+        if not formula_id:
+            return Response(
+                {"error": "formula_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            formula = Formula.objects.get(id=formula_id)
+        except Formula.DoesNotExist:
+            return Response(
+                {"error": "Formula not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        formula.status = "active"
+        formula.save()
+
+        return Response(
+            {"message": "Formula activated successfully"}, status=status.HTTP_200_OK
+        )

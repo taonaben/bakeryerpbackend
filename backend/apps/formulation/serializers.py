@@ -3,10 +3,13 @@ from .models import Formula, FormulaLine
 
 
 class FormulaLineSerializer(serializers.ModelSerializer):
+    material_name = serializers.CharField(source="product.name", read_only=True)
+
     class Meta:
         model = FormulaLine
         fields = [
             "id",
+            "material_name",
             "formula",
             "sequence",
             "line_type",

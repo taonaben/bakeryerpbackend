@@ -465,6 +465,34 @@
                 }
               },
               "response": []
+            },
+            {
+              "name": "edit warehouse details",
+              "id": "f5b545d1-717f-48b8-80dd-3b16547b3695",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"wh_type\": \"production\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/warehouses/{{wh_1_pie_kings}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "warehouses",
+                    "{{wh_1_pie_kings}}"
+                  ]
+                }
+              },
+              "response": []
             }
           ],
           "id": "cc03a505-facf-40b1-8928-c2a6e0295eeb"
@@ -948,6 +976,27 @@
                 }
               },
               "response": []
+            },
+            {
+              "name": "activate formula",
+              "id": "fd1ec2ff-a8eb-408c-ae12-f2a339783389",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/formulation/formulas/activate/{{sausage_roll_formula_id}}",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "formulation",
+                    "formulas",
+                    "activate",
+                    "{{sausage_roll_formula_id}}"
+                  ]
+                }
+              },
+              "response": []
             }
           ],
           "id": "8d479bc0-b4cd-4397-8e9b-fed739dc1670"
@@ -959,10 +1008,66 @@
               "name": "create production order",
               "id": "3b52eed8-ab63-4fa9-bb13-6bb0e1947afa",
               "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"product\": \"{{sausage_roll_id}}\",\r\n  \"quantity\": 400,\r\n  \"scheduled_start\": \"2026-03-22T09:12:01.566Z\",\r\n  \"scheduled_end\": \"2026-03-22T09:15:01.566Z\",\r\n  \"warehouse\": \"{{wh_1_pie_kings}}\",\r\n  \"formula\": \"{{sausage_roll_formula_id}}\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseurl}}/production/orders",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "production",
+                    "orders"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "plan production order",
+              "id": "34fab0bc-ff39-4834-a2bc-0e1737754ee2",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseurl}}/production/orders/a0076fdd-a5a8-4cef-be7c-1bebc93fd9a2/plan",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "production",
+                    "orders",
+                    "a0076fdd-a5a8-4cef-be7c-1bebc93fd9a2",
+                    "plan"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "retrieve production orders",
+              "id": "d086b7a9-acf4-457a-afd6-7dd755c5c67d",
+              "request": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": ""
+                  "raw": "{{baseurl}}/production/orders",
+                  "host": [
+                    "{{baseurl}}"
+                  ],
+                  "path": [
+                    "production",
+                    "orders"
+                  ]
                 }
               },
               "response": []
@@ -986,135 +1091,135 @@
   },
   "variable": [
     {
-      "id": "9065b860-aace-4f9a-b753-8c8966648fb7",
+      "id": "7ad2b46a-0a71-4749-8fc3-bec0da92611d",
       "key": "baseurl",
       "value": ""
     },
     {
-      "id": "eadaf599-7390-4a27-a6a8-71bbe61bba40",
+      "id": "867183ee-ca43-4657-9557-0e2790db8cc8",
       "key": "access_code",
       "value": ""
     },
     {
-      "id": "71385948-8c25-4f7a-bddb-d0919806aace",
+      "id": "a33df859-cde3-4f29-888c-a5572591fdb7",
       "key": "refresh_token",
       "value": ""
     },
     {
-      "id": "50d17b82-d7b3-4456-aa6c-38775dd55b64",
+      "id": "d44c101f-1467-4524-aaa5-bcebcfd3c630",
       "key": "productionurl",
       "value": ""
     },
     {
-      "id": "315de8fb-5ff1-434e-b0c8-89a7f6535e00",
+      "id": "82d61f2b-dca8-4c45-b62e-9aa9a81e4fd5",
       "key": "piekings_id",
       "value": ""
     },
     {
-      "id": "6645cb64-0c69-45f8-a28e-95db46189aa7",
+      "id": "223edade-c72e-4a9f-87fa-faaa3f8c1e94",
       "key": "production_user_code",
       "value": ""
     },
     {
-      "id": "45e58e44-1e98-442d-a266-d8a84e147705",
+      "id": "0fff021e-215d-4044-913b-006fbded1005",
       "key": "current_user_id",
       "value": ""
     },
     {
-      "id": "b9bb6add-91eb-4e8d-9fd0-732ee5f70c75",
+      "id": "8b71e3fd-4f00-4a6b-9c10-3f34af06524b",
       "key": "woben_pies",
       "value": ""
     },
     {
-      "id": "76b3a4ee-b906-4273-af96-740a48f66829",
+      "id": "3bb865d8-531e-4c6d-8b02-7404a4fea77e",
       "key": "wh1_woben_pies",
       "value": ""
     },
     {
-      "id": "308c7ac5-8391-451b-bf42-be2bc246f315",
+      "id": "f448221a-b48a-4c83-914f-072e81c92cca",
       "key": "local_user_code",
       "value": ""
     },
     {
-      "id": "eab29e71-b537-4fe7-b1ce-59c0d4422fa3",
+      "id": "bf724238-6930-4524-8a97-2e0ca9e2d7d1",
       "key": "flour_id",
       "value": "",
       "type": "default"
     },
     {
-      "id": "8bf8c702-2733-49c7-8318-fbba058f7e9f",
+      "id": "e74974f9-1958-48ba-8ee3-6ab5184a2e8b",
       "key": "sugar_id_local",
       "value": "",
       "type": "default"
     },
     {
-      "id": "f733c45c-1a2e-425d-a3c4-299f9764980a",
+      "id": "6d5f2fb1-a1d2-47c0-83e7-f390bf976936",
       "key": "wh_1_pie_kings",
       "value": "",
       "type": "default"
     },
     {
-      "id": "4b647c5e-7815-4763-ad90-319492d05399",
+      "id": "db01642d-101b-4c7d-a016-5c626a724472",
       "key": "sausage_roll_id",
       "value": "",
       "type": "default"
     },
     {
-      "id": "6dfed263-70cf-4c71-ae98-dec0de77a918",
+      "id": "a7afc588-fa2e-475a-a435-b174ef8decd5",
       "key": "pork_loin_id",
       "value": "",
       "type": "default"
     },
     {
-      "id": "9e45c962-d2e2-4ec1-86eb-3ac024ad7afd",
+      "id": "63714824-785e-4180-9da7-cf8ef9f7cb9d",
       "key": "pork_shoulder_id",
       "value": "",
       "type": "default"
     },
     {
-      "id": "4fc42b6b-3678-4ea0-ab96-7700eeafde39",
+      "id": "e405eef0-8edc-4f0b-a687-0d8208354066",
       "key": "pork_fat_id",
       "value": "",
       "type": "default"
     },
     {
-      "id": "dac7fc20-e87d-4e46-a652-30d2c1d6edd7",
+      "id": "fe6cae86-2f1f-474d-b527-983f5be2c6d8",
       "key": "salt_id",
       "value": "",
       "type": "default"
     },
     {
-      "id": "1d7b6a9c-fc9b-42ff-b5cf-59eeff615afa",
+      "id": "a48c0f1a-99e1-4cd5-8198-dca7b5e79aaf",
       "key": "spices_id",
       "value": "",
       "type": "default"
     },
     {
-      "id": "dd8c9cd2-1191-49eb-835a-b7553de9b532",
+      "id": "1e439c21-d5e4-4f18-96d3-919028605379",
       "key": "rusk_id",
       "value": "",
       "type": "default"
     },
     {
-      "id": "8d351514-8da1-4e88-ab75-d4781df6faaf",
+      "id": "2d656d78-a5a9-4c33-8a94-382070ef95ef",
       "key": "ice_id",
       "value": "",
       "type": "default"
     },
     {
-      "id": "e52e4946-9fe9-4a63-807a-0c5644772273",
+      "id": "b849b776-c8ed-4896-b170-c8abfe832463",
       "key": "margarine_id",
       "value": "",
       "type": "default"
     },
     {
-      "id": "b507a3e0-296a-43ac-a179-3e76a8deffb4",
+      "id": "f6958ae3-738a-4143-bc14-e3d2d90ddb51",
       "key": "waste_trimmings",
       "value": "",
       "type": "default"
     },
     {
-      "id": "e2651b44-36b1-433d-a917-f61eac077d69",
+      "id": "669ab419-dc93-45d6-ad50-51401ab90b2a",
       "key": "sausage_roll_formula_id",
       "value": "",
       "type": "default"

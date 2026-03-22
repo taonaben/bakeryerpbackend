@@ -20,7 +20,10 @@ class ProductionPlanAPIView(APIView):
         try:
             plan = ProductionPlanner.plan(order)
         except DjangoValidationError as exc:
-            raise ValidationError(exc.message_dict or exc.messages)
+            return Response(
+                {"errors": exc.message_dict or exc.messages},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         serializer = ProductionPlanSerializer(plan)
         return Response(serializer.data)
@@ -33,7 +36,7 @@ class ProductionOrderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Get Production orders in Warehouse and optionally filter by status & product"""
 
-        queryset = super().get_queryset()
+        queryset = ProductionOrder.objects.all()
         warehouse_id = self.request.query_params.get("warehouse_id")
         status = self.request.query_params.get("status")
         product_id = self.request.query_params.get("product_id")
