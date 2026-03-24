@@ -1,0 +1,5 @@
+$kind: http-request
+name: start production order
+url: "{{baseurl}}/production/orders/a0076fdd-a5a8-4cef-be7c-1bebc93fd9a2/start"
+method: POST
+order: 2288199182321091

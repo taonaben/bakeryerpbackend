@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseurl}}/companies/{{piekings_id}}"
+method: PATCH
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"Pie Kings\",\r
+
+    \  \"status\": true\r
+
+    }"
+order: 4000

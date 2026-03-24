@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseurl}}/users/login/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"username\":\"babyface\",\r
+
+    \    \"password\": \"securepass123\"\r
+
+    }"
+auth:
+  type: noauth
+order: 3000

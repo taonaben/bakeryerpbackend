@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseurl}}/account/users/9d5bc895-d18e-4c20-817e-5376ae2366cc"
+method: PATCH
+body:
+  type: json
+  content: "{\r
+
+    \    \"company\": \"{{woben_pies}}\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_code}}"
+order: 7000

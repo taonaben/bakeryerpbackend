@@ -1,0 +1,29 @@
+$kind: http-request
+url: "{{baseurl}}/inventory/movements/create-with-policy"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \r
+
+    \"product_id\": \"{{flour_id}}\",\r
+
+    \r
+
+    \"warehouse_id\": \"{{wh_1_pie_kings}}\",\r
+
+    \r
+
+    \"movement_type\": \"OUT\",\r
+
+    \r
+
+    \"quantity\": 2\r
+
+    \r
+
+    \r
+
+    }"
+order: 3000

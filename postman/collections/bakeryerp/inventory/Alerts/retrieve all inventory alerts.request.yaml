@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseurl}}/inventory/alerts?warehouse_id={{wh_1_pie_kings}}"
+method: GET
+queryParams:
+  warehouse_id: "{{wh_1_pie_kings}}"
+order: 1000

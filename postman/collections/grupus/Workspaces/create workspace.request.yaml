@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{baseurl}}/workspace/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"Data Structures and Algorithms\",\r
+
+    \  \"description\": \"module  about DS & A\",\r
+
+    \  \"is_public\": true,\r
+
+    \  \"requires_approval\": true,\r
+
+    \  \"metadata\": {\r
+
+    \    \"module_code\": \"CUITM120\",\r
+
+    \    \"lead_lecturer\": \"{{local_user_babyface}}\"\r
+
+    \  },\r
+
+    \  \"workspace_type\": \"{{module workspace_type}}\"\r
+
+    }"
+order: 2000

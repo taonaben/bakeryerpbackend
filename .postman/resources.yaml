@@ -1,0 +1,17 @@
+# Use this workspace to collaborate
+workspace:
+  id: f3b684e1-7748-4133-81de-1e0f8d36da59
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+cloudResources:
+  collections:
+    ..\postman\collections\grupus: 44119411-0a3cab76-edda-4379-9ded-b52119b658f5
+    ..\postman\collections\bakeryerp: 44119411-b5d00db0-fff1-487f-a513-ec01bbbbfa54
+  environments:
+    ..\postman\environments\bakeryerp.environment.yaml: 44119411-8e5e28ca-720a-493b-8a9a-304b99e80d8e
+
+# All resources in the `postman/` folder are automatically registered in Local View.
+# Point to additional files outside the `postman/` folder to register them individually. Example:
+#localResources:
+#  collections:
+#    - ../tests/E2E Test Collection/

@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{baseurl}}/account/users/{{current_user_id}}"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_code}}"
+order: 5000

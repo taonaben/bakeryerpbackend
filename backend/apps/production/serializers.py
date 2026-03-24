@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.formulation.serializers import FormulaSerializer
-from .models import ProductionOrder
+from .models import ProductionOrder, ProductionBatch
 
 
 class ProductionPlanSerializer(serializers.Serializer):
@@ -34,3 +34,28 @@ class ProductionOrderSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = ["id", "status"]
+
+
+class SelectedBatchAllocationSerializer(serializers.Serializer):
+    product_id = serializers.UUIDField()
+    batch_id = serializers.UUIDField()
+    quantity = serializers.DecimalField(max_digits=18, decimal_places=6)
+
+
+class StartProductionSerializer(serializers.Serializer):
+    quantity = serializers.DecimalField(max_digits=18, decimal_places=6, required=False)
+    selected_batches = SelectedBatchAllocationSerializer(many=True, required=False)
+
+
+class ProductionBatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductionBatch
+        fields = [
+            "id",
+            "production_order",
+            "batch_number",
+            "quantity_produced",
+            "status",
+            "started_at",
+            "completed_at",
+        ]

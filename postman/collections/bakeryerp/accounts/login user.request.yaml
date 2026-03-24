@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseurl}}/account/login"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"emp_code\": \"{{local_user_code}}\",\r
+
+    \  \"password\": \"securepass123\"\r
+
+    }"
+auth:
+  type: noauth
+order: 2000

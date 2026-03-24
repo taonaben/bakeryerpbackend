@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseurl}}/account/users/register"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"email\": \"salesrep@gmail.com\",\r
+
+    \  \"password\": \"securepass123\",\r
+
+    \  \"password2\": \"securepass123\",\r
+
+    \  \"first_name\": \"sales\",\r
+
+    \  \"last_name\": \"rep\",\r
+
+    \  \"role\": \"sales_rep\",\r
+
+    \  \"department\": \"ENG\"\r
+
+    }"
+order: 3000

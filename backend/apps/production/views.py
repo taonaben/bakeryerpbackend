@@ -7,8 +7,16 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import viewsets, status, generics
 
 from .models import ProductionOrder
-from .serializers import ProductionOrderSerializer, ProductionPlanSerializer
+from apps.inventory.serializers import StockMovementSerializer
+
+from .serializers import (
+    ProductionOrderSerializer,
+    ProductionPlanSerializer,
+    StartProductionSerializer,
+    ProductionBatchSerializer,
+)
 from .services.production_planner import ProductionPlanner
+from .services.production_engine import ProductionEngine
 
 
 class ProductionPlanAPIView(APIView):
@@ -49,3 +57,42 @@ class ProductionOrderViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(product_id=product_id)
 
         return queryset
+
+
+class ProductionStartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        serializer = StartProductionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            result = ProductionEngine.start_production(
+                order_id=order_id,
+                quantity=serializer.validated_data.get("quantity"),
+                selected_batches=serializer.validated_data.get("selected_batches"),
+            )
+        except ProductionOrder.DoesNotExist:
+            return Response(
+                {"errors": "Production order not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except DjangoValidationError as exc:
+            return Response(
+                {"errors": exc.message_dict or exc.messages},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        batch_serializer = ProductionBatchSerializer(result["batch"])
+        movement_serializer = StockMovementSerializer(result["movements"], many=True)
+        plan_serializer = ProductionPlanSerializer(result["plan"])
+
+        return Response(
+            {
+                "message": "Production started successfully",
+                "batch": batch_serializer.data,
+                "movements": movement_serializer.data,
+                "plan": plan_serializer.data,
+            },
+            status=status.HTTP_201_CREATED,
+        )

@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseurl}}/inventory/stocks/by_product_sku?sku=FLR-FLOU-KG-001"
+method: GET
+queryParams:
+  sku: FLR-FLOU-KG-001
+order: 2000

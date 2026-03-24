@@ -1,0 +1,33 @@
+$kind: collection
+name: bakeryerp
+variables:
+  baseurl: ""
+  access_code: ""
+  refresh_token: ""
+  productionurl: ""
+  piekings_id: ""
+  production_user_code: ""
+  current_user_id: ""
+  woben_pies: ""
+  wh1_woben_pies: ""
+  local_user_code: ""
+  flour_id: ""
+  sugar_id_local: ""
+  wh_1_pie_kings: ""
+  sausage_roll_id: ""
+  pork_loin_id: ""
+  pork_shoulder_id: ""
+  pork_fat_id: ""
+  salt_id: ""
+  spices_id: ""
+  rusk_id: ""
+  ice_id: ""
+  margarine_id: ""
+  waste_trimmings: ""
+  sausage_roll_formula_id: ""
+auth:
+  - id: 71d655a3-7ea1-4e15-be39-9661bfa937cc
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{access_code}}"

@@ -1,0 +1,5 @@
+$kind: http-request
+name: retrieve list of all companies in db
+url: "{{baseurl}}/companies"
+method: GET
+order: 1000

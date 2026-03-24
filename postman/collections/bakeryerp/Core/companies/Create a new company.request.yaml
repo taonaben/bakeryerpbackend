@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseurl}}/companies"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"Woben pies\",\r
+
+    \  \"status\": true\r
+
+    }"
+order: 2000

@@ -22,7 +22,7 @@ class FormulaViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Filter formulas by product if provided"""
-        queryset = Formula.objects.all()
+        queryset = Formula.objects.filter(product__company=self.request.user.company)
         product_id = self.request.query_params.get("product_id", None)
 
         if product_id is not None:

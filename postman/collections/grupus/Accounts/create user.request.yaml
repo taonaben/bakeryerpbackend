@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseurl}}/users/register/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"username\": \"babyface\",\r
+
+    \    \"email\": \"babyface@gmail.com\",\r
+
+    \    \"password\": \"securepass123\",\r
+
+    \    \"password2\": \"securepass123\",\r
+
+    \    \"first_name\": \"taona\",\r
+
+    \    \"last_name\": \"munikwa\"\r
+
+    }\r\n"
+order: 1000

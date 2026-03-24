@@ -1,0 +1,9 @@
+$kind: http-request
+url: "{{baseurl}}/auth/verify-otp/"
+method: POST
+body:
+  type: json
+  content: '{"email": "taonbenjamin180903@gmail.com", "token": 746600}'
+auth:
+  type: noauth
+order: 5000
