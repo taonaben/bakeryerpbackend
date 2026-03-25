@@ -93,6 +93,8 @@ class ProductionOrderViewSet(viewsets.ModelViewSet):
 
 
 class ProductionStartAPIView(APIView):
+    """API view to handle starting a production order with optional batch selection"""
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, order_id):
@@ -132,6 +134,8 @@ class ProductionStartAPIView(APIView):
 
 
 class ProductionFinishAPIView(APIView):
+    """API view to handle finishing a production order with detailed output and waste tracking"""
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, order_id):

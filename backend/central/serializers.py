@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Company, Warehouse, Product
+from apps.inventory.models import ProductPolicy
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -52,6 +53,8 @@ class ProductSerializer(serializers.ModelSerializer):
         source="get_unit_of_measure_display", read_only=True
     )
 
+    has_reorder_policy = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = [
@@ -65,6 +68,10 @@ class ProductSerializer(serializers.ModelSerializer):
             "shelf_life_days",
             "storage_conditions",
             "storage_notes",
+            "has_reorder_policy",
             "created_at",
         ]
-        read_only_fields = ["id", "created_at", "sku", "company"]
+        read_only_fields = ["id", "created_at", "sku", "company", "has_reorder_policy"]
+
+    def get_has_reorder_policy(self, obj):
+        return obj.reorder_policies.filter(is_active=True).exists()
