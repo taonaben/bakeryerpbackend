@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import serializers
 
 from central.models import Product
@@ -5,6 +7,8 @@ from apps.formulation.serializers import FormulaSerializer
 from .models import (
     ProductionOrder,
     ProductionBatch,
+    ProductionBatchLine,
+    BatchMaterial,
     BatchOutput,
     BatchWaste,
 )
@@ -65,6 +69,30 @@ class ProductionBatchSerializer(serializers.ModelSerializer):
             "started_at",
             "completed_at",
         ]
+
+
+class ProductionBatchLineSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+
+    class Meta:
+        model = ProductionBatchLine
+        fields = [
+            "id",
+            "sequence",
+            "line_type",
+            "product",
+            "product_name",
+            "quantity",
+            "text",
+        ]
+
+
+class BatchMaterialSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+
+    class Meta:
+        model = BatchMaterial
+        fields = ["id", "product", "product_name", "quantity_used"]
 
 
 class ProductionOutputLineSerializer(serializers.Serializer):
@@ -132,3 +160,85 @@ class BatchWasteSerializer(serializers.ModelSerializer):
     class Meta:
         model = BatchWaste
         fields = ["id", "product", "product_name", "quantity_wasted", "reason"]
+
+
+class ProductionBatchDetailSerializer(serializers.ModelSerializer):
+    lines = ProductionBatchLineSerializer(many=True, read_only=True)
+    materials = BatchMaterialSerializer(many=True, read_only=True)
+    outputs = BatchOutputSerializer(many=True, read_only=True)
+    waste = BatchWasteSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ProductionBatch
+        fields = [
+            "id",
+            "production_order",
+            "batch_number",
+            "quantity_produced",
+            "status",
+            "started_at",
+            "completed_at",
+            "lines",
+            "materials",
+            "outputs",
+            "waste",
+        ]
+
+
+class ProductionOrderFinishedSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+    warehouse_name = serializers.CharField(source="warehouse.name", read_only=True)
+    batches = ProductionBatchDetailSerializer(many=True, read_only=True)
+    expected_output = serializers.SerializerMethodField()
+    expected_waste = serializers.SerializerMethodField()
+    actual_output = serializers.SerializerMethodField()
+    actual_waste = serializers.SerializerMethodField()
+    variance = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductionOrder
+        fields = [
+            "id",
+            "product",
+            "product_name",
+            "quantity",
+            "status",
+            "scheduled_start",
+            "scheduled_end",
+            "warehouse",
+            "warehouse_name",
+            "formula",
+            "expected_output",
+            "expected_waste",
+            "actual_output",
+            "actual_waste",
+            "variance",
+            "batches",
+        ]
+        read_only_fields = fields
+
+    def get_expected_output(self, obj):
+        return Decimal(str(obj.quantity or 0))
+
+    def get_expected_waste(self, obj):
+        expected_output = Decimal(str(obj.quantity or 0))
+        yield_pct = Decimal(str(getattr(obj.formula, "yield_percentage", 0) or 0))
+        return expected_output * (Decimal("100") - yield_pct) / Decimal("100")
+
+    def get_actual_output(self, obj):
+        total = Decimal("0")
+        for batch in obj.batches.all():
+            for output in batch.outputs.all():
+                if output.product_id == obj.product_id:
+                    total += Decimal(str(output.quantity_produced or 0))
+        return total
+
+    def get_actual_waste(self, obj):
+        total = Decimal("0")
+        for batch in obj.batches.all():
+            for waste in batch.waste.all():
+                total += Decimal(str(waste.quantity_wasted or 0))
+        return total
+
+    def get_variance(self, obj):
+        return self.get_expected_output(obj) - self.get_actual_output(obj)

@@ -1,5 +1,6 @@
 $kind: http-request
-url: "{{baseurl}}/inventory/stocks"
+name: Everything in inventory
+url: "{{baseurl}}/inventory/stocks?page=2"
 method: GET
 queryParams:
   - key: quantity_on_hand>10
@@ -8,4 +9,6 @@ queryParams:
   - key: quantity_on_hand__range
     value: 40,51
     disabled: true
+  - key: page
+    value: "2"
 order: 1000

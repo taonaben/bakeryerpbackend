@@ -21,6 +21,7 @@ from .serializers import (
     FinishProductionSummarySerializer,
     BatchOutputSerializer,
     BatchWasteSerializer,
+    ProductionOrderFinishedSerializer,
 )
 from .services.production_planner import ProductionPlanner
 from .services.production_engine import ProductionEngine
@@ -66,6 +67,18 @@ class ProductionOrderViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    def _summary_queryset(self):
+        return (
+            self.get_queryset()
+            .select_related("product", "warehouse", "formula")
+            .prefetch_related(
+                "batches__lines",
+                "batches__materials",
+                "batches__outputs",
+                "batches__waste",
+            )
+        )
+
     @action(
         detail=False, methods=["post"], url_path="copy/(?P<production_order_id>[^/.]+)"
     )
@@ -90,6 +103,18 @@ class ProductionOrderViewSet(viewsets.ModelViewSet):
 
         serializer = ProductionOrderSerializer(new_order)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=["get"], url_path="finished")
+    def finished_orders(self, request):
+        queryset = self._summary_queryset().filter(status="completed")
+        serializer = ProductionOrderFinishedSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get"], url_path="summary")
+    def order_summary(self, request, pk=None):
+        order = get_object_or_404(self._summary_queryset(), id=pk, status="completed")
+        serializer = ProductionOrderFinishedSerializer(order)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ProductionStartAPIView(APIView):

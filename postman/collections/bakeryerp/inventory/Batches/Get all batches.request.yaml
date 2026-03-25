@@ -1,12 +1,10 @@
 $kind: http-request
-url: "{{baseurl}}/inventory/batches?warehouse_id={{wh_1_pie_kings}}"
+name: Get all batches
+url: "{{baseurl}}/inventory/batches?warehouse_id={{wh_1_pie_kings}}&page=2"
 method: GET
 queryParams:
-  - key: product_id
-    value: 51c41c08-6124-4d44-98d1-aa1c4bddf39d
-    disabled: true
-  - key: warehouse_id
-    value: "{{wh_1_pie_kings}}"
+  warehouse_id: "{{wh_1_pie_kings}}"
+  page: "2"
 body:
   type: json
   content: "{\r
