@@ -8,8 +8,16 @@ from central.models import Company, Warehouse, Product
 from apps.formulation.models import Formula, FormulaLine
 from apps.inventory.models import Batch, StockMovement, StockMovementBatch
 
-from .models import ProductionOrder, ProductionBatch, ProductionBatchLine, BatchMaterial
+from .models import (
+    ProductionOrder,
+    ProductionBatch,
+    ProductionBatchLine,
+    BatchMaterial,
+    BatchOutput,
+    BatchWaste,
+)
 from .services.production_engine import ProductionEngine
+from .services.batch_service import ProductionBatchService
 
 
 class ProductionEngineTests(TestCase):
@@ -139,3 +147,58 @@ class ProductionEngineTests(TestCase):
 
         with self.assertRaises(ValidationError):
             ProductionEngine.start_production(order_id=self.order.id)
+
+    def test_finish_production_records_outputs_and_inventory(self):
+        Batch.objects.create(
+            product=self.material_product,
+            warehouse=self.warehouse,
+            quantity=10,
+        )
+
+        ProductionEngine.start_production(order_id=self.order.id)
+
+        result = ProductionBatchService.finish_order(
+            order_id=self.order.id,
+            outputs=[
+                {
+                    "product": self.finished_product,
+                    "quantity": Decimal("18"),
+                }
+            ],
+            waste=[
+                {
+                    "product": self.finished_product,
+                    "quantity": Decimal("2"),
+                    "reason": "Burnt",
+                }
+            ],
+        )
+
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, "completed")
+
+        batch = result["batch"]
+        batch.refresh_from_db()
+        self.assertEqual(batch.status, "completed")
+        self.assertIsNotNone(batch.completed_at)
+        self.assertEqual(batch.quantity_produced, 18)
+
+        self.assertEqual(BatchOutput.objects.count(), 1)
+        self.assertEqual(BatchWaste.objects.count(), 1)
+
+        movement = StockMovement.objects.filter(movement_type="IN").first()
+        self.assertIsNotNone(movement)
+        self.assertEqual(movement.total_quantity, Decimal("18"))
+        self.assertEqual(
+            StockMovementBatch.objects.filter(stock_movement=movement).count(), 1
+        )
+
+        finished_batch = Batch.objects.filter(product=self.finished_product).first()
+        self.assertIsNotNone(finished_batch)
+        finished_batch.refresh_from_db()
+        self.assertEqual(finished_batch.quantity, Decimal("18"))
+
+        self.assertEqual(result["expected_output"], Decimal("20"))
+        self.assertEqual(result["expected_waste"], Decimal("0"))
+        self.assertEqual(result["actual_output"], Decimal("18"))
+        self.assertEqual(result["variance"], Decimal("2"))
