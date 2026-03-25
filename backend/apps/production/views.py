@@ -1,6 +1,9 @@
+from argparse import Action
+
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
@@ -62,6 +65,31 @@ class ProductionOrderViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(product_id=product_id)
 
         return queryset
+
+    @action(
+        detail=False, methods=["post"], url_path="copy/(?P<production_order_id>[^/.]+)"
+    )
+    def copy_order(self, request, pk=None, production_order_id=None):
+        """create a new production order by copying an existing one"""
+
+        original_order = get_object_or_404(ProductionOrder, id=production_order_id)
+
+        new_order = ProductionOrder.objects.create(
+            product=original_order.product,
+            quantity=original_order.quantity,
+            warehouse=original_order.warehouse,
+            formula=original_order.formula,
+        )
+
+        if request.data:
+            update_serializer = ProductionOrderSerializer(
+                new_order, data=request.data, partial=True
+            )
+            update_serializer.is_valid(raise_exception=True)
+            new_order = update_serializer.save()
+
+        serializer = ProductionOrderSerializer(new_order)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ProductionStartAPIView(APIView):
