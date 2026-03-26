@@ -126,3 +126,60 @@ class BatchWaste(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.quantity_wasted} units wasted in Batch {self.production_batch.batch_number}"
+
+
+class ReworkOrder(models.Model):
+    """Order to rework existing inventory lots into a corrected output lot."""
+
+    rework_status_choices = [
+        ("scheduled", "Scheduled"),
+        ("in_progress", "In Progress"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    target_product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity_requested = models.FloatField(null=True, blank=True)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
+    status = models.CharField(
+        max_length=50, choices=rework_status_choices, default="scheduled"
+    )
+    reason = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Rework Order for {self.target_product.name} ({self.status})"
+
+
+class ReworkInput(models.Model):
+    """Input lots consumed during rework."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    rework_order = models.ForeignKey(
+        ReworkOrder, related_name="inputs", on_delete=models.CASCADE
+    )
+    batch = models.ForeignKey("inventory.Batch", on_delete=models.PROTECT)
+    quantity_used = models.FloatField()
+    notes = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Rework input {self.batch.batch_number} - {self.quantity_used} units"
+
+
+class ReworkOutput(models.Model):
+    """Output lots produced during rework."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    rework_order = models.ForeignKey(
+        ReworkOrder, related_name="outputs", on_delete=models.CASCADE
+    )
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity_produced = models.FloatField()
+    output_batch = models.ForeignKey(
+        "inventory.Batch", on_delete=models.PROTECT, null=True, blank=True
+    )
+
+    def __str__(self):
+        return f"Rework output {self.product.name} - {self.quantity_produced} units"

@@ -15,9 +15,11 @@ from .models import (
     BatchMaterial,
     BatchOutput,
     BatchWaste,
+    ReworkOrder,
 )
 from .services.production_engine import ProductionEngine
 from .services.batch_service import ProductionBatchService
+from .services.rework_service import ReworkService
 
 
 class ProductionEngineTests(TestCase):
@@ -197,6 +199,103 @@ class ProductionEngineTests(TestCase):
         self.assertIsNotNone(finished_batch)
         finished_batch.refresh_from_db()
         self.assertEqual(finished_batch.quantity, Decimal("18"))
+
+
+class ReworkServiceTests(TestCase):
+    def setUp(self):
+        self.company = Company.objects.create(name="Test Co")
+        self.warehouse = Warehouse.objects.create(
+            company=self.company, name="Main Production", wh_type="production"
+        )
+
+        self.product = Product.objects.create(
+            company=self.company,
+            name="Bread",
+            category="Bakery",
+            unit_of_measure="pieces",
+        )
+
+        self.input_batch = Batch.objects.create(
+            product=self.product,
+            warehouse=self.warehouse,
+            quantity=10,
+        )
+
+        self.rework_order = ReworkOrder.objects.create(
+            target_product=self.product,
+            quantity_requested=8,
+            warehouse=self.warehouse,
+            status="scheduled",
+            reason="Undercooked",
+        )
+
+    def test_start_rework_consumes_input_batches(self):
+        result = ReworkService.start_rework(
+            order_id=self.rework_order.id,
+            inputs=[
+                {
+                    "batch_id": self.input_batch.id,
+                    "quantity": Decimal("6"),
+                }
+            ],
+        )
+
+        self.rework_order.refresh_from_db()
+        self.assertEqual(self.rework_order.status, "in_progress")
+        self.assertEqual(StockMovement.objects.count(), 1)
+        self.assertEqual(StockMovementBatch.objects.count(), 1)
+
+        self.input_batch.refresh_from_db()
+        self.assertEqual(self.input_batch.quantity, Decimal("4"))
+        self.assertEqual(result["total_input"], Decimal("6"))
+
+    def test_finish_rework_creates_output_batch(self):
+        ReworkService.start_rework(
+            order_id=self.rework_order.id,
+            inputs=[
+                {
+                    "batch_id": self.input_batch.id,
+                    "quantity": Decimal("6"),
+                }
+            ],
+        )
+
+        result = ReworkService.finish_rework(
+            order_id=self.rework_order.id,
+            outputs=[
+                {
+                    "product": self.product,
+                    "quantity": Decimal("5"),
+                }
+            ],
+        )
+
+        self.rework_order.refresh_from_db()
+        self.assertEqual(self.rework_order.status, "completed")
+        self.assertIsNotNone(self.rework_order.completed_at)
+
+        output_batch = (
+            Batch.objects.filter(product=self.product).order_by("-created_at").first()
+        )
+        self.assertIsNotNone(output_batch)
+        output_batch.refresh_from_db()
+        self.assertEqual(output_batch.quantity, Decimal("5"))
+        self.assertEqual(result["total_output"], Decimal("5"))
+
+    def test_rework_consumed_flag_sets_on_full_consumption(self):
+        ReworkService.start_rework(
+            order_id=self.rework_order.id,
+            inputs=[
+                {
+                    "batch_id": self.input_batch.id,
+                    "quantity": Decimal("10"),
+                }
+            ],
+        )
+
+        self.input_batch.refresh_from_db()
+        self.assertEqual(self.input_batch.quantity, Decimal("0"))
+        self.assertTrue(self.input_batch.rework_consumed)
 
         self.assertEqual(result["expected_output"], Decimal("20"))
         self.assertEqual(result["expected_waste"], Decimal("0"))

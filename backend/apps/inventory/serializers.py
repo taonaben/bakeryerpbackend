@@ -46,6 +46,7 @@ class BatchSerializer(serializers.ModelSerializer):
             "quantity",
             "manufacture_date",
             "expiry_date",
+            "rework_consumed",
             "created_at",
         ]
 

@@ -6,10 +6,14 @@ from .views import (
     ProductionOrderViewSet,
     ProductionStartAPIView,
     ProductionFinishAPIView,
+    ReworkOrderViewSet,
+    ReworkStartAPIView,
+    ReworkFinishAPIView,
 )
 
 router = DefaultRouter(trailing_slash=False)
 router.register(r"orders", ProductionOrderViewSet, basename="production_order")
+router.register(r"rework", ReworkOrderViewSet, basename="rework_order")
 
 urlpatterns = [
     path(
@@ -26,5 +30,15 @@ urlpatterns = [
         "orders/<uuid:order_id>/finish",
         ProductionFinishAPIView.as_view(),
         name="production_order_finish",
+    ),
+    path(
+        "rework/<uuid:order_id>/start",
+        ReworkStartAPIView.as_view(),
+        name="rework_order_start",
+    ),
+    path(
+        "rework/<uuid:order_id>/finish",
+        ReworkFinishAPIView.as_view(),
+        name="rework_order_finish",
     ),
 ] + router.urls

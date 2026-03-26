@@ -11,6 +11,9 @@ from .models import (
     BatchMaterial,
     BatchOutput,
     BatchWaste,
+    ReworkOrder,
+    ReworkInput,
+    ReworkOutput,
 )
 
 
@@ -242,3 +245,126 @@ class ProductionOrderFinishedSerializer(serializers.ModelSerializer):
 
     def get_variance(self, obj):
         return self.get_expected_output(obj) - self.get_actual_output(obj)
+
+
+class ReworkInputLineSerializer(serializers.Serializer):
+    batch_id = serializers.UUIDField()
+    quantity = serializers.DecimalField(max_digits=18, decimal_places=6)
+    notes = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+
+class ReworkOutputLineSerializer(serializers.Serializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    quantity = serializers.DecimalField(max_digits=18, decimal_places=6)
+
+
+class StartReworkSerializer(serializers.Serializer):
+    inputs = ReworkInputLineSerializer(many=True)
+
+    def validate_inputs(self, inputs):
+        if not inputs:
+            raise serializers.ValidationError("At least one input line is required.")
+        for line in inputs:
+            if line["quantity"] <= 0:
+                raise serializers.ValidationError(
+                    "Input quantity must be greater than 0."
+                )
+        return inputs
+
+
+class FinishReworkSerializer(serializers.Serializer):
+    outputs = ReworkOutputLineSerializer(many=True)
+
+    def validate_outputs(self, outputs):
+        if not outputs:
+            raise serializers.ValidationError("At least one output line is required.")
+        for line in outputs:
+            if line["quantity"] <= 0:
+                raise serializers.ValidationError(
+                    "Output quantity must be greater than 0."
+                )
+        return outputs
+
+
+class ReworkOrderSerializer(serializers.ModelSerializer):
+    target_product_name = serializers.CharField(
+        source="target_product.name", read_only=True
+    )
+    warehouse_name = serializers.CharField(source="warehouse.name", read_only=True)
+
+    class Meta:
+        model = ReworkOrder
+        fields = [
+            "id",
+            "target_product",
+            "target_product_name",
+            "quantity_requested",
+            "warehouse",
+            "warehouse_name",
+            "status",
+            "reason",
+            "created_at",
+            "completed_at",
+        ]
+        read_only_fields = ["id", "status", "created_at", "completed_at"]
+
+
+class ReworkInputSerializer(serializers.ModelSerializer):
+    batch_number = serializers.CharField(source="batch.batch_number", read_only=True)
+    product_name = serializers.CharField(source="batch.product.name", read_only=True)
+
+    class Meta:
+        model = ReworkInput
+        fields = [
+            "id",
+            "batch",
+            "batch_number",
+            "product_name",
+            "quantity_used",
+            "notes",
+        ]
+
+
+class ReworkOutputSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+    output_batch_number = serializers.CharField(
+        source="output_batch.batch_number", read_only=True
+    )
+
+    class Meta:
+        model = ReworkOutput
+        fields = [
+            "id",
+            "product",
+            "product_name",
+            "quantity_produced",
+            "output_batch",
+            "output_batch_number",
+        ]
+
+
+class ReworkOrderDetailSerializer(serializers.ModelSerializer):
+    target_product_name = serializers.CharField(
+        source="target_product.name", read_only=True
+    )
+    warehouse_name = serializers.CharField(source="warehouse.name", read_only=True)
+    inputs = ReworkInputSerializer(many=True, read_only=True)
+    outputs = ReworkOutputSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ReworkOrder
+        fields = [
+            "id",
+            "target_product",
+            "target_product_name",
+            "quantity_requested",
+            "warehouse",
+            "warehouse_name",
+            "status",
+            "reason",
+            "created_at",
+            "completed_at",
+            "inputs",
+            "outputs",
+        ]
+        read_only_fields = fields
