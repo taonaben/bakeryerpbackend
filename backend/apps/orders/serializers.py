@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
-from apps.production.serializers import ProductionPlanSerializer
+from apps.production.serializers import (
+    ProductionOrderSerializer,
+    ProductionPlanSerializer,
+)
 from apps.production.services.production_planner import ProductionPlanner
 
 from .models import PlannedOrder
@@ -71,3 +74,25 @@ class PlannedOrderSerializer(serializers.ModelSerializer):
 class PlannedOrderProductionCreateSerializer(serializers.Serializer):
     scheduled_start = serializers.DateTimeField()
     scheduled_end = serializers.DateTimeField()
+
+
+class PlannedOrderPriorityApproveSerializer(serializers.Serializer):
+    approve = serializers.BooleanField()
+    note = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+
+class PlannedOrderPriorityApprovalSerializer(serializers.Serializer):
+    can_request = serializers.BooleanField(read_only=True)
+    reason = serializers.CharField(read_only=True, required=False)
+    jobs_ahead = serializers.IntegerField(read_only=True, required=False)
+    approved = serializers.BooleanField(read_only=True, required=False)
+
+
+class PlannedOrderPriorityApproveResponseSerializer(serializers.Serializer):
+    message = serializers.CharField(read_only=True)
+    queue_position = serializers.IntegerField(read_only=True, allow_null=True)
+
+
+class PlannedOrderProductionPlanResponseSerializer(serializers.Serializer):
+    production_order = ProductionOrderSerializer(read_only=True)
+    plan = ProductionPlanSerializer(read_only=True)

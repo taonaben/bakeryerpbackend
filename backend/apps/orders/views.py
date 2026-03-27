@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError as DjangoValidationError
+from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -6,9 +7,14 @@ from rest_framework.response import Response
 
 from .models import PlannedOrder
 from .serializers import (
+    PlannedOrderPriorityApprovalSerializer,
+    PlannedOrderPriorityApproveResponseSerializer,
+    PlannedOrderPriorityApproveSerializer,
+    PlannedOrderProductionPlanResponseSerializer,
     PlannedOrderProductionCreateSerializer,
     PlannedOrderSerializer,
 )
+from apps.production.serializers import ProductionOrderSerializer
 from .services.order_services import (
     approve_priority_override,
     build_priority_approval_payload,
@@ -58,6 +64,7 @@ class PlannedOrderViewSet(viewsets.ModelViewSet):
             context["queue_positions"] = self._queue_positions()
         return context
 
+    @extend_schema(responses=PlannedOrderPriorityApprovalSerializer)
     @action(detail=True, methods=["get"], url_path="priority-approval")
     def priority_approval(self, request, pk=None):
         """Endpoint to check if a planned order can request priority override and its current queue position."""
@@ -67,9 +74,16 @@ class PlannedOrderViewSet(viewsets.ModelViewSet):
         )
         return Response(payload, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=PlannedOrderPriorityApproveSerializer,
+        responses=PlannedOrderPriorityApproveResponseSerializer,
+    )
     @action(detail=True, methods=["post"], url_path="priority-approve")
     def priority_approve(self, request, pk=None):
-        """Endpoint to approve or revoke priority override for a planned order."""
+        """Endpoint to approve or revoke priority override for a planned order.
+
+        \n The request body should include 'approve' (boolean) and optional 'note' (string) fields.
+        """
         planned_order = self.get_object()
         approve = request.data.get("approve") is True
         note = request.data.get("note")
@@ -90,6 +104,10 @@ class PlannedOrderViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @extend_schema(
+        request=PlannedOrderProductionCreateSerializer,
+        responses={201: ProductionOrderSerializer},
+    )
     @action(detail=True, methods=["post"], url_path="create-production")
     def create_production(self, request, pk=None):
         """This endpoint creates a production order from the planned order.
@@ -115,6 +133,10 @@ class PlannedOrderViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+        request=PlannedOrderProductionCreateSerializer,
+        responses={201: PlannedOrderProductionPlanResponseSerializer},
+    )
     @action(detail=True, methods=["post"], url_path="create-production-plan")
     def create_production_plan(self, request, pk=None):
         """This endpoint creates a production order from the planned order and returns the production plan data."""

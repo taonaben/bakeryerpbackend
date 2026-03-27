@@ -1,0 +1,6 @@
+$kind: http-request
+name: can planned order request priority override
+url: "{{baseurl}}/orders/planned/caa7d222-b9fd-48f4-937c-4277acb03790/priority-\
+  approval"
+method: GET
+order: 2798914379438177

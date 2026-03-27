@@ -1,7 +1,8 @@
 $kind: http-request
-name: retrieve all planned production orders
+name: retrieve all planned orders
 url: "{{baseurl}}/orders/planned?warehouse_id={{wh_1_pie_kings}}"
 method: GET
 queryParams:
-  warehouse_id: "{{wh_1_pie_kings}}"
+  - key: warehouse_id
+    value: "{{wh_1_pie_kings}}"
 order: 1774607221190
