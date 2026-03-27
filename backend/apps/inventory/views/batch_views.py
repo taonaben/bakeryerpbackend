@@ -1,13 +1,9 @@
-from django.shortcuts import render
-from rest_framework import viewsets, status, generics
-from rest_framework.decorators import action
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.response import Response
-from ..models import Stock, StockMovement, Batch
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from ..models import Batch
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from ..filters import StockFilter, StockMovementFilter, BatchFilter
-from ..serializers import StockSerializer, StockMovementSerializer, BatchSerializer
+from ..filters import BatchFilter
+from ..serializers import BatchSerializer
 from .utils import CustomPagination, InventoryPermission, filter_backends
 
 

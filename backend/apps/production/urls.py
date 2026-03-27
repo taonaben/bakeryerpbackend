@@ -1,11 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import (
-    ProductionPlanAPIView,
+from .views.production_views import (
     ProductionOrderViewSet,
     ProductionStartAPIView,
     ProductionFinishAPIView,
+    
+)
+from .views.planning_views import ProductionPlanAPIView
+from .views.rework_views import (
     ReworkOrderViewSet,
     ReworkStartAPIView,
     ReworkFinishAPIView,

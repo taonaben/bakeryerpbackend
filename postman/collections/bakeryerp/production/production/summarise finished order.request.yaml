@@ -1,5 +1,5 @@
 $kind: http-request
 name: summarise finished order
-url: ""
+url: "{{baseurl}}/production/orders/a0076fdd-a5a8-4cef-be7c-1bebc93fd9a2/summary"
 method: GET
 order: 4466063613600158
