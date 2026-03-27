@@ -1,0 +1,24 @@
+$kind: http-request
+name: create a production order
+url: "{{baseurl}}/orders/planned"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"product\": \"{{sausage_roll_id}}\",\r
+
+    \  \"quantity\": \"500\",\r
+
+    \  \"warehouse\": \"{{wh_1_pie_kings}}\",\r
+
+    \  \"need_by\": \"2026-03-28T10:48:26.271Z\",\r
+
+    \  \"priority\": \"normal\",\r
+
+    \  \"status\": \"planned\"\r
+
+    //   \"priority_override_note\": \"string\"\r
+
+    }"
+order: 1051004169975289

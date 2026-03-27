@@ -27,6 +27,34 @@ class ProductionPlanner:
         }
 
     @staticmethod
+    def plan_for_planned_order(planned_order):
+        try:
+            formula = ProductionPlanner.select_formula(planned_order)
+        except ValidationError as exc:
+            return {
+                "formula": None,
+                "scale_factor": None,
+                "shortages": None,
+                "validation_errors": exc.messages or [str(exc)],
+                "can_run": False,
+            }
+
+        validate = ProductionPlanner.validate_planned_order(planned_order, formula)
+        scale_factor = ProductionPlanner.compute_scale_factor(planned_order, formula)
+        shortages = ProductionPlanner.validate_material_availability(
+            planned_order, formula, scale_factor
+        )
+        can_run = not validate and not shortages
+
+        return {
+            "formula": formula,
+            "scale_factor": scale_factor,
+            "shortages": shortages,
+            "validation_errors": validate,
+            "can_run": can_run,
+        }
+
+    @staticmethod
     def select_formula(order):
         if getattr(order, "formula_id", None):
             return order.formula
@@ -59,6 +87,31 @@ class ProductionPlanner:
 
         if formula.product_id != order.product_id:
             errors.append("Formula product does not match production order product.")
+
+        if formula.batch_size is None or formula.batch_size <= 0:
+            errors.append("Formula batch size must be greater than 0.")
+
+        if errors:
+            return errors
+
+    @staticmethod
+    def validate_planned_order(planned_order, formula):
+        errors = []
+
+        if planned_order.status in ["cancelled", "completed"]:
+            errors.append("Planned order must be active for planning.")
+
+        if planned_order.quantity is None or planned_order.quantity <= 0:
+            errors.append("Planned order quantity must be greater than 0.")
+
+        if planned_order.warehouse and planned_order.warehouse.wh_type != "production":
+            errors.append("Planned order warehouse must be a production warehouse.")
+
+        if formula.status != "active":
+            errors.append("Formula must be active before planning production.")
+
+        if formula.product_id != planned_order.product_id:
+            errors.append("Formula product does not match planned order product.")
 
         if formula.batch_size is None or formula.batch_size <= 0:
             errors.append("Formula batch size must be greater than 0.")

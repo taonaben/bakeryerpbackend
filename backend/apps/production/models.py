@@ -22,6 +22,13 @@ class ProductionOrder(models.Model):
     quantity = models.FloatField()
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
     formula = models.ForeignKey(Formula, on_delete=models.PROTECT)
+    planned_order = models.OneToOneField(
+        "orders.PlannedOrder",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="production_order",
+    )
     status = models.CharField(
         max_length=50, choices=production_status_choices, default="scheduled"
     )

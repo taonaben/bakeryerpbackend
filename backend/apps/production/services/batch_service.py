@@ -132,6 +132,9 @@ class ProductionBatchService:
             if not has_open_batches:
                 order.status = "completed"
                 order.save(update_fields=["status"])
+                if order.planned_order_id and order.planned_order.status != "completed":
+                    order.planned_order.status = "completed"
+                    order.planned_order.save(update_fields=["status"])
 
             variance = expected_output - main_output_qty
 

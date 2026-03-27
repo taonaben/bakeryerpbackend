@@ -72,6 +72,9 @@ class ProductionEngine:
             if order.status == "scheduled":
                 order.status = "in_progress"
                 order.save(update_fields=["status"])
+                if order.planned_order_id and order.planned_order.status != "started":
+                    order.planned_order.status = "started"
+                    order.planned_order.save(update_fields=["status"])
 
             formula_lines = FormulaLine.objects.filter(formula=formula).order_by(
                 "sequence"
