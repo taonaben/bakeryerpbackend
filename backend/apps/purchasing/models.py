@@ -150,6 +150,13 @@ class PurchaseOrder(models.Model):
         blank=True,  # Allow PO without PR for direct purchases
         related_name="purchase_orders",
     )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_purchase_orders",
+    )
 
     order_date = models.DateField(auto_now_add=True)
     expected_delivery_date = models.DateField(null=True, blank=True)
@@ -157,6 +164,39 @@ class PurchaseOrder(models.Model):
     description = models.TextField(blank=True)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     status = models.CharField(max_length=50, choices=po_status_choices, default="Draft")
+    submitted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="submitted_purchase_orders",
+    )
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_purchase_orders",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    rejected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rejected_purchase_orders",
+    )
+    rejected_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True)
+    cancelled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cancelled_purchase_orders",
+    )
+    cancelled_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -201,6 +241,7 @@ class PurchaseOrderLineItem(models.Model):
     unit_of_measure = models.CharField(max_length=50, choices=unit_of_measure_choices)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    quantity_received = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -249,6 +290,7 @@ class GoodsReceipt(models.Model):
     )
     status = models.CharField(max_length=50, choices=gr_choices, default="Draft")
     description = models.TextField(blank=True)
+    rejection_reason = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     updated_at = models.DateTimeField(auto_now=True)
@@ -299,6 +341,9 @@ class GoodsReceiptLineItem(models.Model):
     )
     quantity_received = models.DecimalField(max_digits=10, decimal_places=2)
     unit_of_measure = models.CharField(max_length=50, choices=unit_of_measure_choices)
+    supplier_batch_ref = models.CharField(max_length=100, blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
+    manufacturing_date = models.DateField(null=True, blank=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
