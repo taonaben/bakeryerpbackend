@@ -1,5 +1,15 @@
 $kind: http-request
 name: approve priority override of planned order
-url: ""
-method: GET
+url: "{{baseurl}}/orders/planned/caa7d222-b9fd-48f4-937c-4277acb03790/priority-\
+  approve"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"approve\": true,\r
+
+    \  \"note\": \"need it now!\"\r
+
+    }"
 order: 4080936145366470

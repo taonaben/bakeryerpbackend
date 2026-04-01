@@ -8,13 +8,13 @@ body:
 
     \  \"product\": \"{{sausage_roll_id}}\",\r
 
-    \  \"quantity\": \"440\",\r
+    \  \"quantity\": \"300\",\r
 
     \  \"warehouse\": \"{{wh_1_pie_kings}}\",\r
 
-    \  \"need_by\": \"2026-03-30T10:00:26.271Z\",\r
+    \  \"need_by\": \"2026-04-1T10:00:26.271Z\",\r
 
-    \  \"priority\": \"normal\",\r
+    \  \"priority\": \"high\",\r
 
     \  \"status\": \"planned\"\r
 
