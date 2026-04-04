@@ -44,7 +44,7 @@ app_urlpatterns = [
     path("", include(central_urls)),
     path("inventory/", include(inventory_urls)),
     path("formulation/", include(formulation_urls)),
-    path("orders/", include(orders_urls)),
+    path("plan_orders/", include(orders_urls)),
     path("production/", include(production_urls)),
     path("purchasing/", include(purchasing_urls)),
 ]

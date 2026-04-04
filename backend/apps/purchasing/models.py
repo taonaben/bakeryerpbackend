@@ -58,6 +58,14 @@ class SupplierProduct(models.Model):
 class PurchaseRequisition(models.Model):
     """A purchase requisition is an internal document that employees use to request the purchase of goods or services. It includes details about the requested items, quantities, and justification for the purchase."""
 
+    pr_status_choices = [
+        ("Draft", "Draft"),
+        ("Submitted", "Submitted"),
+        ("Approved", "Approved"),
+        ("Rejected", "Rejected"),
+        ("Converted", "Converted"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     pr_number = models.CharField(max_length=20, unique=True, blank=True)
     requested_by = models.ForeignKey(
@@ -65,9 +73,40 @@ class PurchaseRequisition(models.Model):
         on_delete=models.CASCADE,
         related_name="purchase_requisitions",
     )
+    warehouse = models.ForeignKey(
+        Warehouse,
+        on_delete=models.PROTECT,
+        related_name="purchase_requisitions",
+    )
     title = models.CharField(max_length=255)
     description = models.TextField()
-    status = models.CharField(max_length=50, default="Pending")
+    status = models.CharField(max_length=50, choices=pr_status_choices, default="Draft")
+    submitted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="submitted_purchase_requisitions",
+    )
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_purchase_requisitions",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    rejected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rejected_purchase_requisitions",
+    )
+    rejected_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True)
+    converted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
