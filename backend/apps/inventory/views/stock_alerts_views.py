@@ -5,6 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from django.utils import timezone
+
+from core.mixins import CompanyScopedMixin
 from ..models import InventoryAlert, ProductPolicy
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from ..filters import StockFilter, StockMovementFilter, BatchFilter
@@ -12,13 +14,14 @@ from ..serializers import InventoryAlertSerializer, ProductReorderPolicySerializ
 from .utils import CustomPagination, InventoryPermission, filter_backends
 
 
-class InventoryAlertViewSet(viewsets.ReadOnlyModelViewSet):
+class InventoryAlertViewSet(CompanyScopedMixin, viewsets.ReadOnlyModelViewSet):
     """
     ViewSet for viewing inventory alerts.
 
     Read-only access to inventory alerts.
     """
-
+    company_field = "warehouse__company"
+    
     serializer_class = InventoryAlertSerializer
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated, InventoryPermission]
@@ -107,7 +110,7 @@ class InventoryAlertViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
 
-class ProductReorderPolicyViewSet(viewsets.ModelViewSet):
+class ProductReorderPolicyViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     """
     Docstring for ProductReorderPolicyViewSet
 
@@ -118,6 +121,7 @@ class ProductReorderPolicyViewSet(viewsets.ModelViewSet):
     serializer_class = ProductReorderPolicySerializer
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated, InventoryPermission]
+    company_field = "product__company"
     filter_backends = filter_backends
     ordering_fields = ["created_at", "product__name"]
     search_fields = ["product__name", "product__sku"]

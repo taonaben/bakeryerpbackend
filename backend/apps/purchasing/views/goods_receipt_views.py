@@ -5,6 +5,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from core.mixins import CompanyScopedMixin
+
 from ..models import GoodsReceipt
 from ..serializers.goods_receipt_serializers import (
     GoodsReceiptConfirmSerializer,
@@ -15,18 +17,18 @@ from ..serializers.goods_receipt_serializers import (
 from ..services.goods_receipt_service import GoodsReceiptService
 
 
-class GoodsReceiptViewSet(viewsets.ModelViewSet):
+class GoodsReceiptViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = GoodsReceiptSerializer
+    queryset = GoodsReceipt.objects.select_related(
+        "purchase_order",
+        "warehouse",
+        "received_by",
+    ).prefetch_related("line_items", "line_items__product", "line_items__po_line_item")
+    company_field = "warehouse__company"
 
     def get_queryset(self):
-        queryset = GoodsReceipt.objects.select_related(
-            "purchase_order",
-            "warehouse",
-            "received_by",
-        ).prefetch_related(
-            "line_items", "line_items__product", "line_items__po_line_item"
-        )
+        queryset = super().get_queryset()
 
         po_id = self.request.query_params.get("purchase_order_id")
         warehouse_id = self.request.query_params.get("warehouse_id")

@@ -5,6 +5,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from core.mixins import CompanyScopedMixin
+
 from .models import PlannedOrder
 from .serializers import (
     PlannedOrderPriorityApprovalSerializer,
@@ -25,9 +27,10 @@ from .services.order_services import (
 )
 
 
-class PlannedOrderViewSet(viewsets.ModelViewSet):
+class PlannedOrderViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     serializer_class = PlannedOrderSerializer
     permission_classes = [IsAuthenticated]
+    company_field = "warehouse__company"
 
     def get_queryset(self):
         queryset = PlannedOrder.objects.select_related(

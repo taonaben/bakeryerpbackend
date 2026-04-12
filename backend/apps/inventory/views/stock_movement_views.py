@@ -2,6 +2,8 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from core.mixins import CompanyScopedMixin
 from ..models import StockMovement
 from ..filters import StockMovementFilter
 from ..serializers import StockMovementSerializer
@@ -12,7 +14,7 @@ from ..services.stock_movement_service import (
 from .utils import CustomPagination, InventoryPermission, filter_backends
 
 
-class StockMovementViewSet(viewsets.ModelViewSet):
+class StockMovementViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     """
     ViewSet for managing stock movements and inventory transactions.
 
@@ -35,6 +37,8 @@ class StockMovementViewSet(viewsets.ModelViewSet):
     search_fields = ["reference_number", "notes"]
     tags = ["Stock Movements"]
 
+    company_field = "batches__warehouse__company"
+    
     def get_queryset(self):
         """Filter stock movements by warehouse and date range if provided"""
         queryset = StockMovement.objects.all()

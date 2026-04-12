@@ -5,6 +5,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from core.mixins import CompanyScopedMixin
+
 from ..models import PurchaseOrder, PurchaseOrderLineItem
 from ..serializers.purchase_order_serializers import (
     PurchaseOrderApproveSerializer,
@@ -25,19 +27,21 @@ from ..services.purchase_order_service import (
 )
 
 
-class PurchaseOrderViewSet(viewsets.ModelViewSet):
+class PurchaseOrderViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
+    queryset = PurchaseOrder.objects.select_related(
+        "supplier",
+        "warehouse",
+        "created_by",
+        "submitted_by",
+        "approved_by",
+        "rejected_by",
+        "cancelled_by",
+    ).prefetch_related("line_items", "line_items__product")
+    company_field = "warehouse__company"
 
     def get_queryset(self):
-        queryset = PurchaseOrder.objects.select_related(
-            "supplier",
-            "warehouse",
-            "created_by",
-            "submitted_by",
-            "approved_by",
-            "rejected_by",
-            "cancelled_by",
-        ).prefetch_related("line_items", "line_items__product")
+        queryset = super().get_queryset()
 
         status_filter = self.request.query_params.get("status")
         supplier_id = self.request.query_params.get("supplier_id")
@@ -196,14 +200,14 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         )
 
 
-class PurchaseOrderLineItemViewSet(viewsets.ModelViewSet):
+class PurchaseOrderLineItemViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     serializer_class = PurchaseOrderLineItemSerializer
     permission_classes = [IsAuthenticated]
+    queryset = PurchaseOrderLineItem.objects.select_related("purchase_order", "product")
+    company_field = "purchase_order__warehouse__company"
 
     def get_queryset(self):
-        queryset = PurchaseOrderLineItem.objects.select_related(
-            "purchase_order", "product"
-        )
+        queryset = super().get_queryset()
         po_id = self.request.query_params.get("purchase_order_id")
         if po_id:
             queryset = queryset.filter(purchase_order_id=po_id)

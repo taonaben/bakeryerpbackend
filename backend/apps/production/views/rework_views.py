@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
 
+from core.mixins import CompanyScopedMixin
+
 from ..models import ReworkOrder
 from apps.inventory.serializers import StockMovementSerializer
 
@@ -16,11 +18,12 @@ from ..serializers import (
 from ..services.rework_service import ReworkService
 
 
-class ReworkOrderViewSet(viewsets.ModelViewSet):
+class ReworkOrderViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     """Rework orders to track reprocessing of inventory lots that did not meet quality standards or require correction"""
 
     serializer_class = ReworkOrderSerializer
     permission_classes = [IsAuthenticated]
+    company_field = "warehouse__company"
 
     def get_queryset(self):
         queryset = ReworkOrder.objects.all()

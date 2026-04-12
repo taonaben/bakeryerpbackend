@@ -5,6 +5,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from core.mixins import CompanyScopedMixin
+
 from apps.purchasing.models import PurchaseRequisition, PurchaseRequisitionLineItem
 from apps.purchasing.serializers.requisition_serilalizer import (
     PurchaseRequisitionApproveSerializer,
@@ -27,17 +29,19 @@ from apps.purchasing.services.requisition_service import (
 )
 
 
-class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
+class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
+    queryset = PurchaseRequisition.objects.select_related(
+        "requested_by",
+        "warehouse",
+        "submitted_by",
+        "approved_by",
+        "rejected_by",
+    ).prefetch_related("line_items", "line_items__product")
+    company_field = "warehouse__company"
 
     def get_queryset(self):
-        queryset = PurchaseRequisition.objects.select_related(
-            "requested_by",
-            "warehouse",
-            "submitted_by",
-            "approved_by",
-            "rejected_by",
-        ).prefetch_related("line_items", "line_items__product")
+        queryset = super().get_queryset()
 
         status_filter = self.request.query_params.get("status")
         warehouse_id = self.request.query_params.get("warehouse_id")
@@ -204,14 +208,16 @@ class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
         )
 
 
-class PurchaseRequisitionLineItemViewSet(viewsets.ModelViewSet):
+class PurchaseRequisitionLineItemViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     serializer_class = PurchaseRequisitionLineItemSerializer
     permission_classes = [IsAuthenticated]
+    queryset = PurchaseRequisitionLineItem.objects.select_related(
+        "purchase_requisition", "product"
+    )
+    company_field = "purchase_requisition__warehouse__company"
 
     def get_queryset(self):
-        queryset = PurchaseRequisitionLineItem.objects.select_related(
-            "purchase_requisition", "product"
-        )
+        queryset = super().get_queryset()
         requisition_id = self.request.query_params.get("purchase_requisition_id")
         if requisition_id:
             queryset = queryset.filter(purchase_requisition_id=requisition_id)

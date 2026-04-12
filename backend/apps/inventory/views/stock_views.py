@@ -4,6 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+
+from core.mixins import CompanyScopedMixin
 from ..models import Stock, StockMovement, Batch
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from ..filters import StockFilter, StockMovementFilter, BatchFilter
@@ -11,7 +13,7 @@ from ..serializers import StockSerializer, StockMovementSerializer, BatchSeriali
 from .utils import CustomPagination, InventoryPermission, filter_backends
 
 
-class StockViewSet(viewsets.ReadOnlyModelViewSet):
+class StockViewSet(CompanyScopedMixin, viewsets.ReadOnlyModelViewSet):
     """
     ViewSet for viewing stock levels of products in warehouses.
 
@@ -38,6 +40,8 @@ class StockViewSet(viewsets.ReadOnlyModelViewSet):
     ]
     search_fields = ["product__name", "product__sku"]
     tags = ["Stocks"]
+    
+    company_field = "product__company"
 
     @action(detail=False, methods=["get"])
     def by_product_sku(self, request):

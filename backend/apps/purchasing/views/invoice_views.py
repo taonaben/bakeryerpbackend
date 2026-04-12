@@ -5,6 +5,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from core.mixins import CompanyScopedMixin
+
 from ..models import SupplierInvoice
 from ..serializers.invoice_serializers import (
     InvoiceApproveSerializer,
@@ -23,18 +25,20 @@ from ..services.invoice_service import (
 )
 
 
-class SupplierInvoiceViewSet(viewsets.ModelViewSet):
+class SupplierInvoiceViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
+    queryset = SupplierInvoice.objects.select_related(
+        "supplier",
+        "warehouse",
+        "purchase_order",
+        "approved_by",
+        "rejected_by",
+        "paid_by",
+    ).prefetch_related("line_items", "line_items__product")
+    company_field = "warehouse__company"
 
     def get_queryset(self):
-        queryset = SupplierInvoice.objects.select_related(
-            "supplier",
-            "warehouse",
-            "purchase_order",
-            "approved_by",
-            "rejected_by",
-            "paid_by",
-        ).prefetch_related("line_items", "line_items__product")
+        queryset = super().get_queryset()
 
         status_filter = self.request.query_params.get("status")
         supplier_id = self.request.query_params.get("supplier_id")

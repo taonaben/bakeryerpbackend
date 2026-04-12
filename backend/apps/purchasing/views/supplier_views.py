@@ -3,6 +3,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from apps.purchasing.models import Supplier
 from apps.purchasing.serializers.supplier_serializers import (
     SupplierCreateUpdateSerializer,
     SupplierProductCreateSerializer,
@@ -17,20 +18,16 @@ from apps.purchasing.services.supplier_services import (
     reactivate_supplier,
     update_supplier,
 )
+from core.mixins import CompanyScopedMixin
 
 
-class SupplierViewSet(viewsets.ModelViewSet):
+class SupplierViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     serializer_class = SupplierSerializer
+    queryset = Supplier.objects.select_related("company").all()
+    company_field = "company"
 
     def get_queryset(self):
-        from apps.purchasing.models import Supplier
-
-        qs = Supplier.objects.select_related("company").all()
-        company_id = self.request.query_params.get(
-            "company_id", getattr(self.request.user, "company_id", None)
-        )
-        if company_id:
-            qs = qs.filter(company_id=company_id)
+        qs = super().get_queryset()
         is_active = self.request.query_params.get("is_active")
         if is_active is not None:
             qs = qs.filter(is_active=is_active.lower() == "true")

@@ -2,6 +2,8 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+from core.mixins import CompanyScopedMixin
 from ..models import Batch, StockMovement
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from ..filters import BatchFilter
@@ -9,7 +11,7 @@ from ..serializers import BatchSerializer, StockMovementSerializer
 from .utils import CustomPagination, InventoryPermission, filter_backends
 
 
-class BatchViewSet(viewsets.ModelViewSet):
+class BatchViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     """
     ViewSet for managing batches of products in inventory's warehouses.
 
@@ -21,6 +23,7 @@ class BatchViewSet(viewsets.ModelViewSet):
     """
 
     queryset = Batch.objects.all()
+    company_field = "warehouse__company"
     serializer_class = BatchSerializer
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated, InventoryPermission]

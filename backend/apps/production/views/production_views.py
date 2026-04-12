@@ -6,12 +6,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
 
+from backend.core.mixins import CompanyScopedMixin
+
 from ..services.batch_service import ProductionBatchService
 from ..services.production_engine import ProductionEngine
 
 from ..models import ProductionOrder, BatchOutput, BatchWaste
 from apps.inventory.serializers import StockMovementSerializer
-
+from core.mixins import CompanyScopedMixin
 
 from ..serializers import (
     ProductionOrderSerializer,
@@ -26,9 +28,10 @@ from ..serializers import (
 )
 
 
-class ProductionOrderViewSet(viewsets.ModelViewSet):
+class ProductionOrderViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     serializer_class = ProductionOrderSerializer
     permission_classes = [IsAuthenticated]
+    company_field = "warehouse__company"
 
     def get_queryset(self):
         """Get Production orders in Warehouse and optionally filter by status & product"""

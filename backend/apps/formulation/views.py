@@ -5,6 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
+from core.mixins import CompanyScopedMixin
+
 from .models import Formula
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
@@ -12,12 +14,13 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from .serializers import FormulaSerializer, FormulaCreateSerializer
 
 
-class FormulaViewSet(viewsets.ModelViewSet):
+class FormulaViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     serializer_class = FormulaSerializer
     permission_classes = [IsAuthenticated]
 
     ordering_fields = ["created_at", "product__name"]
     search_fields = ["product__name", "revision"]
+    company_field = "product__company"
     tags = ["Formulas"]
 
     def get_queryset(self):
