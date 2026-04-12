@@ -87,6 +87,7 @@ class GoodsReceiptService:
                         quantity_received=line_qty,
                         unit_of_measure=line.get("unit_of_measure")
                         or po_line.unit_of_measure,
+                        unit_price=po_line.unit_price,
                         supplier_batch_ref=line.get("supplier_batch_ref", ""),
                         expiry_date=line.get("expiry_date"),
                         manufacturing_date=line.get("manufacturing_date"),

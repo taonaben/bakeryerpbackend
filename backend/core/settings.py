@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "djoser",
     #! Local apps
     "apps.accounts",
+    "apps.accounting",
     "apps.inventory",
     "apps.formulation",
     "apps.orders",

@@ -1,6 +1,6 @@
 from django.db import models
 import uuid
-from central.models import Product, Warehouse
+from central.models import Company, Product, Warehouse
 
 from django.contrib.auth import get_user_model
 from django.conf import settings
@@ -13,6 +13,9 @@ class Supplier(models.Model):
     """The master record for every vendor we buy from. It includes contact information, payment terms, and other details about the supplier."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name="suppliers"
+    )
     name = models.CharField(max_length=255)
     contact_person = models.CharField(max_length=255)
     email = models.EmailField()
@@ -380,6 +383,7 @@ class GoodsReceiptLineItem(models.Model):
     )
     quantity_received = models.DecimalField(max_digits=10, decimal_places=2)
     unit_of_measure = models.CharField(max_length=50, choices=unit_of_measure_choices)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     supplier_batch_ref = models.CharField(max_length=100, blank=True)
     expiry_date = models.DateField(null=True, blank=True)
     manufacturing_date = models.DateField(null=True, blank=True)
@@ -420,13 +424,36 @@ class SupplierInvoice(models.Model):
         blank=True,
         related_name="supplier_invoices",
     )
-    invoice_date = models.DateField(auto_now_add=True)
+    invoice_date = models.DateField()
     due_date = models.DateField(null=True, blank=True)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     status = models.CharField(
         max_length=50, choices=invoice_status_choices, default="Draft"
     )
     description = models.TextField(blank=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_supplier_invoices",
+    )
+    rejected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rejected_supplier_invoices",
+    )
+    rejection_reason = models.TextField(blank=True)
+    paid_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="paid_supplier_invoices",
+    )
+    payment_reference = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -488,3 +515,26 @@ class SupplierInvoiceLineItem(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.quantity_invoiced} {self.unit_of_measure} at {self.unit_price} each"
+
+
+class PurchasingConfig(models.Model):
+    """Company-level configuration for purchasing tolerances and rules.
+    One record per company."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.OneToOneField(
+        "central.Company",
+        on_delete=models.CASCADE,
+        related_name="purchasing_config",
+    )
+    price_tolerance_pct = models.DecimalField(
+        max_digits=5, decimal_places=2, default=2.00
+    )
+    qty_tolerance_pct = models.DecimalField(
+        max_digits=5, decimal_places=2, default=2.00
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"PurchasingConfig for {self.company.name}"
