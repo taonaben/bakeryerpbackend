@@ -41,7 +41,7 @@ class InventoryAlertViewSet(viewsets.ReadOnlyModelViewSet):
             except (ValueError, TypeError):
                 queryset = queryset.none()
 
-        return queryset
+        return queryset.order_by("-created_at")
 
     @action(detail=False, methods=["get"])
     def low_stock(self, request):

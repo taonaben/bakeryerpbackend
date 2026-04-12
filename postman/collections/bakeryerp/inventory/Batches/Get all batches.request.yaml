@@ -1,10 +1,10 @@
 $kind: http-request
 name: Get all batches
-url: "{{baseurl}}/inventory/batches?warehouse_id={{wh_1_pie_kings}}&page=2"
+url: "{{baseurl}}/inventory/batches?warehouse_id={{wh_1_pie_kings}}&page=3"
 method: GET
 queryParams:
   warehouse_id: "{{wh_1_pie_kings}}"
-  page: "2"
+  page: "3"
 body:
   type: json
   content: "{\r

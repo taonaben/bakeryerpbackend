@@ -1,0 +1,5 @@
+$kind: http-request
+name: repair missing batches
+url: "{{baseurl}}//inventory/stock_movements/repair-missing-batches"
+method: POST
+order: 553407216618055
