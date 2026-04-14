@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{baseurl}}/warehouses/{{wh_1_pie_kings}}"
+method: PATCH
+body:
+  type: json
+  content: '{"wh_type": "production"}'
+order: 4000

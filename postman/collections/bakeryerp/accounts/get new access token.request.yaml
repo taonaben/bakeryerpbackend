@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseurl}}/api/token/refresh/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"refresh\": \"{{refresh_token}}\"\r
+
+    }"
+order: 6000

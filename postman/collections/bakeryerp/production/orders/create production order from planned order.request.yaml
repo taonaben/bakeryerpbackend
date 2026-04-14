@@ -1,0 +1,19 @@
+$kind: http-request
+name: create production order from planned order
+url: "{{baseurl}}/orders/planned/5c01d480-71e2-458f-a2a3-8527612065d5/create-pr\
+  oduction"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"scheduled_start\": \"2026-03-28T08:00:26.271Z\",\r
+
+    \    \r
+
+    \    \"scheduled_end\":  \"2026-03-28T10:00:26.271Z\"\r
+
+    \    \r
+
+    }"
+order: 1841415894731100

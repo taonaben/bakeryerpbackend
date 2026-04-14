@@ -1,17 +1,17 @@
-from django.shortcuts import render
-from rest_framework import viewsets, status, generics
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from ..models import Stock, StockMovement, Batch
+
+from core.mixins import CompanyScopedMixin
+from ..models import Batch, StockMovement
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from ..filters import StockFilter, StockMovementFilter, BatchFilter
-from ..serializers import StockSerializer, StockMovementSerializer, BatchSerializer
+from ..filters import BatchFilter
+from ..serializers import BatchSerializer, StockMovementSerializer
 from .utils import CustomPagination, InventoryPermission, filter_backends
 
 
-class BatchViewSet(viewsets.ModelViewSet):
+class BatchViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     """
     ViewSet for managing batches of products in inventory's warehouses.
 
@@ -23,12 +23,20 @@ class BatchViewSet(viewsets.ModelViewSet):
     """
 
     queryset = Batch.objects.all()
+    company_field = "warehouse__company"
     serializer_class = BatchSerializer
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated, InventoryPermission]
     filterset_class = BatchFilter
     filter_backends = filter_backends
-    ordering_fields = ["created_at", "product__name"]
+    ordering_fields = [
+        "created_at",
+        "product__name",
+        "batch_number",
+        "manufacture_date",
+        "expiry_date",
+        "quantity",
+    ]
     search_fields = ["product__name", "batch_number"]
     tags = ["Batches"]
 
@@ -61,3 +69,31 @@ class BatchViewSet(viewsets.ModelViewSet):
         if warehouse_id is not None:
             queryset = queryset.filter(warehouse_id=warehouse_id)
         return queryset
+
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated, InventoryPermission],
+        pagination_class=CustomPagination,
+    )
+    @extend_schema(
+        summary="Get movements for a batch",
+        description="Retrieve all stock movements associated with a specific batch to track its movement history.",
+        tags=["Batches"],
+    )
+    def movements(self, request, pk=None):
+        """
+        Get all movements associated with this batch.
+
+        Returns paginated list of stock movements with batch-specific details.
+        """
+        batch = self.get_object()
+        movements = batch.movements.all().order_by("-created_at")
+
+        page = self.paginate_queryset(movements)
+        if page is not None:
+            serializer = StockMovementSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = StockMovementSerializer(movements, many=True)
+        return Response(serializer.data)

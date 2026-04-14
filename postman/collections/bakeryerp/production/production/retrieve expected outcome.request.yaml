@@ -1,0 +1,8 @@
+$kind: http-request
+name: retrieve expected outcome
+url: "{{baseurl}}/production/orders/a0076fdd-a5a8-4cef-be7c-1bebc93fd9a2/finish"
+method: GET
+body:
+  type: json
+  content: ""
+order: 4384097617364063

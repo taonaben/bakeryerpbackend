@@ -1,0 +1,13 @@
+$kind: collection
+variables:
+  baseurl: ""
+  access_code: ""
+  refresh_token: ""
+  module workspace_type: ""
+  local_user_babyface: ""
+auth:
+  - id: 85cfdedb-0f54-4a9c-9429-00460b425e72
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{access_code}}"

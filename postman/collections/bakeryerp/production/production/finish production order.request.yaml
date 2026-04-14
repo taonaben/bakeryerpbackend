@@ -1,0 +1,14 @@
+$kind: http-request
+name: finish production order
+url: "{{baseurl}}/production/orders/a0076fdd-a5a8-4cef-be7c-1bebc93fd9a2/finish"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"actual_output\": 396,\r
+
+    \    \"waste\": 12 \r
+
+    }"
+order: 4442579286530352

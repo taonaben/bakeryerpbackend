@@ -1,0 +1,275 @@
+$kind: http-request
+url: "{{baseurl}}/formulation/formulas/create-with-lines"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"product\": \"{{sausage_roll_id}}\",\r
+
+    \  \"revision\": 1,\r
+
+    \  \"batch_size\": 1000,\r
+
+    \  \"yield_percentage\": 98,\r
+
+    \  \"status\": \"draft\",\r
+
+    \  \"lines\": [\r
+
+    \    {\r
+
+    \      \"sequence\": 1,\r
+
+    \      \"line_type\": \"PROCESS\",\r
+
+    \      \"text\": \"Meat Preparation\"\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 2,\r
+
+    \      \"line_type\": \"MATERIAL\",\r
+
+    \      \"product\": \"{{pork_loin_id}}\",\r
+
+    \      \"quantity\": 200\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 3,\r
+
+    \      \"line_type\": \"MATERIAL\",\r
+
+    \      \"product\": \"{{pork_shoulder_id}}\",\r
+
+    \      \"quantity\": 300\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 4,\r
+
+    \      \"line_type\": \"MATERIAL\",\r
+
+    \      \"product\": \"{{pork_fat_id}}\",\r
+
+    \      \"quantity\": 100\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 5,\r
+
+    \      \"line_type\": \"MATERIAL\",\r
+
+    \      \"product\": \"{{salt_id}}\",\r
+
+    \      \"quantity\": 10\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 6,\r
+
+    \      \"line_type\": \"MATERIAL\",\r
+
+    \      \"product\": \"{{spices_id}}\",\r
+
+    \      \"quantity\": 5\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 7,\r
+
+    \      \"line_type\": \"MATERIAL\",\r
+
+    \      \"product\": \"{{rusk_id}}\",\r
+
+    \      \"quantity\": 50\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 8,\r
+
+    \      \"line_type\": \"MATERIAL\",\r
+
+    \      \"product\": \"{{ice_id}}\",\r
+
+    \      \"quantity\": 30\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 9,\r
+
+    \      \"line_type\": \"INSTRUCTION\",\r
+
+    \      \"text\": \"Mince meat and mix with all ingredients until consistent
+    paste is achieved\"\r
+
+    \    },\r
+
+    \r
+
+    \    {\r
+
+    \      \"sequence\": 10,\r
+
+    \      \"line_type\": \"PROCESS\",\r
+
+    \      \"text\": \"Pastry Preparation\"\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 11,\r
+
+    \      \"line_type\": \"MATERIAL\",\r
+
+    \      \"product\": \"{{flour_id}}\",\r
+
+    \      \"quantity\": 400\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 12,\r
+
+    \      \"line_type\": \"MATERIAL\",\r
+
+    \      \"product\": \"{{margarine_id}}\",\r
+
+    \      \"quantity\": 200\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 13,\r
+
+    \      \"line_type\": \"INSTRUCTION\",\r
+
+    \      \"text\": \"Fold and laminate dough to create layered puff pastry\"\r
+
+    \    },\r
+
+    \r
+
+    \    {\r
+
+    \      \"sequence\": 14,\r
+
+    \      \"line_type\": \"PROCESS\",\r
+
+    \      \"text\": \"Assembly Line\"\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 15,\r
+
+    \      \"line_type\": \"INSTRUCTION\",\r
+
+    \      \"text\": \"Roll pastry sheets onto conveyor\"\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 16,\r
+
+    \      \"line_type\": \"INSTRUCTION\",\r
+
+    \      \"text\": \"Extrude sausage meat evenly along pastry\"\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 17,\r
+
+    \      \"line_type\": \"INSTRUCTION\",\r
+
+    \      \"text\": \"Wrap pastry around filling and seal using egg wash\"\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 18,\r
+
+    \      \"line_type\": \"INSTRUCTION\",\r
+
+    \      \"text\": \"Cut into uniform sausage roll portions\"\r
+
+    \    },\r
+
+    \r
+
+    \    {\r
+
+    \      \"sequence\": 19,\r
+
+    \      \"line_type\": \"PROCESS\",\r
+
+    \      \"text\": \"Baking\"\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"sequence\": 20,\r
+
+    \      \"line_type\": \"INSTRUCTION\",\r
+
+    \      \"text\": \"Bake in oven at 180°C until golden brown\"\r
+
+    \    },\r
+
+    \r
+
+    \    {\r
+
+    \      \"sequence\": 21,\r
+
+    \      \"line_type\": \"BYPRODUCT\",\r
+
+    \      \"product\": \"{{waste_trimmings}}\",\r
+
+    \      \"quantity\": 20\r
+
+    \    },\r
+
+    \r
+
+    \    {\r
+
+    \      \"sequence\": 22,\r
+
+    \      \"line_type\": \"TEXT\",\r
+
+    \      \"text\": \"Cool and package finished sausage rolls for
+    distribution\"\r
+
+    \    }\r
+
+    \  ]\r
+
+    }"
+order: 1000

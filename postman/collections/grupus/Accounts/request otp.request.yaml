@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseurl}}/auth/request-otp/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"munikwataona09@gmail.com\"\r
+
+    }"
+auth:
+  type: noauth
+order: 4000

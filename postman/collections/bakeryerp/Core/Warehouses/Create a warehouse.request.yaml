@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseurl}}/warehouses?company_id={{piekings_id}}"
+method: POST
+queryParams:
+  company_id: "{{piekings_id}}"
+body:
+  type: json
+  content: "{\r
+
+    \  \"company\": \"{{piekings_id}}\",\r
+
+    \  \"name\": \"wh-002\",\r
+
+    \  \"status\": true,\r
+
+    \  \"wh_type\": \"production\"\r
+
+    }"
+order: 2000

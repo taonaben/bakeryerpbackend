@@ -1,0 +1,33 @@
+$kind: http-request
+url: "{{baseurl}}/workspace/types/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"cohort\",\r
+
+    \  \"schema\": {\r
+
+    \  \"fields\": {\r
+
+    \    \"start_date\": { \"type\": \"date\", \"required\": true },\r
+
+    \    \"end_date\": { \"type\": \"date\", \"required\": false },\r
+
+    \    \"mentor\": { \"type\": \"user\", \"required\": true },\r
+
+    \    \"focus_area\": { \"type\": \"string\", \"required\": false }\r
+
+    \  }\r
+
+    }\r
+
+    \r
+
+    \r
+
+    \r
+
+    }"
+order: 1000

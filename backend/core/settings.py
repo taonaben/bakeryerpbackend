@@ -67,7 +67,12 @@ INSTALLED_APPS = [
     "djoser",
     #! Local apps
     "apps.accounts",
+    "apps.accounting",
     "apps.inventory",
+    "apps.formulation",
+    "apps.orders",
+    "apps.production",
+    "apps.purchasing",
     "central",
 ]
 
@@ -129,7 +134,7 @@ if render_external_db_url:
             }
         else:
             DATABASES = {"default": dj_database_url.parse(render_external_db_url)}
-            
+
     except Exception as e:
         logger.error(f"Error configuring database: {e}")
         # Fallback to sqlite for build-time commands

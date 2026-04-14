@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseurl}}/inventory/stock_movements?warehouse_id={{wh_1_pie_kings}}"
+method: POST
+queryParams:
+  warehouse_id: "{{wh_1_pie_kings}}"
+body:
+  type: json
+  content: "{\r
+
+    \  \"batch\": \"08dd65ea-455f-47b6-ae39-17d19dde86d9\",\r
+
+    \  \"movement_type\": \"RETURN\",\r
+
+    \  \"quantity\": \"59\",\r
+
+    \  \"reference_number\": \"ref-003\",\r
+
+    \  \"notes\": \"\"\r
+
+    }"
+order: 2000

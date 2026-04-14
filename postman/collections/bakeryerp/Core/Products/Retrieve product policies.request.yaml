@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseurl}}/reorder_policies"
+method: GET
+order: 6000

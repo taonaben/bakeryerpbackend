@@ -1,0 +1,5 @@
+$kind: http-request
+name: retrieve finished orders
+url: "{{baseurl}}/production/orders/finished"
+method: GET
+order: 4458424511735834

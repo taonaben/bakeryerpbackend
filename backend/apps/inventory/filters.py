@@ -7,14 +7,15 @@ class StockFilter(django_filters.FilterSet):
     FilterSet for Stock model to filter by warehouse ID.
     """
 
+    status = django_filters.BaseInFilter(field_name="status", lookup_expr="in")
+
     class Meta:
         model = Stock
         fields = {
             "warehouse_id": ["exact"],
             "product__sku": ["exact", "icontains"],
             "quantity_on_hand": ["exact", "gt", "lt", "gte", "lte"],
-            "status": ["exact"],
-            "created_at": ["exact", "gt", "lt", "gte", "lte"],
+            "created_at": ["exact", "gt", "lt", "gte", "lte", "range"],
         }
 
 
@@ -23,13 +24,16 @@ class StockMovementFilter(django_filters.FilterSet):
     FilterSet for StockMovement model to filter by warehouse ID.
     """
 
+    movement_type = django_filters.BaseInFilter(
+        field_name="movement_type", lookup_expr="in"
+    )
+
     class Meta:
         model = StockMovement
         fields = {
-            "movement_type": ["exact"],
             "notes": ["icontains"],
             "total_quantity": ["exact", "gt", "lt", "gte", "lte"],
-            "created_at": ["exact", "gt", "lt", "gte", "lte"],
+            "created_at": ["exact", "gt", "lt", "gte", "lte", "range"],
         }
 
 

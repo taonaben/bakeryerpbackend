@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseurl}}/reorder_policies"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"product\": \"{{flour_id}}\",\r
+
+    \  \"warehouse\": \"{{wh_1_pie_kings}}\",\r
+
+    \  \"min_stock_level\": \"10\",\r
+
+    \  \"reorder_qty\": \"50\",\r
+
+    \  \"lead_time_days\": 3,\r
+
+    \  \"retrieval_method\": \"FIFO\",\r
+
+    \  \"safety_stock_qty\": \"30\",\r
+
+    \  \"is_active\": true\r
+
+    }"
+order: 5000

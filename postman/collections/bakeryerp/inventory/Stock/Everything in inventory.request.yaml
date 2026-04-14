@@ -1,0 +1,15 @@
+$kind: http-request
+name: Everything in inventory
+url: "{{baseurl}}/inventory/stocks"
+method: GET
+queryParams:
+  - key: quantity_on_hand>10
+    value: ""
+    disabled: true
+  - key: quantity_on_hand__range
+    value: 40,51
+    disabled: true
+  - key: page
+    value: "2"
+    disabled: true
+order: 1000

@@ -1,0 +1,7 @@
+$kind: http-request
+name: Retrieve stock movement history
+url: "{{baseurl}}/inventory/stock_movements?warehouse_id={{piekings_id}}"
+method: GET
+queryParams:
+  warehouse_id: "{{piekings_id}}"
+order: 1000

@@ -80,7 +80,6 @@ def check_inventory_alerts(sender, instance, created, **kwargs):
                     alert_type__in=["LOW_STOCK", "OUT_OF_STOCK"],
                 ).update(status="RESOLVED", resolved_at=timezone.now())
     except Exception as e:
-        # Log error but don't crash the application
         import logging
 
         logger = logging.getLogger(__name__)

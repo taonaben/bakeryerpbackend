@@ -5,6 +5,7 @@ from django.db.models import F
 from django.contrib.auth import get_user_model
 from django.conf import settings
 
+
 class Stock(models.Model):
     """Represents current inventory levels of a product in a warehouse"""
 
@@ -76,6 +77,7 @@ class Batch(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     manufacture_date = models.DateField(null=True, blank=True)
     expiry_date = models.DateField(null=True, blank=True)
+    rework_consumed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -190,14 +192,14 @@ class ProductPolicy(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
-       settings.AUTH_USER_MODEL,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="reorder_policies",
     )
     updated_by = models.ForeignKey(
-    settings.AUTH_USER_MODEL,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -269,7 +271,7 @@ class InventoryAlert(models.Model):
     triggered_by = models.CharField(max_length=50, choices=TRIGGER_CHOICES)
     acknowledged_at = models.DateTimeField(null=True, blank=True)
     acknowledged_by = models.ForeignKey(
-     settings.AUTH_USER_MODEL,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -280,7 +282,7 @@ class InventoryAlert(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
     resolved_by = models.ForeignKey(
-      settings.AUTH_USER_MODEL,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

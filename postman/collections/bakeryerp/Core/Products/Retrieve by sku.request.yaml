@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseurl}}/products/FLR-FLOU-KG-001/by_sku"
+method: GET
+order: 4000

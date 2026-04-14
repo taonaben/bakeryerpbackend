@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseurl}}/formulation/formulas"
+method: GET
+order: 2000

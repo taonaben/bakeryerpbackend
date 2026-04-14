@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseurl}}/production/orders"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"product\": \"{{sausage_roll_id}}\",\r
+
+    \  \"quantity\": 400,\r
+
+    \  \"scheduled_start\": \"2026-03-22T09:12:01.566Z\",\r
+
+    \  \"scheduled_end\": \"2026-03-22T09:15:01.566Z\",\r
+
+    \  \"warehouse\": \"{{wh_1_pie_kings}}\",\r
+
+    \  \"formula\": \"{{sausage_roll_formula_id}}\"\r
+
+    }"
+order: 1000

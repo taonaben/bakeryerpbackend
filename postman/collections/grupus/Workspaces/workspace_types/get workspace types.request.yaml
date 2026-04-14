@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseurl}}/workspace/types/"
+method: GET
+order: 2000

@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseurl}}/companies/6c6d5fc7-894b-4e96-bc0c-b80fbdb265d4"
+method: GET
+order: 3000

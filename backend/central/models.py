@@ -78,6 +78,12 @@ class Product(models.Model):
         ("box", "Box"),
     ]
 
+    STORAGE_CONDITION_CHOICES = [
+        ("ambient", "Ambient"),
+        ("refrigerated", "Refrigerated"),
+        ("frozen", "Frozen"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sku = models.CharField(max_length=100, unique=True, blank=True)
     name = models.CharField(max_length=255, unique=True)
@@ -88,6 +94,11 @@ class Product(models.Model):
     unit_of_measure = models.CharField(
         max_length=50, choices=UNIT_CHOICES, null=True, blank=True
     )
+    shelf_life_days = models.IntegerField(null=True, blank=True)
+    storage_conditions = models.CharField(
+        max_length=50, choices=STORAGE_CONDITION_CHOICES, null=True, blank=True
+    )
+    storage_notes = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -115,5 +126,3 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.sku})"
-
-

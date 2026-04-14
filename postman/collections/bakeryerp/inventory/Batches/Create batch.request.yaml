@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseurl}}/inventory/batches"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"product\": \"6c34ccbf-5330-44a0-b180-1f7a83e8c9ac\",\r
+
+    \  \"warehouse\": \"{{wh1_woben_pies}}\",\r
+
+    \  \"quantity\": 50,\r
+
+    \  \"manufacture_date\": \"2026-01-16\",\r
+
+    \  \"expiry_date\": \"2026-02-25\"\r
+
+    }"
+order: 2000

@@ -10,11 +10,16 @@ from .models import (
 
 
 class StockSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+    warehouse_name = serializers.CharField(source="warehouse.name", read_only=True)
+
     class Meta:
         model = Stock
         fields = [
             "id",
             "product",
+            "product_name",
+            "warehouse_name",
             "warehouse",
             "quantity_on_hand",
             "status",
@@ -26,16 +31,22 @@ class StockSerializer(serializers.ModelSerializer):
 
 
 class BatchSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+    warehouse_name = serializers.CharField(source="warehouse.name", read_only=True)
+
     class Meta:
         model = Batch
         fields = [
             "id",
             "product",
+            "product_name",
             "warehouse",
+            "warehouse_name",
             "batch_number",
             "quantity",
             "manufacture_date",
             "expiry_date",
+            "rework_consumed",
             "created_at",
         ]
 

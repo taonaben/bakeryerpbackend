@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseurl}}/warehouses/active/?company_id={{piekings_id}}"
+method: GET
+queryParams:
+  company_id: "{{piekings_id}}"
+order: 3000
