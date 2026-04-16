@@ -40,6 +40,7 @@ class GoodsReceiptSerializer(serializers.ModelSerializer):
     )
     warehouse_name = serializers.CharField(source="warehouse.name", read_only=True)
     line_items = GoodsReceiptLineItemSerializer(many=True, read_only=True)
+    item_count = serializers.IntegerField(source="line_items.count", read_only=True)
 
     class Meta:
         model = GoodsReceipt
@@ -57,6 +58,7 @@ class GoodsReceiptSerializer(serializers.ModelSerializer):
             "rejection_reason",
             "created_at",
             "updated_at",
+            "item_count",
             "line_items",
         ]
         read_only_fields = [
@@ -66,6 +68,7 @@ class GoodsReceiptSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
             "updated_at",
+                "item_count",
             "line_items",
         ]
 

@@ -33,6 +33,7 @@ class SupplierInvoiceSerializer(serializers.ModelSerializer):
     warehouse_name = serializers.CharField(source="warehouse.name", read_only=True)
     po_number = serializers.CharField(source="purchase_order.po_number", read_only=True)
     line_items = SupplierInvoiceLineItemSerializer(many=True, read_only=True)
+    item_count = serializers.IntegerField(source="line_items.count", read_only=True)
 
     class Meta:
         model = SupplierInvoice
@@ -57,6 +58,7 @@ class SupplierInvoiceSerializer(serializers.ModelSerializer):
             "payment_reference",
             "created_at",
             "updated_at",
+            "item_count",
             "line_items",
         ]
         read_only_fields = [
@@ -71,6 +73,7 @@ class SupplierInvoiceSerializer(serializers.ModelSerializer):
             "payment_reference",
             "created_at",
             "updated_at",
+            "item_count",
             "line_items",
         ]
 

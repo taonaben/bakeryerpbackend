@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
 
-from backend.core.mixins import CompanyScopedMixin
+from core.mixins import CompanyScopedMixin
 
 from ..services.batch_service import ProductionBatchService
 from ..services.production_engine import ProductionEngine
