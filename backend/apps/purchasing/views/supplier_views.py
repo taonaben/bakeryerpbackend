@@ -3,19 +3,28 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.purchasing.models import Supplier
+from apps.purchasing.models import Supplier, SupplierContact, SupplierDocument
 from apps.purchasing.serializers.supplier_serializers import (
+    SupplierContactCreateSerializer,
+    SupplierContactSerializer,
     SupplierCreateUpdateSerializer,
+    SupplierDocumentCreateSerializer,
+    SupplierDocumentSerializer,
     SupplierProductCreateSerializer,
     SupplierProductSerializer,
+    SupplierPutOnHoldSerializer,
     SupplierSerializer,
 )
 from apps.purchasing.services.supplier_services import (
     add_product_to_catalogue,
     create_supplier,
+    create_supplier_contact,
+    create_supplier_document,
     deactivate_supplier,
     get_preferred_supplier,
+    put_supplier_on_hold,
     reactivate_supplier,
+    release_supplier_hold,
     update_supplier,
 )
 from core.mixins import CompanyScopedMixin
@@ -26,6 +35,17 @@ class SupplierViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
     queryset = Supplier.objects.select_related("company").all()
     company_field = "company"
 
+    def get_serializer_class(self):
+        if self.action in ("create", "update", "partial_update"):
+            return SupplierCreateUpdateSerializer
+        if self.action == "add_product":
+            return SupplierProductCreateSerializer
+        if self.action == "preferred_supplier":
+            return SupplierProductSerializer
+        if self.action == "put_on_hold":
+            return SupplierPutOnHoldSerializer
+        return SupplierSerializer
+
     def get_queryset(self):
         qs = super().get_queryset()
         is_active = self.request.query_params.get("is_active")
@@ -34,7 +54,7 @@ class SupplierViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
         return qs
 
     def create(self, request, *args, **kwargs):
-        serializer = SupplierCreateUpdateSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
             supplier = create_supplier(serializer.validated_data)
@@ -45,7 +65,7 @@ class SupplierViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
         )
 
     def update(self, request, *args, **kwargs):
-        serializer = SupplierCreateUpdateSerializer(
+        serializer = self.get_serializer(
             data=request.data, partial=kwargs.get("partial", False)
         )
         serializer.is_valid(raise_exception=True)
@@ -76,7 +96,7 @@ class SupplierViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="add-product")
     def add_product(self, request, pk=None):
-        serializer = SupplierProductCreateSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         try:
@@ -109,3 +129,76 @@ class SupplierViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
         return Response(SupplierProductSerializer(sp).data)
+
+    @action(detail=True, methods=["post"], url_path="put-on-hold")
+    def put_on_hold(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        reason = serializer.validated_data.get("reason", "")
+        try:
+            supplier = put_supplier_on_hold(pk, reason)
+        except DjangoValidationError as e:
+            return Response({"detail": e.message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(SupplierSerializer(supplier).data)
+
+    @action(detail=True, methods=["post"], url_path="release-hold")
+    def release_hold(self, request, pk=None):
+        try:
+            supplier = release_supplier_hold(pk)
+        except DjangoValidationError as e:
+            return Response({"detail": e.message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(SupplierSerializer(supplier).data)
+
+
+class SupplierContactViewSet(viewsets.ModelViewSet):
+    serializer_class = SupplierContactSerializer
+
+    def get_serializer_class(self):
+        if self.action in ("create", "update", "partial_update"):
+            return SupplierContactCreateSerializer
+        return SupplierContactSerializer
+
+    def get_queryset(self):
+        return SupplierContact.objects.filter(
+            supplier_id=self.kwargs["supplier_pk"]
+        ).order_by("-is_primary", "name")
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        data.pop("supplier", None)  # supplier comes from the URL
+        try:
+            contact = create_supplier_contact(self.kwargs["supplier_pk"], data)
+        except DjangoValidationError as e:
+            return Response({"detail": e.message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            SupplierContactSerializer(contact).data, status=status.HTTP_201_CREATED
+        )
+
+
+class SupplierDocumentViewSet(viewsets.ModelViewSet):
+    serializer_class = SupplierDocumentSerializer
+
+    def get_serializer_class(self):
+        if self.action in ("create", "update", "partial_update"):
+            return SupplierDocumentCreateSerializer
+        return SupplierDocumentSerializer
+
+    def get_queryset(self):
+        return SupplierDocument.objects.filter(
+            supplier_id=self.kwargs["supplier_pk"]
+        ).order_by("-created_at")
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        data.pop("supplier", None)  # supplier comes from the URL
+        try:
+            doc = create_supplier_document(self.kwargs["supplier_pk"], data)
+        except DjangoValidationError as e:
+            return Response({"detail": e.message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            SupplierDocumentSerializer(doc).data, status=status.HTTP_201_CREATED
+        )

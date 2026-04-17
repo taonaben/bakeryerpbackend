@@ -31,6 +31,11 @@ def create_purchase_order(
         supplier = Supplier.objects.select_for_update().get(id=supplier_id)
         if not supplier.is_active:
             raise ValidationError("Supplier must be active to create a purchase order.")
+        if supplier.on_hold:
+            raise ValidationError(
+                f"Supplier '{supplier.name}' is on hold and cannot receive new purchase orders. "
+                f"Reason: {supplier.on_hold_reason or 'No reason given.'}"
+            )
 
         warehouse = Warehouse.objects.select_for_update().get(id=warehouse_id)
 

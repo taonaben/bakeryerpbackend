@@ -11,7 +11,11 @@ from .views.requisition_views import (
     PurchaseRequisitionLineItemViewSet,
     PurchaseRequisitionViewSet,
 )
-from .views.supplier_views import SupplierViewSet
+from .views.supplier_views import (
+    SupplierContactViewSet,
+    SupplierDocumentViewSet,
+    SupplierViewSet,
+)
 
 
 router = DefaultRouter()
@@ -37,6 +41,36 @@ router.register(
 #     basename="purchase-requisition-lines",
 # )
 
+# Nested routes: /suppliers/{supplier_pk}/contacts/ and /suppliers/{supplier_pk}/documents/
+contact_list = SupplierContactViewSet.as_view({"get": "list", "post": "create"})
+contact_detail = SupplierContactViewSet.as_view(
+    {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}
+)
+document_list = SupplierDocumentViewSet.as_view({"get": "list", "post": "create"})
+document_detail = SupplierDocumentViewSet.as_view(
+    {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}
+)
+
 urlpatterns = [
     path("", include(router.urls)),
+    path(
+        "suppliers/<uuid:supplier_pk>/contacts/",
+        contact_list,
+        name="supplier-contact-list",
+    ),
+    path(
+        "suppliers/<uuid:supplier_pk>/contacts/<uuid:pk>/",
+        contact_detail,
+        name="supplier-contact-detail",
+    ),
+    path(
+        "suppliers/<uuid:supplier_pk>/documents/",
+        document_list,
+        name="supplier-document-list",
+    ),
+    path(
+        "suppliers/<uuid:supplier_pk>/documents/<uuid:pk>/",
+        document_detail,
+        name="supplier-document-detail",
+    ),
 ]
