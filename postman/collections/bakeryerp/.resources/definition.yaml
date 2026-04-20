@@ -25,6 +25,7 @@ variables:
   margarine_id: ""
   waste_trimmings: ""
   sausage_roll_formula_id: ""
+  wh_2_pie_kings: ""
 auth:
   - id: 71d655a3-7ea1-4e15-be39-9661bfa937cc
     type: bearer

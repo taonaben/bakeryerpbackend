@@ -21,11 +21,11 @@ from .views.supplier_views import (
 router = DefaultRouter()
 router.register("suppliers", SupplierViewSet, basename="suppliers")
 router.register("purchase-orders", PurchaseOrderViewSet, basename="purchase-orders")
-# router.register(
-#     "purchase-order-lines",
-#     PurchaseOrderLineItemViewSet,
-#     basename="purchase-order-lines",
-# )
+router.register(
+    "purchase-order-lines",
+    PurchaseOrderLineItemViewSet,
+    basename="purchase-order-lines",
+)
 router.register("goods-receipts", GoodsReceiptViewSet, basename="goods-receipts")
 router.register(
     "supplier-invoices", SupplierInvoiceViewSet, basename="supplier-invoices"

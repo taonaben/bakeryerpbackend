@@ -1,0 +1,9 @@
+$kind: http-request
+name: retrieve purchase requisitions
+url: "{{baseurl}}/purchasing/purchase-requisitions/?warehouse_id={{wh_1_pie_kings}}"
+method: GET
+queryParams:
+  - key: warehouse_id
+    value: "{{wh_1_pie_kings}}"
+    $type: ""
+order: 1776591999685

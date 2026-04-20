@@ -68,6 +68,8 @@ def create_purchase_order(
 
             unit_of_measure = line.get("unit_of_measure") or product.unit_of_measure
 
+            total_price = quantity * unit_price
+
             line_items.append(
                 PurchaseOrderLineItem(
                     purchase_order=po,
@@ -75,6 +77,7 @@ def create_purchase_order(
                     quantity=quantity,
                     unit_of_measure=unit_of_measure,
                     unit_price=unit_price,
+                    total_price=total_price,
                     description=line.get("description", ""),
                 )
             )

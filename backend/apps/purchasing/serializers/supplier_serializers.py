@@ -68,11 +68,43 @@ class SupplierDocumentCreateSerializer(serializers.ModelSerializer):
         ]
 
 
+class SupplierProductSerializer(serializers.ModelSerializer):
+    supplier_name = serializers.CharField(source="supplier.name", read_only=True)
+    product_name = serializers.CharField(source="product.name", read_only=True)
+
+    class Meta:
+        model = SupplierProduct
+        fields = [
+            "id",
+            "supplier",
+            "supplier_name",
+            "product",
+            "product_name",
+            "price",
+            "lead_time_days",
+            "is_preferred",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class SupplierProductCreateSerializer(serializers.Serializer):
+    product_id = serializers.UUIDField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    lead_time_days = serializers.IntegerField(min_value=0)
+    is_preferred = serializers.BooleanField(default=False)
+
+
 class SupplierSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(source="company.name", read_only=True)
     contacts = SupplierContactSerializer(many=True, read_only=True)
     documents = SupplierDocumentSerializer(many=True, read_only=True)
     warehouses_served = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    products = SupplierProductSerializer(
+        source="supplier_products", many=True, read_only=True
+    )
 
     class Meta:
         model = Supplier
@@ -120,6 +152,7 @@ class SupplierSerializer(serializers.ModelSerializer):
             # Related
             "contacts",
             "documents",
+            "products",
         ]
         read_only_fields = ["id", "is_active", "created_at", "updated_at"]
 
@@ -170,35 +203,6 @@ class SupplierCreateUpdateSerializer(serializers.ModelSerializer):
             "on_hold",
             "on_hold_reason",
         ]
-
-
-class SupplierProductSerializer(serializers.ModelSerializer):
-    supplier_name = serializers.CharField(source="supplier.name", read_only=True)
-    product_name = serializers.CharField(source="product.name", read_only=True)
-
-    class Meta:
-        model = SupplierProduct
-        fields = [
-            "id",
-            "supplier",
-            "supplier_name",
-            "product",
-            "product_name",
-            "price",
-            "lead_time_days",
-            "is_preferred",
-            "is_active",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["id", "created_at", "updated_at"]
-
-
-class SupplierProductCreateSerializer(serializers.Serializer):
-    product_id = serializers.UUIDField()
-    price = serializers.DecimalField(max_digits=10, decimal_places=2)
-    lead_time_days = serializers.IntegerField(min_value=0)
-    is_preferred = serializers.BooleanField(default=False)
 
 
 class SupplierPutOnHoldSerializer(serializers.Serializer):
