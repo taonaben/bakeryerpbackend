@@ -21,25 +21,26 @@ class GoodsReceiptService:
             raise ValidationError("Goods receipt requires at least one line item.")
 
         with transaction.atomic():
-            po = (
-                PurchaseOrder.objects.select_for_update()
-                .select_related("warehouse")
-                .get(id=po_id)
-            )
+            po = PurchaseOrder.objects.select_for_update().get(id=po_id)
+
+            # Fetch warehouse separately if needed
+            warehouse = (
+                po.warehouse
+            )  # This will trigger a separate query if not already fetched
 
             if po.status not in ["Approved", "Partially Received"]:
                 raise ValidationError(
                     "Purchase order must be Approved or Partially Received."
                 )
 
-            if not po.warehouse or str(po.warehouse.id) != str(warehouse_id):
+            if not warehouse or str(warehouse.id) != str(warehouse_id):
                 raise ValidationError(
                     "Warehouse must match the purchase order warehouse."
                 )
 
             grn = GoodsReceipt.objects.create(
                 purchase_order=po,
-                warehouse=po.warehouse,
+                warehouse=warehouse,
                 received_by=received_by,
                 status="Draft",
             )
