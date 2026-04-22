@@ -1,4 +1,3 @@
-
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -8,7 +7,6 @@ from apps.purchasing.models import (
 )
 
 User = get_user_model()
-
 
 
 class GoodsReceiptLineItemSerializer(serializers.ModelSerializer):
@@ -41,6 +39,21 @@ class GoodsReceiptSerializer(serializers.ModelSerializer):
     warehouse_name = serializers.CharField(source="warehouse.name", read_only=True)
     line_items = GoodsReceiptLineItemSerializer(many=True, read_only=True)
     item_count = serializers.IntegerField(source="line_items.count", read_only=True)
+    supplier = serializers.SerializerMethodField(read_only=True)
+    supplier_name = serializers.SerializerMethodField(read_only=True)
+    received_by_name = serializers.CharField(source="received_by.username", read_only=True)
+
+    def get_supplier(self, obj):
+        try:
+            return obj.purchase_order.supplier.id
+        except AttributeError:
+            return None
+
+    def get_supplier_name(self, obj):
+        try:
+            return obj.purchase_order.supplier.name
+        except AttributeError:
+            return None
 
     class Meta:
         model = GoodsReceipt
@@ -49,10 +62,13 @@ class GoodsReceiptSerializer(serializers.ModelSerializer):
             "gr_number",
             "purchase_order",
             "purchase_order_number",
+            "supplier",
+            "supplier_name",
             "warehouse",
             "warehouse_name",
             "received_date",
             "received_by",
+            "received_by_name",
             "status",
             "description",
             "rejection_reason",
@@ -68,8 +84,10 @@ class GoodsReceiptSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
             "updated_at",
-                "item_count",
+            "item_count",
             "line_items",
+            "received_by_name",
+            
         ]
 
 

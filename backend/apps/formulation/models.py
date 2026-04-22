@@ -1,10 +1,6 @@
 from django.db import models
 import uuid
 from central.models import Product
-from django.db.models import F
-
-# from django.contrib.auth import get_user_model
-from django.conf import settings
 
 
 class Formula(models.Model):
@@ -12,6 +8,8 @@ class Formula(models.Model):
     formula_status_choices = [
         ("draft", "Draft"),
         ("active", "Active"),
+        ("on_hold", "On Hold"),
+        ("deactivated", "Deactivated"),
         ("archived", "Archived"),
     ]
 
@@ -24,6 +22,9 @@ class Formula(models.Model):
     status = models.CharField(
         max_length=50, choices=formula_status_choices, default="draft"
     )
+    is_active = models.BooleanField(default=True)
+    on_hold = models.BooleanField(default=False)
+    on_hold_reason = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -60,12 +60,17 @@ class ProductionPlanner:
             return order.formula
 
         formula = (
-            Formula.objects.filter(product=order.product, status="active")
+            Formula.objects.filter(
+                product=order.product,
+                status="active",
+                is_active=True,
+                on_hold=False,
+            )
             .order_by("-revision", "-created_at")
             .first()
         )
         if not formula:
-            raise ValidationError("No active formula found for this product.")
+            raise ValidationError("No active and available formula found for this product.")
 
         return formula
 
@@ -84,6 +89,14 @@ class ProductionPlanner:
 
         if formula.status != "active":
             errors.append("Formula must be active before starting production.")
+
+        if not formula.is_active:
+            errors.append("Formula must be enabled before starting production.")
+
+        if formula.on_hold:
+            errors.append(
+                "Formula is currently on hold and cannot be used for production."
+            )
 
         if formula.product_id != order.product_id:
             errors.append("Formula product does not match production order product.")
@@ -109,6 +122,14 @@ class ProductionPlanner:
 
         if formula.status != "active":
             errors.append("Formula must be active before planning production.")
+
+        if not formula.is_active:
+            errors.append("Formula must be enabled before planning production.")
+
+        if formula.on_hold:
+            errors.append(
+                "Formula is currently on hold and cannot be used for planning."
+            )
 
         if formula.product_id != planned_order.product_id:
             errors.append("Formula product does not match planned order product.")
