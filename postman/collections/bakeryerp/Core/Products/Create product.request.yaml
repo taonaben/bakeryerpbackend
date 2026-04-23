@@ -1,17 +1,13 @@
 $kind: http-request
-url: "{{baseurl}}/products?company_id={{piekings_id}}"
+name: Create product
+url: "{{baseurl}}/products"
 method: POST
 queryParams:
-  company_id: "{{piekings_id}}"
+  - key: company_id
+    value: "{{piekings_id}}"
+    disabled: true
+    $type: ""
 body:
   type: json
-  content: "{\r
-
-    \  \"name\": \"waste trimmings\",\r
-
-    \  \"category\": \"byproduct\",\r
-
-    \  \"unit_of_measure\": \"kg\"\r
-
-    }"
+  content: ""
 order: 1000

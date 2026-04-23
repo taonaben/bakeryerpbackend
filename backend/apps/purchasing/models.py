@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 import uuid
 from central.models import Company, Product, Warehouse
@@ -8,21 +10,109 @@ from apps.purchasing.utils import generate_company_year_number
 
 user = get_user_model()
 
+VALID_DELIVERY_DAYS = {"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"}
+
+
+def validate_delivery_days(value):
+    if not isinstance(value, list):
+        raise ValidationError("delivery_days must be a list.")
+    invalid = [v for v in value if v not in VALID_DELIVERY_DAYS]
+    if invalid:
+        raise ValidationError(
+            f"Invalid delivery day(s): {invalid}. "
+            f"Must be one of {sorted(VALID_DELIVERY_DAYS)}."
+        )
+
 
 class Supplier(models.Model):
     """The master record for every vendor we buy from. It includes contact information, payment terms, and other details about the supplier."""
+
+    PAYMENT_TERMS_CHOICES = [
+        ("NET_30", "Net 30"),
+        ("NET_60", "Net 60"),
+        ("COD", "Cash on Delivery"),
+        ("EOM", "End of Month"),
+        ("PREPAID", "Prepaid"),
+        ("IMMEDIATE", "Immediate"),
+    ]
+
+    SUPPLIER_TYPE_CHOICES = [
+        ("MANUFACTURER", "Manufacturer"),
+        ("DISTRIBUTOR", "Distributor"),
+        ("AGENT", "Agent"),
+        ("INDIVIDUAL", "Individual"),
+    ]
+
+    DELIVERY_METHOD_CHOICES = [
+        ("OWN_TRANSPORT", "Own Transport"),
+        ("COURIER", "Courier"),
+        ("COLLECT", "Collect"),
+    ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, related_name="suppliers"
     )
+
+    # Identity & Compliance
     name = models.CharField(max_length=255)
-    contact_person = models.CharField(max_length=255)
-    email = models.EmailField()
-    phone_number = models.CharField(max_length=20)
-    address = models.TextField()
-    payment_terms = models.CharField(max_length=255)
+    registration_number = models.CharField(max_length=100, blank=True)
+    tax_number = models.CharField(max_length=100, blank=True)
+    supplier_type = models.CharField(
+        max_length=20, choices=SUPPLIER_TYPE_CHOICES, blank=True
+    )
+
+    # Contact & Location
+    primary_email = models.EmailField()
+    secondary_email = models.EmailField(blank=True)
+    primary_phone = models.CharField(max_length=20)
+    alternate_phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    website = models.URLField(blank=True)
+
+    # Financial
+    payment_terms = models.CharField(
+        max_length=20, choices=PAYMENT_TERMS_CHOICES, blank=True
+    )
     currency = models.CharField(max_length=10)
+    credit_limit = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+    bank_name = models.CharField(max_length=200, blank=True)
+    bank_branch = models.CharField(max_length=200, blank=True)
+    bank_account_number = models.CharField(max_length=100, blank=True)
+    can_supply_on_credit = models.BooleanField(default=False)
+
+    # Logistics
+    default_lead_time_days = models.IntegerField(null=True, blank=True)
+    minimum_order_value = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+    delivery_days = models.JSONField(
+        default=list, blank=True, validators=[validate_delivery_days]
+    )
+    delivery_method = models.CharField(
+        max_length=20, choices=DELIVERY_METHOD_CHOICES, blank=True
+    )
+    delivery_radius_km = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True, blank=True
+    )
+    warehouses_served = models.ManyToManyField(
+        Warehouse, blank=True, related_name="served_suppliers"
+    )
+
+    # Performance & Internal
+    rating = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+    )
+    internal_notes = models.TextField(blank=True)
+    on_hold = models.BooleanField(default=False)
+    on_hold_reason = models.TextField(blank=True)
+
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -538,3 +628,52 @@ class PurchasingConfig(models.Model):
 
     def __str__(self):
         return f"PurchasingConfig for {self.company.name}"
+
+
+class SupplierContact(models.Model):
+    """A contact person associated with a supplier. Multiple contacts can exist per supplier; one may be marked as primary."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    supplier = models.ForeignKey(
+        Supplier, on_delete=models.CASCADE, related_name="contacts"
+    )
+    name = models.CharField(max_length=255)
+    role = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    is_primary = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.supplier.name})"
+
+
+class SupplierDocument(models.Model):
+    """Documents associated with a supplier (contracts, health certificates, tax clearance, etc.). The expiry_date field is critical for food-sector compliance tracking."""
+
+    DOCUMENT_TYPE_CHOICES = [
+        ("CONTRACT", "Contract"),
+        ("HEALTH_CERT", "Health Certificate"),
+        ("TAX_CLEARANCE", "Tax Clearance"),
+        ("CERTIFICATION", "Certification"),
+        ("OTHER", "Other"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    supplier = models.ForeignKey(
+        Supplier, on_delete=models.CASCADE, related_name="documents"
+    )
+    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES)
+    name = models.CharField(max_length=255)
+    file_url = models.CharField(max_length=500, blank=True)
+    file_name = models.CharField(max_length=255, blank=True)
+    issued_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.supplier.name})"

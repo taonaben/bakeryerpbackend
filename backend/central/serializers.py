@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Company, Warehouse, Product
-from apps.inventory.models import ProductPolicy
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -71,7 +70,24 @@ class ProductSerializer(serializers.ModelSerializer):
             "has_reorder_policy",
             "created_at",
         ]
-        read_only_fields = ["id", "created_at", "sku", "company", "has_reorder_policy"]
+        read_only_fields = ["id", "created_at", "sku", "has_reorder_policy"]
 
     def get_has_reorder_policy(self, obj):
         return obj.reorder_policies.filter(is_active=True).exists()
+
+
+class ProductCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating Product model"""
+
+    class Meta:
+        model = Product
+        fields = [
+            "name",
+            "company",
+            "category",
+            "unit_of_measure",
+            "shelf_life_days",
+            "storage_conditions",
+            "storage_notes",
+        ]
+        read_only_fields = ["id", "created_at"]

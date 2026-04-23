@@ -1,21 +1,22 @@
 $kind: http-request
+name: create user
 url: "{{baseurl}}/account/users/register"
 method: POST
 body:
   type: json
   content: "{\r
 
-    \  \"email\": \"salesrep@gmail.com\",\r
+    \  \"email\": \"benjamin@gmail.com\",\r
 
     \  \"password\": \"securepass123\",\r
 
     \  \"password2\": \"securepass123\",\r
 
-    \  \"first_name\": \"sales\",\r
+    \  \"first_name\": \"benjamin\",\r
 
-    \  \"last_name\": \"rep\",\r
+    \  \"last_name\": \"netenyahu\",\r
 
-    \  \"role\": \"sales_rep\",\r
+    \  \"role\": \"owner_director\",\r
 
     \  \"department\": \"ENG\"\r
 

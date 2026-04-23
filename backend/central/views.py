@@ -1,9 +1,13 @@
-from urllib import request
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Company, Warehouse, Product
-from .serializers import CompanySerializer, WarehouseSerializer, ProductSerializer
+from .serializers import (
+    CompanySerializer,
+    WarehouseSerializer,
+    ProductSerializer,
+    ProductCreateSerializer,
+)
 from .filters import WarehouseFilter, ProductFilter
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -107,6 +111,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filterset_class = ProductFilter
+
     filter_backends = filter_backends
     ordering_fields = ["name", "sku", "created_at"]
     search_fields = ["name", "sku", "category"]
@@ -119,18 +124,10 @@ class ProductViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(category=category)
         return queryset
 
-    def create(self, request, *args, **kwargs):
-        company = self.request.query_params.get("company_id", None)
-        if company is not None:
-            request.data["company"] = company
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        product = serializer.save(company_id=company)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
+    def get_serializer_class(self):
+        if self.action == "create":
+            return ProductCreateSerializer
+        return ProductSerializer
 
     @action(detail=False, methods=["get"])
     def by_category(self, request):

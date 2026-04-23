@@ -41,7 +41,8 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
     supplier_name = serializers.CharField(source="supplier.name", read_only=True)
     warehouse_name = serializers.CharField(source="warehouse.name", read_only=True)
     line_items = PurchaseOrderLineItemSerializer(many=True, read_only=True)
-
+    item_count = serializers.IntegerField(source="line_items.count", read_only=True)
+    pr_number = serializers.CharField(source="purchase_requisition.pr_number", read_only=True)
     class Meta:
         model = PurchaseOrder
         fields = [
@@ -52,6 +53,7 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
             "warehouse",
             "warehouse_name",
             "purchase_requisition",
+            "pr_number",
             "created_by",
             "order_date",
             "expected_delivery_date",
@@ -70,6 +72,7 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
             "cancelled_at",
             "created_at",
             "updated_at",
+            "item_count",
             "line_items",
         ]
         read_only_fields = [
@@ -89,6 +92,7 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
             "cancelled_at",
             "created_at",
             "updated_at",
+            "item_count",
             "line_items",
         ]
 

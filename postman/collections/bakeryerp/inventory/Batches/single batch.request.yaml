@@ -1,5 +1,5 @@
 $kind: http-request
 name: single batch
-url: ""
-method: GET
+url: "{{baseurl}}/formulation/formulas"
+method: POST
 order: 2005871586444372

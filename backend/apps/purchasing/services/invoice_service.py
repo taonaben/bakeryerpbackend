@@ -22,11 +22,11 @@ def create_invoice(po_id, supplier_id, invoice_date, due_date, lines, created_by
         raise ValidationError("Invoice requires at least one line item.")
 
     with transaction.atomic():
-        po = (
-            PurchaseOrder.objects.select_for_update()
-            .select_related("supplier", "warehouse")
-            .get(id=po_id)
-        )
+        # Lock only the PurchaseOrder row, fetch related objects separately to avoid FOR UPDATE on nullable side
+        po = PurchaseOrder.objects.select_for_update().get(id=po_id)
+        # Fetch related objects (supplier, warehouse) after locking
+        po_supplier = po.supplier  # May trigger a DB query if not cached
+        po_warehouse = po.warehouse
 
         if po.status not in ("Partially Received", "Received"):
             raise ValidationError(
@@ -40,8 +40,8 @@ def create_invoice(po_id, supplier_id, invoice_date, due_date, lines, created_by
 
         invoice = SupplierInvoice.objects.create(
             purchase_order=po,
-            supplier=po.supplier,
-            warehouse=po.warehouse,
+            supplier=po_supplier,
+            warehouse=po_warehouse,
             invoice_date=invoice_date,
             due_date=due_date,
             status="Draft",
@@ -92,6 +92,8 @@ def create_invoice(po_id, supplier_id, invoice_date, due_date, lines, created_by
                         f"Invoiced quantity exceeds received quantity for GRN line {gr_line_item_id}."
                     )
 
+            # Set total_price manually since bulk_create does not call save()
+            total_price = quantity_invoiced * unit_price
             invoice_lines.append(
                 SupplierInvoiceLineItem(
                     supplier_invoice=invoice,
@@ -100,6 +102,7 @@ def create_invoice(po_id, supplier_id, invoice_date, due_date, lines, created_by
                     quantity_invoiced=quantity_invoiced,
                     unit_of_measure=line.get("unit_of_measure", ""),
                     unit_price=unit_price,
+                    total_price=total_price,
                     description=line.get("description", ""),
                 )
             )
@@ -210,14 +213,20 @@ def match_invoice(invoice_id):
 
 def approve_invoice(invoice_id, approved_by):
     with transaction.atomic():
-        invoice = (
-            SupplierInvoice.objects.select_for_update()
-            .select_related("purchase_order__warehouse__company")
-            .get(id=invoice_id)
-        )
+        # Lock only the invoice row. Fetch nullable related objects separately to
+        # avoid PostgreSQL FOR UPDATE errors on outer joins.
+        invoice = SupplierInvoice.objects.select_for_update().get(id=invoice_id)
+        purchase_order = invoice.purchase_order
+        warehouse = purchase_order.warehouse if purchase_order else None
+        company = warehouse.company if warehouse else None
 
         if invoice.status != "Draft":
             raise ValidationError("Only Draft invoices can be approved.")
+
+        if not purchase_order or not warehouse or not company:
+            raise ValidationError(
+                "Supplier invoice must be linked to a purchase order warehouse and company."
+            )
 
         # Run 3-way match — warn but don't block
         match_result = match_invoice(invoice_id)
@@ -240,7 +249,6 @@ def approve_invoice(invoice_id, approved_by):
         invoice.save(update_fields=["status", "approved_by", "updated_at"])
 
         # Post journal entry: Dr Accounts Payable / Cr Inventory
-        company = invoice.purchase_order.warehouse.company
         post_journal_entry(
             company=company,
             entry_date=invoice.invoice_date,
@@ -292,14 +300,20 @@ def reject_invoice(invoice_id, rejected_by, reason=""):
 
 def mark_paid(invoice_id, paid_by, payment_reference=""):
     with transaction.atomic():
-        invoice = (
-            SupplierInvoice.objects.select_for_update()
-            .select_related("purchase_order__warehouse__company")
-            .get(id=invoice_id)
-        )
+        # Lock only the invoice row. Fetch nullable related objects separately to
+        # avoid PostgreSQL FOR UPDATE errors on outer joins.
+        invoice = SupplierInvoice.objects.select_for_update().get(id=invoice_id)
+        purchase_order = invoice.purchase_order
+        warehouse = purchase_order.warehouse if purchase_order else None
+        company = warehouse.company if warehouse else None
 
         if invoice.status != "Approved":
             raise ValidationError("Only Approved invoices can be marked as paid.")
+
+        if not purchase_order or not warehouse or not company:
+            raise ValidationError(
+                "Supplier invoice must be linked to a purchase order warehouse and company."
+            )
 
         invoice.status = "Paid"
         invoice.paid_by = paid_by
@@ -314,7 +328,6 @@ def mark_paid(invoice_id, paid_by, payment_reference=""):
         )
 
         # Post journal entry: Dr Accounts Payable / Cr Bank
-        company = invoice.purchase_order.warehouse.company
         post_journal_entry(
             company=company,
             entry_date=invoice.invoice_date,

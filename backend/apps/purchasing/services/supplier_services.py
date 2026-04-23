@@ -1,18 +1,43 @@
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
-from apps.purchasing.models import PurchaseOrder, Supplier, SupplierProduct
+from apps.purchasing.models import (
+    PurchaseOrder,
+    Supplier,
+    SupplierContact,
+    SupplierDocument,
+    SupplierProduct,
+)
 
 OPEN_PO_STATUSES = ("Draft", "Approved", "Submitted", "Partially Received")
 
 SUPPLIER_UPDATABLE_FIELDS = (
     "name",
-    "contact_person",
-    "email",
-    "phone_number",
+    "registration_number",
+    "tax_number",
+    "supplier_type",
+    "primary_email",
+    "secondary_email",
+    "primary_phone",
+    "alternate_phone",
     "address",
+    "country",
+    "city",
+    "website",
     "payment_terms",
     "currency",
+    "credit_limit",
+    "bank_name",
+    "bank_branch",
+    "bank_account_number",
+    "can_supply_on_credit",
+    "default_lead_time_days",
+    "minimum_order_value",
+    "delivery_days",
+    "delivery_method",
+    "delivery_radius_km",
+    "rating",
+    "internal_notes",
 )
 
 
@@ -24,14 +49,16 @@ def update_supplier(supplier_id, data):
     with transaction.atomic():
         supplier = Supplier.objects.select_for_update().get(id=supplier_id)
 
-        for field in SUPPLIER_UPDATABLE_FIELDS:
-            if field in data:
-                setattr(supplier, field, data[field])
+        scalar_fields = [f for f in SUPPLIER_UPDATABLE_FIELDS if f in data]
+        for field in scalar_fields:
+            setattr(supplier, field, data[field])
 
-        supplier.save(
-            update_fields=[f for f in SUPPLIER_UPDATABLE_FIELDS if f in data]
-            + ["updated_at"]
-        )
+        if scalar_fields:
+            supplier.save(update_fields=scalar_fields + ["updated_at"])
+
+        if "warehouses_served" in data:
+            supplier.warehouses_served.set(data["warehouses_served"])
+
         return supplier
 
 
@@ -111,3 +138,43 @@ def get_preferred_supplier(product_id, company_id=None):
     if company_id:
         qs = qs.filter(supplier__company_id=company_id)
     return qs.first()
+
+
+def put_supplier_on_hold(supplier_id, reason):
+    with transaction.atomic():
+        supplier = Supplier.objects.select_for_update().get(id=supplier_id)
+        if supplier.on_hold:
+            raise ValidationError("Supplier is already on hold.")
+        supplier.on_hold = True
+        supplier.on_hold_reason = reason or ""
+        supplier.save(update_fields=["on_hold", "on_hold_reason", "updated_at"])
+        return supplier
+
+
+def release_supplier_hold(supplier_id):
+    with transaction.atomic():
+        supplier = Supplier.objects.select_for_update().get(id=supplier_id)
+        if not supplier.on_hold:
+            raise ValidationError("Supplier is not currently on hold.")
+        supplier.on_hold = False
+        supplier.on_hold_reason = ""
+        supplier.save(update_fields=["on_hold", "on_hold_reason", "updated_at"])
+        return supplier
+
+
+def create_supplier_contact(supplier_id, data):
+    with transaction.atomic():
+        supplier = Supplier.objects.get(id=supplier_id)
+        is_primary = data.get("is_primary", False)
+        if is_primary:
+            # Soft-enforce: clear existing primary before setting new one
+            SupplierContact.objects.filter(supplier=supplier, is_primary=True).update(
+                is_primary=False
+            )
+        contact = SupplierContact.objects.create(supplier=supplier, **data)
+        return contact
+
+
+def create_supplier_document(supplier_id, data):
+    supplier = Supplier.objects.get(id=supplier_id)
+    return SupplierDocument.objects.create(supplier=supplier, **data)

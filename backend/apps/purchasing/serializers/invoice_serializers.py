@@ -29,10 +29,16 @@ class SupplierInvoiceLineItemSerializer(serializers.ModelSerializer):
 
 
 class SupplierInvoiceSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        # Prevent editing if invoice is not Draft
+        if self.instance and self.instance.status not in ("Draft",):
+            raise serializers.ValidationError("Cannot edit an invoice that is not in Draft status.")
+        return super().validate(attrs)
     supplier_name = serializers.CharField(source="supplier.name", read_only=True)
     warehouse_name = serializers.CharField(source="warehouse.name", read_only=True)
     po_number = serializers.CharField(source="purchase_order.po_number", read_only=True)
     line_items = SupplierInvoiceLineItemSerializer(many=True, read_only=True)
+    item_count = serializers.IntegerField(source="line_items.count", read_only=True)
 
     class Meta:
         model = SupplierInvoice
@@ -57,6 +63,7 @@ class SupplierInvoiceSerializer(serializers.ModelSerializer):
             "payment_reference",
             "created_at",
             "updated_at",
+            "item_count",
             "line_items",
         ]
         read_only_fields = [
@@ -71,6 +78,7 @@ class SupplierInvoiceSerializer(serializers.ModelSerializer):
             "payment_reference",
             "created_at",
             "updated_at",
+            "item_count",
             "line_items",
         ]
 

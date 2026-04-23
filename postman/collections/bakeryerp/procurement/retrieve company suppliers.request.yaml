@@ -1,0 +1,5 @@
+$kind: http-request
+name: retrieve company suppliers
+url: "{{baseurl}}/purchasing/suppliers/"
+method: GET
+order: 2378454299483049

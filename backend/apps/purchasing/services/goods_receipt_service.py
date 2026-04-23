@@ -21,25 +21,26 @@ class GoodsReceiptService:
             raise ValidationError("Goods receipt requires at least one line item.")
 
         with transaction.atomic():
-            po = (
-                PurchaseOrder.objects.select_for_update()
-                .select_related("warehouse")
-                .get(id=po_id)
-            )
+            po = PurchaseOrder.objects.select_for_update().get(id=po_id)
+
+            # Fetch warehouse separately if needed
+            warehouse = (
+                po.warehouse
+            )  # This will trigger a separate query if not already fetched
 
             if po.status not in ["Approved", "Partially Received"]:
                 raise ValidationError(
                     "Purchase order must be Approved or Partially Received."
                 )
 
-            if not po.warehouse or str(po.warehouse.id) != str(warehouse_id):
+            if not warehouse or str(warehouse.id) != str(warehouse_id):
                 raise ValidationError(
                     "Warehouse must match the purchase order warehouse."
                 )
 
             grn = GoodsReceipt.objects.create(
                 purchase_order=po,
-                warehouse=po.warehouse,
+                warehouse=warehouse,
                 received_by=received_by,
                 status="Draft",
             )
@@ -102,37 +103,34 @@ class GoodsReceiptService:
     @staticmethod
     def confirm_grn(grn_id, confirmed_by=None):
         with transaction.atomic():
-            grn = (
-                GoodsReceipt.objects.select_for_update()
-                .select_related("purchase_order", "warehouse")
-                .get(id=grn_id)
-            )
+            grn = GoodsReceipt.objects.select_for_update().get(id=grn_id)
+            # Access related objects separately to avoid outer join with FOR UPDATE
+            purchase_order = grn.purchase_order
+            warehouse = grn.warehouse
 
             if grn.status != "Draft":
                 raise ValidationError(
                     "Goods receipt must be in Draft status to confirm."
                 )
 
-            po = grn.purchase_order
-            if po.status not in ["Approved", "Partially Received"]:
+            if purchase_order.status not in ["Approved", "Partially Received"]:
                 raise ValidationError(
                     "Purchase order must be Approved or Partially Received."
                 )
 
             if (
-                not grn.warehouse
-                or not po.warehouse
-                or grn.warehouse_id != po.warehouse_id
+                not warehouse
+                or not purchase_order.warehouse
+                or warehouse.id != purchase_order.warehouse.id
             ):
                 raise ValidationError(
                     "Goods receipt warehouse must match purchase order warehouse."
                 )
 
-            line_items = (
-                GoodsReceiptLineItem.objects.select_for_update()
-                .select_related("po_line_item", "product")
-                .filter(goods_receipt=grn)
+            line_items = GoodsReceiptLineItem.objects.select_for_update().filter(
+                goods_receipt=grn
             )
+            # Access po_line_item and product as needed per line
 
             if not line_items.exists():
                 raise ValidationError("Goods receipt must have at least one line item.")
@@ -156,7 +154,7 @@ class GoodsReceiptService:
 
                 po_line = locked_po_lines[po_line_id]
 
-                if po_line.purchase_order_id != po.id:
+                if po_line.purchase_order_id != purchase_order.id:
                     raise ValidationError(
                         "Goods receipt line item does not belong to the PO."
                     )
@@ -198,7 +196,7 @@ class GoodsReceiptService:
             grn.status = "Approved"
             grn.save(update_fields=["status", "received_by", "updated_at"])
 
-            update_status_from_grn(po.id)
+            update_status_from_grn(purchase_order.id)
 
             return grn
 

@@ -31,6 +31,11 @@ def create_purchase_order(
         supplier = Supplier.objects.select_for_update().get(id=supplier_id)
         if not supplier.is_active:
             raise ValidationError("Supplier must be active to create a purchase order.")
+        if supplier.on_hold:
+            raise ValidationError(
+                f"Supplier '{supplier.name}' is on hold and cannot receive new purchase orders. "
+                f"Reason: {supplier.on_hold_reason or 'No reason given.'}"
+            )
 
         warehouse = Warehouse.objects.select_for_update().get(id=warehouse_id)
 
@@ -63,6 +68,8 @@ def create_purchase_order(
 
             unit_of_measure = line.get("unit_of_measure") or product.unit_of_measure
 
+            total_price = quantity * unit_price
+
             line_items.append(
                 PurchaseOrderLineItem(
                     purchase_order=po,
@@ -70,6 +77,7 @@ def create_purchase_order(
                     quantity=quantity,
                     unit_of_measure=unit_of_measure,
                     unit_price=unit_price,
+                    total_price=total_price,
                     description=line.get("description", ""),
                 )
             )
