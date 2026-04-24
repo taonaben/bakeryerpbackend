@@ -1,0 +1,5 @@
+$kind: http-request
+name: retrieve production order batches
+url: ""
+method: GET
+order: 4499111189642561

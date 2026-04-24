@@ -5,7 +5,10 @@ from .views.production_views import (
     ProductionOrderViewSet,
     ProductionStartAPIView,
     ProductionFinishAPIView,
-    
+)
+from .views.batch_views import (
+    ProductionBatchListView,
+    ProductionBatchDetailView,
 )
 from .views.planning_views import ProductionPlanAPIView
 from .views.rework_views import (
@@ -33,6 +36,16 @@ urlpatterns = [
         "orders/<uuid:order_id>/finish",
         ProductionFinishAPIView.as_view(),
         name="production_order_finish",
+    ),
+    path(
+        "orders/<uuid:order_id>/batches",
+        ProductionBatchListView.as_view(),
+        name="production_batch_list",
+    ),
+    path(
+        "orders/<uuid:order_id>/batches/<uuid:batch_id>",
+        ProductionBatchDetailView.as_view(),
+        name="production_batch_detail",
     ),
     path(
         "rework/<uuid:order_id>/start",
