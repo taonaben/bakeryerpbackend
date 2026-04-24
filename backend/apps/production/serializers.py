@@ -33,6 +33,12 @@ class ProductionOrderSerializer(serializers.ModelSerializer):
     planned_order_status = serializers.CharField(
         source="planned_order.status", read_only=True
     )
+    formula_name = serializers.SerializerMethodField()
+
+    def get_formula_name(self, obj):
+        if obj.formula:
+            return obj.formula.name
+        return None
 
     class Meta:
         model = ProductionOrder
@@ -47,11 +53,12 @@ class ProductionOrderSerializer(serializers.ModelSerializer):
             "warehouse",
             "warehouse_name",
             "formula",
+            "formula_name",
             "planned_order",
             "planned_order_status",
         ]
 
-        read_only_fields = ["id", "status", "planned_order_status"]
+        read_only_fields = ["id", "status", "planned_order_status", "formula_name"]
 
 
 class SelectedBatchAllocationSerializer(serializers.Serializer):

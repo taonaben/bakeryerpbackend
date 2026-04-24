@@ -70,22 +70,37 @@ class ProductionOrderViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
 
         original_order = get_object_or_404(ProductionOrder, id=production_order_id)
 
-        new_order = ProductionOrder.objects.create(
-            product=original_order.product,
-            quantity=original_order.quantity,
-            warehouse=original_order.warehouse,
-            formula=original_order.formula,
+        # Prepare initial data for required fields
+        data = {
+            "product": (
+                original_order.product.id
+                if hasattr(original_order.product, "id")
+                else original_order.product
+            ),
+            "quantity": original_order.quantity,
+            "warehouse": (
+                original_order.warehouse.id
+                if hasattr(original_order.warehouse, "id")
+                else original_order.warehouse
+            ),
+            "formula": (
+                original_order.formula.id
+                if original_order.formula and hasattr(original_order.formula, "id")
+                else original_order.formula
+            ),
+            "scheduled_start": getattr(original_order, "scheduled_start", None),
+            "scheduled_end": getattr(original_order, "scheduled_end", None),
+        }
+        # Overwrite with any provided request data
+        data.update(request.data)
+
+        serializer = ProductionOrderSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        new_order = serializer.save()
+
+        return Response(
+            ProductionOrderSerializer(new_order).data, status=status.HTTP_201_CREATED
         )
-
-        if request.data:
-            update_serializer = ProductionOrderSerializer(
-                new_order, data=request.data, partial=True
-            )
-            update_serializer.is_valid(raise_exception=True)
-            new_order = update_serializer.save()
-
-        serializer = ProductionOrderSerializer(new_order)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=["get"], url_path="finished")
     def finished_orders(self, request):
