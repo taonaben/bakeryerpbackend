@@ -5,7 +5,6 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
 
-from apps.accounting.models import ACCOUNT_AP, ACCOUNT_BANK, ACCOUNT_INVENTORY
 from apps.accounting.services import post_journal_entry
 from apps.purchasing.models import (
     PurchaseOrder,
@@ -258,13 +257,13 @@ def approve_invoice(invoice_id, approved_by):
             source_id=invoice.id,
             lines=[
                 {
-                    "account_code": ACCOUNT_AP,
+                    "account_code": "2100",
                     "debit": invoice.total_amount,
                     "credit": Decimal("0"),
                     "description": "Accounts Payable",
                 },
                 {
-                    "account_code": ACCOUNT_INVENTORY,
+                    "account_code": "1200",
                     "debit": Decimal("0"),
                     "credit": invoice.total_amount,
                     "description": "Inventory",
@@ -337,13 +336,13 @@ def mark_paid(invoice_id, paid_by, payment_reference=""):
             source_id=invoice.id,
             lines=[
                 {
-                    "account_code": ACCOUNT_AP,
+                    "account_code": "2100",
                     "debit": invoice.total_amount,
                     "credit": Decimal("0"),
                     "description": "Accounts Payable",
                 },
                 {
-                    "account_code": ACCOUNT_BANK,
+                    "account_code": "1100",
                     "debit": Decimal("0"),
                     "credit": invoice.total_amount,
                     "description": "Bank",

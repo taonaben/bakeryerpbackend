@@ -3,19 +3,12 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from .models import (
-    ACCOUNT_AP,
-    ACCOUNT_BANK,
-    ACCOUNT_INVENTORY,
-    Account,
-    JournalEntry,
-    JournalEntryLine,
-)
+from .models import Account, JournalEntry, JournalEntryLine
 
 DEFAULT_ACCOUNT_DEFINITIONS = {
-    ACCOUNT_BANK: {"name": "Bank", "account_type": "Asset"},
-    ACCOUNT_INVENTORY: {"name": "Inventory", "account_type": "Asset"},
-    ACCOUNT_AP: {"name": "Accounts Payable", "account_type": "Liability"},
+    "1100": {"name": "Bank", "account_type": "Asset"},
+    "1200": {"name": "Raw Materials Inventory", "account_type": "Asset"},
+    "2100": {"name": "Accounts Payable", "account_type": "Liability"},
 }
 
 
