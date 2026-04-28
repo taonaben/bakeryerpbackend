@@ -6,14 +6,14 @@ Scaffold the `apps/sales` Django app and implement the eight data models — Cus
 
 ## Tasks
 
-- [ ] 1. Scaffold the sales app
+- [x] 1. Scaffold the sales app
   - Create `backend/apps/sales/` with `__init__.py`, `apps.py`, `models.py`, `admin.py`, `migrations/__init__.py`
   - In `apps.py` set `name = "apps.sales"` and `default_auto_field = "django.db.models.BigAutoField"`
   - Add `"apps.sales"` to `INSTALLED_APPS` in the Django settings file
   - _Requirements: 1.1, 3.1, 5.1, 7.1, 8.1_
 
-- [ ] 2. Implement the Customer model
-  - [ ] 2.1 Write the `Customer` model in `backend/apps/sales/models.py`
+- [x] 2. Implement the Customer model
+  - [x] 2.1 Write the `Customer` model in `backend/apps/sales/models.py`
     - UUID primary key, `customer_type` choices (retail/business), `name`, `phone`, `email`, `address`, `company_name`, `payment_terms` (default `cash`), `credit_limit`, `tax_number`, `is_active` (default `True`), `created_at`
     - Add `Meta` with `verbose_name`, `indexes` on `customer_type` and `is_active`
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
@@ -22,8 +22,8 @@ Scaffold the `apps/sales` Django app and implement the eight data models — Cus
     - Test UUID PK assignment, `name` required, `payment_terms` default, `is_active` default
     - _Requirements: 1.2, 1.3, 1.4_
 
-- [ ] 3. Implement the CustomerProduct model
-  - [ ] 3.1 Write the `CustomerProduct` model
+- [x] 3. Implement the CustomerProduct model
+  - [x] 3.1 Write the `CustomerProduct` model
     - UUID PK, FK to `Customer` (`CASCADE`), FK to `Product` (`PROTECT`), `unit_price`, `min_order_quantity`, `is_active`, `valid_from`, `valid_until`, `created_at`
     - Add `clean()` to flag `unit_price < ProductPricingRule.minimum_selling_price` as a warning (non-blocking `ValidationError` with `code="price_below_floor"`)
     - Add `Meta` with index on `(customer, product)` and `(is_active, valid_from)`
@@ -34,8 +34,8 @@ Scaffold the `apps/sales` Django app and implement the eight data models — Cus
     - **Validates: Requirements 2.2**
     - Generate arbitrary `unit_price` and `minimum_selling_price` values; assert `clean()` raises warning iff `unit_price < minimum_selling_price`
 
-- [ ] 4. Implement the reference number generator utility
-  - [ ] 4.1 Create `backend/apps/sales/utils.py` with a `generate_reference_number(prefix, model_class, field)` function
+- [x] 4. Implement the reference number generator utility
+  - [x] 4.1 Create `backend/apps/sales/utils.py` with a `generate_reference_number(prefix, model_class, field)` function
     - Use `SELECT MAX` + `F-expression` with `select_for_update()` inside a transaction to produce sequential, zero-padded 5-digit numbers (e.g. `SO-00001`)
     - _Requirements: 3.2, 5.2, 7.2, 9.1, 9.2, 9.3, 9.4_
 
@@ -44,8 +44,8 @@ Scaffold the `apps/sales` Django app and implement the eight data models — Cus
     - **Validates: Requirements 9.1, 9.2, 9.3**
     - Generate N reference numbers sequentially; assert each matches `^(SO|DEL|INV)-\d{5}$` and the full set has no duplicates
 
-- [ ] 5. Implement the SalesOrder model
-  - [ ] 5.1 Write the `SalesOrder` model
+- [x] 5. Implement the SalesOrder model
+  - [x] 5.1 Write the `SalesOrder` model
     - UUID PK, `order_number` (unique, editable=False), FK to `Customer` (`PROTECT`), FK to `Warehouse` (`PROTECT`), `order_type` choices (pos/b2b), `status` choices (draft/confirmed/picking/dispatched/invoiced/paid/cancelled, default `draft`), `order_date`, `expected_delivery_date`, `delivery_address`, `notes`, `subtotal`/`tax_amount`/`total_amount` (all default `0`), FK to `User` (`PROTECT`), `created_at`, `updated_at`
     - Override `save()` to call `generate_reference_number` when `order_number` is blank
     - Add `clean()` to enforce POS/B2B status transition rules and block cancellation after `dispatched`
@@ -57,8 +57,8 @@ Scaffold the `apps/sales` Django app and implement the eight data models — Cus
     - **Validates: Requirements 3.5**
     - For any `status` in `{dispatched, invoiced, paid}`, assert `clean()` raises `ValidationError` when `status=cancelled` is attempted
 
-- [ ] 6. Implement the SalesOrderLine model
-  - [ ] 6.1 Write the `SalesOrderLine` model
+- [x] 6. Implement the SalesOrderLine model
+  - [x] 6.1 Write the `SalesOrderLine` model
     - UUID PK, FK to `SalesOrder` (`CASCADE`), FK to `Product` (`PROTECT`), `quantity`, `unit_price`, `subtotal`, `quantity_dispatched` (default `0`), `cost_per_unit` (nullable), `cogs_total` (nullable)
     - Override `save()` to compute `subtotal = quantity × unit_price` and `cogs_total = quantity_dispatched × cost_per_unit` when `cost_per_unit` is set
     - Add `clean()` to lock `unit_price` once parent order is past `draft`, and to assert `quantity_dispatched <= quantity`
@@ -75,12 +75,12 @@ Scaffold the `apps/sales` Django app and implement the eight data models — Cus
     - **Validates: Requirements 4.4**
     - For any `quantity_dispatched > quantity`, assert `clean()` raises `ValidationError`
 
-- [ ] 7. Checkpoint — run migrations and verify models so far
+- [x] 7. Checkpoint — run migrations and verify models so far
   - Run `python manage.py makemigrations sales` and `python manage.py migrate`
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 8. Implement the Delivery model
-  - [ ] 8.1 Write the `Delivery` model
+- [x] 8. Implement the Delivery model
+  - [x] 8.1 Write the `Delivery` model
     - UUID PK, FK to `SalesOrder` (`PROTECT`), FK to `Warehouse` (`PROTECT`), `delivery_number` (unique, editable=False), `status` choices (pending/in_transit/delivered/failed, default `pending`), `dispatched_at`, `delivered_at` (nullable), `driver_name` (nullable), `vehicle` (nullable), `notes` (nullable), FK to `User` (`PROTECT`)
     - Override `save()` to call `generate_reference_number` when `delivery_number` is blank
     - Add `Meta` with indexes on `(sales_order, status)`, `(status,)`
@@ -90,8 +90,8 @@ Scaffold the `apps/sales` Django app and implement the eight data models — Cus
     - Test `delivery_number` format, default `status=pending`, PROTECT on SalesOrder FK
     - _Requirements: 5.2, 5.3, 5.5_
 
-- [ ] 9. Implement the DeliveryLine model
-  - [ ] 9.1 Write the `DeliveryLine` model
+- [x] 9. Implement the DeliveryLine model
+  - [x] 9.1 Write the `DeliveryLine` model
     - UUID PK, FK to `Delivery` (`CASCADE`), FK to `SalesOrderLine` (`PROTECT`), FK to `Product` (`PROTECT`), FK to `Batch` (`PROTECT`), `quantity_delivered`
     - Add `clean()` to assert `quantity_delivered <= (sales_order_line.quantity − sales_order_line.quantity_dispatched)`
     - Add `Meta` with index on `(delivery, sales_order_line)`
@@ -102,8 +102,8 @@ Scaffold the `apps/sales` Django app and implement the eight data models — Cus
     - **Validates: Requirements 6.5**
     - For any `quantity_delivered` that would push the sum past `SalesOrderLine.quantity`, assert `clean()` raises `ValidationError`
 
-- [ ] 10. Implement the Invoice model
-  - [ ] 10.1 Write the `Invoice` model
+- [x] 10. Implement the Invoice model
+  - [x] 10.1 Write the `Invoice` model
     - UUID PK, OneToOne FK to `SalesOrder` (`PROTECT`), `invoice_number` (unique, editable=False), `invoice_type` choices (receipt/tax_invoice), `issued_date`, `due_date`, `subtotal`, `tax_amount`, `total_amount`, `status` choices (draft/issued/partially_paid/paid/overdue/cancelled, default `draft`), FK to `User` (`PROTECT`), `created_at`
     - Override `save()` to call `generate_reference_number` when `invoice_number` is blank, set `invoice_type` from `sales_order.order_type`, and compute `due_date` from `customer.payment_terms`
     - Add `clean()` to block changes to `subtotal`, `tax_amount`, `total_amount` when `status=issued`
@@ -115,8 +115,8 @@ Scaffold the `apps/sales` Django app and implement the eight data models — Cus
     - **Validates: Requirements 7.3**
     - For each of the three `payment_terms` values, assert `due_date` equals the expected offset from `issued_date`
 
-- [ ] 11. Implement the Payment model
-  - [ ] 11.1 Write the `Payment` model
+- [x] 11. Implement the Payment model
+  - [x] 11.1 Write the `Payment` model
     - UUID PK, FK to `Invoice` (`PROTECT`), FK to `Customer` (`PROTECT`), `amount`, `payment_method` choices (cash/bank_transfer/mobile_money/cheque), `payment_date`, `reference` (nullable), FK to `User` (`PROTECT`), `notes` (nullable)
     - Add `clean()` to assert `amount > 0` and to compute `SUM(invoice.payments.amount) + amount`; raise `ValidationError` on overpayment
     - Override `save()` to update `invoice.status` to `partially_paid` or `paid` after a successful payment
@@ -128,18 +128,18 @@ Scaffold the `apps/sales` Django app and implement the eight data models — Cus
     - **Validates: Requirements 8.3, 8.4, 8.5**
     - For any sequence of payment amounts against a fixed `invoice.total_amount`, assert: status is `partially_paid` when partial, `paid` when exact, and overpayment raises `ValidationError`
 
-- [ ] 12. Generate and apply migrations
+- [x] 12. Generate and apply migrations
   - Run `python manage.py makemigrations sales` to produce the initial migration file
   - Verify the migration file covers all 8 models with correct field types, constraints, and indexes
   - Run `python manage.py migrate` to apply
   - _Requirements: 1.1–8.1 (all models)_
 
-- [ ] 13. Register all models in admin
+- [~] 13. Register all models in admin
   - In `backend/apps/sales/admin.py`, register `Customer`, `CustomerProduct`, `SalesOrder`, `SalesOrderLine`, `Delivery`, `DeliveryLine`, `Invoice`, `Payment` using `@admin.register`
   - Add `list_display`, `list_filter`, and `search_fields` for each model to make the admin usable
   - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 8.1_
 
-- [ ] 14. Final checkpoint — ensure all tests pass
+- [~] 14. Final checkpoint — ensure all tests pass
   - Run the full test suite for the sales app: `python manage.py test apps.sales`
   - Ensure all tests pass, ask the user if questions arise.
 
