@@ -1,0 +1,10 @@
+{
+  "workspace_id": "f3b684e1-7748-4133-81de-1e0f8d36da59",
+  "collections": {
+    "grupus": "44119411-0a3cab76-edda-4379-9ded-b52119b658f5",
+    "bakeryerp": "44119411-b5d00db0-fff1-487f-a513-ec01bbbbfa54"
+  },
+  "environments": {
+    "bakeryerp": "44119411-8e5e28ca-720a-493b-8a9a-304b99e80d8e"
+  }
+}

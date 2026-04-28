@@ -6,8 +6,7 @@ queryParams:
   - key: company_id
     value: "{{piekings_id}}"
     disabled: true
-    $type: ""
 body:
   type: json
-  content: ""
+  content: '{"name":"Apples","company":"ec2eb06b-0899-45b2-9c21-664da558289b","category":"Ingredients","unit_of_measure":"BOX","shelf_life_days":5,"storage_conditions":"chilled","storage_notes":"fd"}'
 order: 1000

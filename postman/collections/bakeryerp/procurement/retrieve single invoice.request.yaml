@@ -1,5 +1,5 @@
 $kind: http-request
 name: retrieve single invoice
-url: ""
-method: GET
+url: "{{baseurl}}/purchasing/supplier-invoices/ed036ff8-97e7-402c-a69a-ad801f3101d8/"
+method: DELETE
 order: 4281510983809733

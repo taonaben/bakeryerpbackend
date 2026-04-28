@@ -1,5 +1,5 @@
 $kind: http-request
 name: retrieve supplier invoices
-url: ""
+url: "{{baseurl}}/purchasing/supplier-invoices/"
 method: GET
 order: 4257803012874528
