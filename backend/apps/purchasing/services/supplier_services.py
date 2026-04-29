@@ -178,3 +178,44 @@ def create_supplier_contact(supplier_id, data):
 def create_supplier_document(supplier_id, data):
     supplier = Supplier.objects.get(id=supplier_id)
     return SupplierDocument.objects.create(supplier=supplier, **data)
+
+
+def get_supplier_products(product_id=None, supplier_id=None, company_id=None):
+    qs = SupplierProduct.objects.select_related("supplier", "product").filter(
+        is_active=True, supplier__is_active=True
+    )
+    if product_id:
+        qs = qs.filter(product_id=product_id)
+    if supplier_id:
+        qs = qs.filter(supplier_id=supplier_id)
+    if company_id:
+        qs = qs.filter(supplier__company_id=company_id)
+    return qs.order_by("-is_preferred", "price")
+
+
+def update_supplier_product(sp_id, data):
+    with transaction.atomic():
+        sp = SupplierProduct.objects.select_for_update().select_related("supplier").get(id=sp_id)
+
+        if data.get("is_preferred"):
+            SupplierProduct.objects.filter(
+                product_id=sp.product_id,
+                is_preferred=True,
+                supplier__company=sp.supplier.company,
+            ).exclude(id=sp_id).update(is_preferred=False)
+
+        for field in ("price", "lead_time_days", "is_preferred", "is_active"):
+            if field in data:
+                setattr(sp, field, data[field])
+
+        sp.save()
+        return sp
+
+
+def remove_supplier_product(sp_id):
+    with transaction.atomic():
+        sp = SupplierProduct.objects.select_for_update().get(id=sp_id)
+        sp.is_active = False
+        sp.is_preferred = False
+        sp.save(update_fields=["is_active", "is_preferred", "updated_at"])
+        return sp

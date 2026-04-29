@@ -14,12 +14,14 @@ from .views.requisition_views import (
 from .views.supplier_views import (
     SupplierContactViewSet,
     SupplierDocumentViewSet,
+    SupplierProductViewSet,
     SupplierViewSet,
 )
 
 
 router = DefaultRouter()
 router.register("suppliers", SupplierViewSet, basename="suppliers")
+router.register("supplier-products", SupplierProductViewSet, basename="supplier-products")
 router.register("purchase-orders", PurchaseOrderViewSet, basename="purchase-orders")
 router.register(
     "purchase-order-lines",

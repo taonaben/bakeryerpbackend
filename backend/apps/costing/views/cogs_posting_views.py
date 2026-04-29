@@ -20,6 +20,8 @@ class COGSPostView(APIView):
     Normally fired automatically by the sales order confirmation signal.
     """
     permission_classes = [IsAuthenticated]
+    
+ 
 
     def post(self, request):
         sales_order_id = request.data.get("sales_order_id")

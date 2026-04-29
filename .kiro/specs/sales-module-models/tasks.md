@@ -134,12 +134,12 @@ Scaffold the `apps/sales` Django app and implement the eight data models — Cus
   - Run `python manage.py migrate` to apply
   - _Requirements: 1.1–8.1 (all models)_
 
-- [~] 13. Register all models in admin
+- [ ] 13. Register all models in admin
   - In `backend/apps/sales/admin.py`, register `Customer`, `CustomerProduct`, `SalesOrder`, `SalesOrderLine`, `Delivery`, `DeliveryLine`, `Invoice`, `Payment` using `@admin.register`
   - Add `list_display`, `list_filter`, and `search_fields` for each model to make the admin usable
   - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 8.1_
 
-- [~] 14. Final checkpoint — ensure all tests pass
+- [ ] 14. Final checkpoint — ensure all tests pass
   - Run the full test suite for the sales app: `python manage.py test apps.sales`
   - Ensure all tests pass, ask the user if questions arise.
 

@@ -97,7 +97,7 @@ class ProductPricingRuleUpdater:
         try:
             from apps.sales.models import CustomerProduct  # noqa: F401
         except ImportError:
-            return
+            return 
 
         try:
             updated = CustomerProduct.objects.filter(

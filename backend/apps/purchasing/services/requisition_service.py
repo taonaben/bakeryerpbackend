@@ -80,6 +80,54 @@ def submit_requisition(pr_id, submitted_by):
         return requisition
 
 
+def create_and_submit_requisition(
+    requested_by, submitted_by, warehouse_id, title, lines, description=""
+):
+    """Create a requisition and immediately submit it in one atomic operation."""
+    if not lines:
+        raise ValidationError("Purchase requisition requires at least one line item.")
+
+    with transaction.atomic():
+        warehouse = Warehouse.objects.select_for_update().get(id=warehouse_id)
+
+        requisition = PurchaseRequisition.objects.create(
+            requested_by=requested_by,
+            warehouse=warehouse,
+            title=title,
+            description=description or "",
+            status="Submitted",
+            submitted_by=submitted_by,
+            submitted_at=timezone.now(),
+        )
+
+        line_items = []
+        for line in lines:
+            product_id = line.get("product_id")
+            if not product_id:
+                raise ValidationError("Each line must include a product.")
+
+            product = Product.objects.get(id=product_id)
+            quantity = Decimal(str(line.get("quantity", 0)))
+            if quantity <= 0:
+                raise ValidationError("Line quantity must be greater than zero.")
+
+            unit_of_measure = line.get("unit_of_measure") or product.unit_of_measure
+
+            line_items.append(
+                PurchaseRequisitionLineItem(
+                    purchase_requisition=requisition,
+                    product=product,
+                    quantity=quantity,
+                    unit_of_measure=unit_of_measure,
+                    description=line.get("description", ""),
+                )
+            )
+
+        PurchaseRequisitionLineItem.objects.bulk_create(line_items)
+
+        return requisition
+
+
 def approve_requisition(pr_id, approved_by):
     with transaction.atomic():
         requisition = PurchaseRequisition.objects.select_for_update().get(id=pr_id)

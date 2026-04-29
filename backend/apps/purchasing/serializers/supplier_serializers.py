@@ -97,6 +97,21 @@ class SupplierProductCreateSerializer(serializers.Serializer):
     is_preferred = serializers.BooleanField(default=False)
 
 
+class SupplierProductUpdateSerializer(serializers.Serializer):
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    lead_time_days = serializers.IntegerField(min_value=0, required=False)
+    is_preferred = serializers.BooleanField(required=False)
+    is_active = serializers.BooleanField(required=False)
+
+
+class SupplierProductByProductSerializer(serializers.Serializer):
+    """Used for POST /supplier-products/?product_id= — links an existing supplier to a product."""
+    supplier_id = serializers.UUIDField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    lead_time_days = serializers.IntegerField(min_value=0)
+    is_preferred = serializers.BooleanField(default=False)
+
+
 class SupplierSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(source="company.name", read_only=True)
     contacts = SupplierContactSerializer(many=True, read_only=True)

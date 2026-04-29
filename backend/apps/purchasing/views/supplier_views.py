@@ -3,15 +3,22 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.purchasing.models import Supplier, SupplierContact, SupplierDocument
+from apps.purchasing.models import (
+    Supplier,
+    SupplierContact,
+    SupplierDocument,
+    SupplierProduct,
+)
 from apps.purchasing.serializers.supplier_serializers import (
     SupplierContactCreateSerializer,
     SupplierContactSerializer,
     SupplierCreateUpdateSerializer,
     SupplierDocumentCreateSerializer,
     SupplierDocumentSerializer,
+    SupplierProductByProductSerializer,
     SupplierProductCreateSerializer,
     SupplierProductSerializer,
+    SupplierProductUpdateSerializer,
     SupplierPutOnHoldSerializer,
     SupplierSerializer,
 )
@@ -22,10 +29,13 @@ from apps.purchasing.services.supplier_services import (
     create_supplier_document,
     deactivate_supplier,
     get_preferred_supplier,
+    get_supplier_products,
     put_supplier_on_hold,
     reactivate_supplier,
     release_supplier_hold,
+    remove_supplier_product,
     update_supplier,
+    update_supplier_product,
 )
 from core.mixins import CompanyScopedMixin
 
@@ -202,3 +212,93 @@ class SupplierDocumentViewSet(viewsets.ModelViewSet):
         return Response(
             SupplierDocumentSerializer(doc).data, status=status.HTTP_201_CREATED
         )
+
+
+class SupplierProductViewSet(viewsets.ViewSet):
+    """
+    GET  /supplier-products/?product_id=<uuid>   — all suppliers for a product
+    GET  /supplier-products/?supplier_id=<uuid>  — all products for a supplier
+    POST /supplier-products/?product_id=<uuid>   — add a supplier to a product
+    GET  /supplier-products/<id>/                — retrieve single record
+    PATCH/PUT /supplier-products/<id>/           — update price, lead time, preferred
+    DELETE /supplier-products/<id>/              — soft-deactivate
+
+    """
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return SupplierProductByProductSerializer
+        if self.action in ("update", "partial_update"):
+            return SupplierProductUpdateSerializer
+
+        return SupplierProductSerializer
+
+    def list(self, request):
+        product_id = request.query_params.get("product_id")
+        supplier_id = request.query_params.get("supplier_id")
+        company_id = request.query_params.get("company_id")
+
+        if not product_id and not supplier_id:
+            return Response(
+                {"detail": "Provide product_id or supplier_id as a query parameter."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        qs = get_supplier_products(
+            product_id=product_id,
+            supplier_id=supplier_id,
+            company_id=company_id,
+        )
+        return Response(SupplierProductSerializer(qs, many=True).data)
+
+    def create(self, request):
+        product_id = request.query_params.get("product_id")
+        if not product_id:
+            return Response(
+                {"detail": "product_id query parameter is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = SupplierProductByProductSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        try:
+            sp = add_product_to_catalogue(
+                supplier_id=data["supplier_id"],
+                product_id=product_id,
+                price=data["price"],
+                lead_time_days=data["lead_time_days"],
+                is_preferred=data.get("is_preferred", False),
+            )
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            SupplierProductSerializer(sp).data, status=status.HTTP_201_CREATED
+        )
+
+    def retrieve(self, request, pk=None):
+        try:
+            sp = SupplierProduct.objects.select_related("supplier", "product").get(
+                id=pk
+            )
+        except SupplierProduct.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(SupplierProductSerializer(sp).data)
+
+    def partial_update(self, request, pk=None):
+        serializer = SupplierProductUpdateSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        try:
+            sp = update_supplier_product(pk, serializer.validated_data)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(SupplierProductSerializer(sp).data)
+
+    def update(self, request, pk=None):
+        return self.partial_update(request, pk=pk)
+
+    def destroy(self, request, pk=None):
+        try:
+            sp = remove_supplier_product(pk)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(SupplierProductSerializer(sp).data)

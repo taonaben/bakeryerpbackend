@@ -88,6 +88,15 @@ class PurchaseRequisitionCreateSerializer(serializers.Serializer):
     lines = PurchaseRequisitionCreateLineSerializer(many=True)
 
 
+class PurchaseRequisitionCreateAndSubmitSerializer(serializers.Serializer):
+    """Used for the create-and-submit endpoint. Same as create but also requires submitted_by."""
+    warehouse_id = serializers.UUIDField()
+    title = serializers.CharField()
+    description = serializers.CharField(required=False, allow_blank=True)
+    submitted_by = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    lines = PurchaseRequisitionCreateLineSerializer(many=True)
+
+
 class PurchaseRequisitionSubmitSerializer(serializers.Serializer):
     submitted_by = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
