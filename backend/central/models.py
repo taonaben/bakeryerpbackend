@@ -84,13 +84,35 @@ class Product(models.Model):
         ("frozen", "Frozen"),
     ]
 
+    CATEGORY_CHOICES = [
+# Raw materials: primary ingredients used directly in baking (flour, sugar, butter, eggs, yeast)
+        ("raw_material", "Raw Material"),
+        # Consumables: supplies used in operations but not part of the final product (cleaning agents, gloves, parchment paper)
+        ("consumable", "Consumable"),
+        # Finished goods: products ready for sale (baked bread, cakes, pastries, cookies)
+        ("finished_good", "Finished Good"),
+        # Semi-finished: partially processed items used in further production (pre-mixed dough, cake layers before frosting)
+        ("semi_finished", "Semi-Finished"),
+        # Packaging: materials used to wrap or contain finished goods (boxes, bags, labels, twine)
+        ("packaging", "Packaging"),
+        # Spare parts: replacement components for bakery equipment (oven heating elements, mixer attachments)
+        ("spare_part", "Spare Part"),
+        # Byproducts: secondary outputs from production (bread crumbs from trimming, excess dough scraps)
+        ("byproduct", "By-Product"),
+        # Waste: unusable materials generated during production (expired ingredients, burnt batches)
+        ("waste", "Waste"),
+        # Other: any product type that does not fit the above categories
+        ("other", "Other"),
+
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sku = models.CharField(max_length=100, unique=True, blank=True)
     name = models.CharField(max_length=255, unique=True)
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, related_name="products"
     )
-    category = models.CharField(max_length=255, null=True, blank=True)
+    category = models.CharField(max_length=255, null=True, blank=True, choices = CATEGORY_CHOICES)
     unit_of_measure = models.CharField(
         max_length=50, choices=UNIT_CHOICES, null=True, blank=True
     )

@@ -9,6 +9,7 @@ from apps.costing.models import ProductPricingRule
 from apps.inventory.models import Stock
 from apps.sales.models import Customer
 from apps.sales.serializers.pricing_serializers import ResolvePriceSerializer, ResolvedPriceSerializer
+from apps.sales.services.customer_service import CustomerService
 from apps.sales.services.pricing_service import NoPricingRuleError, PriceBelowFloorError, PricingService
 from central.models import Product, Warehouse
 
@@ -20,6 +21,10 @@ class ResolvePriceView(APIView):
     Returns the resolved unit price for a customer + product combination,
     the source of the price, floor check result, and current stock level.
     Called by the order UI every time a product is added to an order.
+
+    customer_id is optional — omit it for walk-in / anonymous customers.
+    The endpoint will fall back to the Cash Customer record in that case,
+    which always resolves prices from the product pricing rule (POS path).
     """
 
     permission_classes = [IsAuthenticated]
@@ -29,7 +34,11 @@ class ResolvePriceView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        customer = get_object_or_404(Customer, pk=data["customer_id"])
+        # Fall back to Cash Customer for walk-in / anonymous customers
+        if data.get("customer_id"):
+            customer = get_object_or_404(Customer, pk=data["customer_id"])
+        else:
+            customer = CustomerService.get_or_create_cash_customer()
         product = get_object_or_404(Product, pk=data["product_id"])
         warehouse = get_object_or_404(Warehouse, pk=data["warehouse_id"])
 

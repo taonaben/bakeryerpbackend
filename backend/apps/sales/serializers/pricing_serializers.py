@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 class ResolvePriceSerializer(serializers.Serializer):
     """Query params for GET /pricing/resolve"""
-    customer_id = serializers.UUIDField()
+    customer_id = serializers.UUIDField(required=False, allow_null=True)
     product_id = serializers.UUIDField()
     warehouse_id = serializers.UUIDField()
 
