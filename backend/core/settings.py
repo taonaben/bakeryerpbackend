@@ -66,7 +66,6 @@ INSTALLED_APPS = [
     # "django_extensions",
     "djoser",
     #! Local apps
-    "management",
     "apps.accounts",
     "apps.accounting",
     "apps.inventory",
