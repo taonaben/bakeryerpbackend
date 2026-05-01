@@ -236,9 +236,11 @@ def convert_to_purchase_order(
             po_lines.append(
                 {
                     "product_id": line.product_id,
+                    "supplier_id": str(supplier.id),
                     "quantity": line.quantity,
                     "unit_of_measure": line.unit_of_measure,
                     "unit_price": unit_price,
+                    "quoted_price": unit_price,
                     "description": line.description,
                 }
             )

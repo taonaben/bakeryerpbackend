@@ -37,7 +37,7 @@ class PurchaseOrderViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
         "approved_by",
         "rejected_by",
         "cancelled_by",
-    ).prefetch_related("line_items", "line_items__product")
+    ).prefetch_related("line_items", "line_items__product", "line_items__supplier")
     company_field = "warehouse__company"
 
     def get_queryset(self):
@@ -68,10 +68,10 @@ class PurchaseOrderViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
 
         try:
             po = create_purchase_order(
-                supplier_id=payload["supplier_id"],
                 warehouse_id=payload["warehouse_id"],
                 lines=payload["lines"],
                 created_by=request.user,
+                supplier_id=payload.get("supplier_id"),
                 pr_id=payload.get("purchase_requisition_id"),
                 currency=payload.get("currency"),
                 description=payload.get("description", ""),

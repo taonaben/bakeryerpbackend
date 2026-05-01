@@ -78,7 +78,11 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
             )
         except DjangoValidationError as exc:
             return Response(
-                {"errors": exc.message_dict or exc.messages},
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -119,7 +123,11 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
             )
         except DjangoValidationError as exc:
             return Response(
-                {"errors": exc.message_dict or exc.messages},
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -146,7 +154,11 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
             )
         except DjangoValidationError as exc:
             return Response(
-                {"errors": exc.message_dict or exc.messages},
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -173,7 +185,11 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
             )
         except DjangoValidationError as exc:
             return Response(
-                {"errors": exc.message_dict or exc.messages},
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -202,7 +218,11 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
             )
         except DjangoValidationError as exc:
             return Response(
-                {"errors": exc.message_dict or exc.messages},
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -232,7 +252,11 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
             )
         except DjangoValidationError as exc:
             return Response(
-                {"errors": exc.message_dict or exc.messages},
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
