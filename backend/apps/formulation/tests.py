@@ -275,6 +275,60 @@ class FormulaModuleTests(TestCase):
             revised_formula.lines.filter(text="Bake for 30 minutes.").exists()
         )
 
+    def test_revise_active_formula_full_line_payload_without_ids_does_not_duplicate_lines(self):
+        formula = Formula.objects.create(
+            name="Bread Formula",
+            product=self.finished_product,
+            revision=1,
+            batch_size=100,
+            yield_percentage=95,
+            status="active",
+            is_active=True,
+        )
+        FormulaLine.objects.create(
+            formula=formula,
+            sequence=1,
+            line_type="MATERIAL",
+            product=self.flour,
+            quantity=60,
+        )
+        FormulaLine.objects.create(
+            formula=formula,
+            sequence=2,
+            line_type="PROCESS",
+            text="Old process",
+        )
+
+        serializer = FormulaWriteSerializer(
+            formula,
+            data={
+                "batch_size": 120,
+                "lines": [
+                    {
+                        "sequence": 1,
+                        "line_type": "MATERIAL",
+                        "product": str(self.flour.id),
+                        "quantity": 60,
+                    },
+                    {
+                        "sequence": 2,
+                        "line_type": "PROCESS",
+                        "text": "Old process",
+                    },
+                ],
+            },
+            partial=True,
+        )
+
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        revised_formula = serializer.save()
+
+        self.assertEqual(revised_formula.lines.count(), 2)
+        self.assertEqual(
+            list(revised_formula.lines.order_by("sequence").values_list("sequence", flat=True)),
+            [1, 2],
+        )
+
     def test_formula_hold_and_archive_states(self):
         formula = Formula.objects.create(
             name="Bread Formula",

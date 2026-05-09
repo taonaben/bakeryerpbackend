@@ -1,0 +1,432 @@
+{
+    "id": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+    "name": "sausage roll normal",
+    "product": "bc0fb1f0-b056-4cf3-b853-18b1a75acea8",
+    "product_name": "sausage roll",
+    "revision": 2,
+    "batch_size": 1000.0,
+    "yield_percentage": 98.0,
+    "status": "draft",
+    "is_active": false,
+    "on_hold": false,
+    "on_hold_reason": "",
+    "created_at": "2026-05-09T19:40:39.925904Z",
+    "lines": [
+        {
+            "id": "c85a75c8-2705-46c2-b325-86b56ac8721b",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 1,
+            "line_type": "PROCESS",
+            "product": null,
+            "quantity": null,
+            "text": "Meat Preparation"
+        },
+        {
+            "id": "1819fa83-2fb3-4df2-9d50-989fc2ba4195",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 2,
+            "line_type": "MATERIAL",
+            "product": "19b67903-4457-4d19-bcf4-04c15be1da0a",
+            "product_name": "pork loin",
+            "quantity": 200.0,
+            "text": null
+        },
+        {
+            "id": "3b6ced62-6a5a-4a90-a2cf-14e8693b5505",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 3,
+            "line_type": "MATERIAL",
+            "product": "45d7068e-c58a-465b-b20c-fc4de93e7889",
+            "product_name": "pork shoulder",
+            "quantity": 300.0,
+            "text": null
+        },
+        {
+            "id": "dc1ba510-eb53-4a15-8b3f-dd9723947b23",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 4,
+            "line_type": "MATERIAL",
+            "product": "7be30a82-fe86-4a6f-9cc2-203b5cd5d1cd",
+            "product_name": "pork fat",
+            "quantity": 100.0,
+            "text": null
+        },
+        {
+            "id": "7e6d80aa-2dca-4ec4-8840-706e9fe49f84",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 5,
+            "line_type": "MATERIAL",
+            "product": "5fbf2032-20d7-4480-a16e-3c0e1641048c",
+            "product_name": "salt",
+            "quantity": 10.0,
+            "text": null
+        },
+        {
+            "id": "0e3671ec-4004-4c3c-9b87-4612cce42938",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 6,
+            "line_type": "MATERIAL",
+            "product": "e24c10ee-07fa-4f65-8f3e-db80dfd3fd64",
+            "product_name": "spices",
+            "quantity": 5.0,
+            "text": null
+        },
+        {
+            "id": "f7801f4b-10aa-458e-90d3-10ce1187518d",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 7,
+            "line_type": "MATERIAL",
+            "product": "20c01b94-fa24-40eb-b8e4-12878f2872b4",
+            "product_name": "rusk",
+            "quantity": 50.0,
+            "text": null
+        },
+        {
+            "id": "a053a672-2759-417e-9ca7-b738f83d6216",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 8,
+            "line_type": "MATERIAL",
+            "product": "77f53527-e556-4bfa-9e15-ba7a5f0b2352",
+            "product_name": "ice",
+            "quantity": 30.0,
+            "text": null
+        },
+        {
+            "id": "90185ed7-55ea-41da-9af6-9f73c0ea38c9",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 9,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Mince meat and mix with all ingredients until consistent paste is achieved"
+        },
+        {
+            "id": "c9faca84-8d17-4ab5-94f8-4f2ced4626c5",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 10,
+            "line_type": "PROCESS",
+            "product": null,
+            "quantity": null,
+            "text": "Pastry Preparation"
+        },
+        {
+            "id": "47d5a7a2-d057-4ef1-977a-9e89f7a33171",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 11,
+            "line_type": "MATERIAL",
+            "product": "51c41c08-6124-4d44-98d1-aa1c4bddf39d",
+            "product_name": "flour",
+            "quantity": 400.0,
+            "text": null
+        },
+        {
+            "id": "e969de17-d7dd-49fd-96de-3349efb0f5e1",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 12,
+            "line_type": "MATERIAL",
+            "product": "bde85309-5d19-4363-93c6-cbe848646ec4",
+            "product_name": "margarine",
+            "quantity": 200.0,
+            "text": null
+        },
+        {
+            "id": "a6d377f4-757e-46ce-a9dd-57138e4e26dc",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 13,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Fold and laminate dough to create layered puff pastry"
+        },
+        {
+            "id": "649c8ce3-10b3-4b36-9ee3-9640fec07280",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 14,
+            "line_type": "PROCESS",
+            "product": null,
+            "quantity": null,
+            "text": "Assembly Line"
+        },
+        {
+            "id": "ad3dc786-4c5d-4f1f-8246-a21707c0dbab",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 15,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Roll pastry sheets onto conveyor"
+        },
+        {
+            "id": "ce43aac3-d2ba-4111-8345-347102b8a954",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 16,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Extrude sausage meat evenly along pastry"
+        },
+        {
+            "id": "9c7d4887-ce14-410e-8ac6-42d7088edb59",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 17,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Wrap pastry around filling and seal using egg wash"
+        },
+        {
+            "id": "e5879398-7de6-4f48-a963-f9d60845b903",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 18,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Cut into uniform sausage roll portions"
+        },
+        {
+            "id": "c7b0affb-7ebb-42e3-ab15-d87d734cfc0c",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 19,
+            "line_type": "PROCESS",
+            "product": null,
+            "quantity": null,
+            "text": "Baking"
+        },
+        {
+            "id": "2a387d5a-932c-4374-8750-02003b2ce60f",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 20,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Bake in oven at 180°C until golden brown"
+        },
+        {
+            "id": "d678c13b-4bf3-432d-b88d-47de106c65f1",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 21,
+            "line_type": "BYPRODUCT",
+            "product": "57b19888-c834-4153-b31f-d9847734de38",
+            "product_name": "waste trimmings",
+            "quantity": 20.0,
+            "text": null
+        },
+        {
+            "id": "85562949-354a-483c-b962-2c4c7b1bcf63",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 22,
+            "line_type": "TEXT",
+            "product": null,
+            "quantity": null,
+            "text": "Cool and package finished sausage rolls for distribution"
+        },
+        {
+            "id": "e49102e6-29ad-4f0b-a86e-4fd7d89fc250",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 1,
+            "line_type": "PROCESS",
+            "product": null,
+            "quantity": null,
+            "text": "Meat Preparation"
+        },
+        {
+            "id": "ee991282-86f9-4730-8dc0-2d55630f8c3f",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 2,
+            "line_type": "MATERIAL",
+            "product": "19b67903-4457-4d19-bcf4-04c15be1da0a",
+            "product_name": "pork loin",
+            "quantity": 180.0,
+            "text": null
+        },
+        {
+            "id": "c54e0716-e884-4a28-8f09-c88ac24741c1",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 3,
+            "line_type": "MATERIAL",
+            "product": "45d7068e-c58a-465b-b20c-fc4de93e7889",
+            "product_name": "pork shoulder",
+            "quantity": 300.0,
+            "text": null
+        },
+        {
+            "id": "1e2bdaf3-0f69-4b86-a342-1cd8c858d02e",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 4,
+            "line_type": "MATERIAL",
+            "product": "7be30a82-fe86-4a6f-9cc2-203b5cd5d1cd",
+            "product_name": "pork fat",
+            "quantity": 100.0,
+            "text": null
+        },
+        {
+            "id": "034c442c-4f9c-41bb-8395-11ddf11481ac",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 5,
+            "line_type": "MATERIAL",
+            "product": "5fbf2032-20d7-4480-a16e-3c0e1641048c",
+            "product_name": "salt",
+            "quantity": 10.0,
+            "text": null
+        },
+        {
+            "id": "be38ab51-8c14-4a1e-9b21-c0c3f90220a6",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 6,
+            "line_type": "MATERIAL",
+            "product": "e24c10ee-07fa-4f65-8f3e-db80dfd3fd64",
+            "product_name": "spices",
+            "quantity": 5.0,
+            "text": null
+        },
+        {
+            "id": "b7ea3789-d828-413b-8484-5e2d3c5b737a",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 7,
+            "line_type": "MATERIAL",
+            "product": "20c01b94-fa24-40eb-b8e4-12878f2872b4",
+            "product_name": "rusk",
+            "quantity": 50.0,
+            "text": null
+        },
+        {
+            "id": "faed7168-6ca4-4e2a-ba8e-341cc21a18ef",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 8,
+            "line_type": "MATERIAL",
+            "product": "77f53527-e556-4bfa-9e15-ba7a5f0b2352",
+            "product_name": "ice",
+            "quantity": 30.0,
+            "text": null
+        },
+        {
+            "id": "26379864-509d-4ab9-8436-41899ff7992d",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 9,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Mince meat and mix with all ingredients until consistent paste is achieved"
+        },
+        {
+            "id": "c0610ca7-3a86-4888-8dcc-bbd5a6251093",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 10,
+            "line_type": "PROCESS",
+            "product": null,
+            "quantity": null,
+            "text": "Pastry Preparation"
+        },
+        {
+            "id": "b1c1a3c9-62e5-4e2e-bb45-191fae151aca",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 11,
+            "line_type": "MATERIAL",
+            "product": "51c41c08-6124-4d44-98d1-aa1c4bddf39d",
+            "product_name": "flour",
+            "quantity": 400.0,
+            "text": null
+        },
+        {
+            "id": "ce0bfd21-6858-4cec-8daa-855c7c964958",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 12,
+            "line_type": "MATERIAL",
+            "product": "bde85309-5d19-4363-93c6-cbe848646ec4",
+            "product_name": "margarine",
+            "quantity": 200.0,
+            "text": null
+        },
+        {
+            "id": "34c5c483-7093-4cac-bbef-51e96a30bee1",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 13,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Fold and laminate dough to create layered puff pastry"
+        },
+        {
+            "id": "f08a1564-0531-4920-8281-885231688271",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 14,
+            "line_type": "PROCESS",
+            "product": null,
+            "quantity": null,
+            "text": "Assembly Line"
+        },
+        {
+            "id": "20d1282b-87eb-45de-8b29-cc5a1aa6d509",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 15,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Roll pastry sheets onto conveyor"
+        },
+        {
+            "id": "9b719e87-6d2e-4fcc-96ff-6f820115f182",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 16,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Extrude sausage meat evenly along pastry"
+        },
+        {
+            "id": "85486194-1300-403c-a8b4-83703199d5dc",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 17,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Wrap pastry around filling and seal using egg wash"
+        },
+        {
+            "id": "a14f5da5-f1ec-4537-8ff8-a1f610fa0127",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 18,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Cut into uniform sausage roll portions"
+        },
+        {
+            "id": "f6b38162-c1fb-4c38-9b11-c71114cea407",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 19,
+            "line_type": "PROCESS",
+            "product": null,
+            "quantity": null,
+            "text": "Baking"
+        },
+        {
+            "id": "bae5a984-b115-4fb0-84b8-101e0ccb2a04",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 20,
+            "line_type": "INSTRUCTION",
+            "product": null,
+            "quantity": null,
+            "text": "Bake in oven at 180°C until golden brown"
+        },
+        {
+            "id": "d54db0b6-6e88-4c51-b44c-3c8849cd5438",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 21,
+            "line_type": "BYPRODUCT",
+            "product": "57b19888-c834-4153-b31f-d9847734de38",
+            "product_name": "waste trimmings",
+            "quantity": 20.0,
+            "text": null
+        },
+        {
+            "id": "00266341-2967-4227-908d-98926a72b817",
+            "formula": "58a2d34d-160e-4d15-96c7-ec9e7b6a62c7",
+            "sequence": 22,
+            "line_type": "TEXT",
+            "product": null,
+            "quantity": null,
+            "text": "Cool and package finished sausage rolls for distribution"
+        }
+    ]
+}

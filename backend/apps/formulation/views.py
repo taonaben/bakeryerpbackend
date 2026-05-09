@@ -60,7 +60,7 @@ class FormulaViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
         if on_hold is not None:
             queryset = queryset.filter(on_hold=on_hold.lower() == "true")
 
-        return queryset
+        return queryset.order_by("-created_at")
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -95,6 +95,8 @@ class FormulaViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         try:
+            if self.get_object().status == "draft":
+                return super().destroy(request, *args, **kwargs)
             formula = FormulaService.deactivate_formula(self.get_object())
         except DjangoValidationError as exc:
             return self._validation_error_response(exc)

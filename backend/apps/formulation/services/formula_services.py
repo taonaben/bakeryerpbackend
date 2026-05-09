@@ -105,12 +105,16 @@ class FormulaService:
             on_hold_reason="",
         )
 
-        line_id_map = FormulaService._copy_lines(source_formula, new_formula)
+        line_id_map, line_sequence_map = FormulaService._copy_lines(
+            source_formula,
+            new_formula,
+        )
 
         if lines_data is not None:
             translated_lines = FormulaService._translate_revision_lines(
                 lines_data,
                 line_id_map,
+                line_sequence_map,
             )
             FormulaService._sync_lines(
                 new_formula,
@@ -248,6 +252,7 @@ class FormulaService:
     @staticmethod
     def _copy_lines(source_formula, target_formula):
         line_id_map = {}
+        line_sequence_map = {}
         new_lines = []
 
         source_lines = list(source_formula.lines.order_by("sequence"))
@@ -262,14 +267,21 @@ class FormulaService:
             )
             new_lines.append(target_line)
             line_id_map[str(source_line.id)] = target_line
+            line_sequence_map[source_line.sequence] = target_line
 
         if new_lines:
             FormulaLine.objects.bulk_create(new_lines)
 
-        return {source_id: str(line.id) for source_id, line in line_id_map.items()}
+        return (
+            {source_id: str(line.id) for source_id, line in line_id_map.items()},
+            {
+                sequence: str(line.id)
+                for sequence, line in line_sequence_map.items()
+            },
+        )
 
     @staticmethod
-    def _translate_revision_lines(lines_data, line_id_map):
+    def _translate_revision_lines(lines_data, line_id_map, line_sequence_map):
         translated_lines = []
 
         for line_data in lines_data:
@@ -286,6 +298,8 @@ class FormulaService:
                         }
                     )
                 line_data["id"] = new_line_id
+            elif line_data.get("sequence") in line_sequence_map:
+                line_data["id"] = line_sequence_map[line_data["sequence"]]
 
             translated_lines.append(line_data)
 
