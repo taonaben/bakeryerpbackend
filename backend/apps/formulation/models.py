@@ -27,6 +27,14 @@ class Formula(models.Model):
     on_hold_reason = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product", "revision"],
+                name="unique_formula_product_revision",
+            )
+        ]
+
     def __str__(self):
         return f"{self.product.name} - Revision {self.revision}"
 

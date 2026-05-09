@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Max
 
 from ..models import Formula, FormulaLine
 
@@ -7,7 +8,6 @@ from ..models import Formula, FormulaLine
 FORMULA_UPDATABLE_FIELDS = (
     "name",
     "product",
-    "revision",
     "batch_size",
     "yield_percentage",
     "is_active",
@@ -34,6 +34,8 @@ class FormulaService:
     def create_with_lines(data):
         data = data.copy()
         lines_data = data.pop("lines", [])
+        data.pop("revision", None)
+        data["revision"] = FormulaService._next_revision(data["product"])
         data.setdefault("is_active", True)
         data["status"] = "draft" if data["is_active"] else "deactivated"
         formula = Formula.objects.create(**data)
@@ -42,10 +44,11 @@ class FormulaService:
 
     @staticmethod
     @transaction.atomic
-    def update_with_lines(formula, data):
+    def update_with_lines(formula, data, *, replace_lines=True):
         data = data.copy()
         lines_data = data.pop("lines", None)
         requested_status = data.pop("status", None)
+        data.pop("revision", None)
 
         update_fields = []
         for field in FORMULA_UPDATABLE_FIELDS:
@@ -62,9 +65,60 @@ class FormulaService:
             formula.save(update_fields=update_fields)
 
         if lines_data is not None:
-            FormulaService._sync_lines(formula, lines_data)
+            FormulaService._sync_lines(
+                formula,
+                lines_data,
+                replace_missing=replace_lines,
+            )
 
         return formula
+
+    @staticmethod
+    @transaction.atomic
+    def revise_with_lines(source_formula, data, *, replace_lines=True):
+        source_formula = (
+            Formula.objects.select_for_update()
+            .select_related("product")
+            .prefetch_related("lines")
+            .get(id=source_formula.id)
+        )
+
+        data = data.copy()
+        lines_data = data.pop("lines", None)
+        data.pop("revision", None)
+        data.pop("status", None)
+        data.pop("is_active", None)
+
+        product = data.get("product", source_formula.product)
+        new_formula = Formula.objects.create(
+            name=data.get("name", source_formula.name),
+            product=product,
+            revision=FormulaService._next_revision(product),
+            batch_size=data.get("batch_size", source_formula.batch_size),
+            yield_percentage=data.get(
+                "yield_percentage",
+                source_formula.yield_percentage,
+            ),
+            status="draft",
+            is_active=False,
+            on_hold=False,
+            on_hold_reason="",
+        )
+
+        line_id_map = FormulaService._copy_lines(source_formula, new_formula)
+
+        if lines_data is not None:
+            translated_lines = FormulaService._translate_revision_lines(
+                lines_data,
+                line_id_map,
+            )
+            FormulaService._sync_lines(
+                new_formula,
+                translated_lines,
+                replace_missing=replace_lines,
+            )
+
+        return new_formula
 
     @staticmethod
     @transaction.atomic
@@ -72,7 +126,20 @@ class FormulaService:
         if formula.on_hold:
             raise ValidationError("Release the formula hold before activating it.")
 
-        FormulaService._update_formula_state(formula, is_active=True, status="active")
+        Formula.objects.filter(
+            product=formula.product,
+            status="active",
+            is_active=True,
+            on_hold=False,
+        ).exclude(id=formula.id).update(is_active=False, status="deactivated")
+
+        FormulaService._update_formula_state(
+            formula,
+            is_active=True,
+            on_hold=False,
+            on_hold_reason="",
+            status="active",
+        )
 
         return formula
 
@@ -167,11 +234,65 @@ class FormulaService:
             formula.save(update_fields=update_fields)
 
         return formula
-    
-    
 
     @staticmethod
-    def _sync_lines(formula, lines_data):
+    def _next_revision(product):
+        latest_revision = (
+            Formula.objects.filter(product=product).aggregate(Max("revision"))[
+                "revision__max"
+            ]
+            or 0
+        )
+        return latest_revision + 1
+
+    @staticmethod
+    def _copy_lines(source_formula, target_formula):
+        line_id_map = {}
+        new_lines = []
+
+        source_lines = list(source_formula.lines.order_by("sequence"))
+        for source_line in source_lines:
+            target_line = FormulaLine(
+                formula=target_formula,
+                sequence=source_line.sequence,
+                line_type=source_line.line_type,
+                product=source_line.product,
+                quantity=source_line.quantity,
+                text=source_line.text,
+            )
+            new_lines.append(target_line)
+            line_id_map[str(source_line.id)] = target_line
+
+        if new_lines:
+            FormulaLine.objects.bulk_create(new_lines)
+
+        return {source_id: str(line.id) for source_id, line in line_id_map.items()}
+
+    @staticmethod
+    def _translate_revision_lines(lines_data, line_id_map):
+        translated_lines = []
+
+        for line_data in lines_data:
+            line_data = line_data.copy()
+            line_id = str(line_data.get("id")) if line_data.get("id") else None
+            if line_id:
+                new_line_id = line_id_map.get(line_id)
+                if not new_line_id:
+                    raise ValidationError(
+                        {
+                            "lines": [
+                                f"Line '{line_id}' does not belong to this formula."
+                            ]
+                        }
+                    )
+                line_data["id"] = new_line_id
+
+            translated_lines.append(line_data)
+
+        return translated_lines
+
+    @staticmethod
+    def _sync_lines(formula, lines_data, *, replace_missing=True):
         existing_lines = {str(line.id): line for line in formula.lines.all()}
         kept_line_ids = set()
         new_lines = []
@@ -192,7 +313,8 @@ class FormulaService:
                     )
 
                 for field in ("sequence", "line_type", "product", "quantity", "text"):
-                    setattr(line, field, line_data.get(field))
+                    if field in line_data:
+                        setattr(line, field, line_data[field])
                 updated_lines.append(line)
                 kept_line_ids.add(line_id)
                 continue
@@ -217,8 +339,11 @@ class FormulaService:
         if new_lines:
             FormulaLine.objects.bulk_create(new_lines)
 
-        stale_line_ids = [
-            line.id for key, line in existing_lines.items() if key not in kept_line_ids
-        ]
-        if stale_line_ids:
-            FormulaLine.objects.filter(id__in=stale_line_ids).delete()
+        if replace_missing:
+            stale_line_ids = [
+                line.id
+                for key, line in existing_lines.items()
+                if key not in kept_line_ids
+            ]
+            if stale_line_ids:
+                FormulaLine.objects.filter(id__in=stale_line_ids).delete()
