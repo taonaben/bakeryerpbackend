@@ -28,6 +28,10 @@ class NoOverheadRateError(Exception):
     """Raised when no active OverheadRate covers the current date for the warehouse."""
 
 
+class InvalidFormulaCostingError(Exception):
+    """Raised when formula output assumptions cannot support cost computation."""
+
+
 class StandardCostEngine:
     """
     Compute and persist a StandardCost for a given Formula.
@@ -64,11 +68,11 @@ class StandardCostEngine:
         line_costs = self._compute_line_costs(material_lines)
 
         total_material_cost_per_batch = sum(lc["cost_per_batch"] for lc in line_costs)
-        effective_units = Decimal(str(self.formula.batch_size)) * (
-            Decimal(str(self.formula.yield_percentage)) / Decimal("100")
-        )
+        effective_units = self._effective_units()
         material_cost_per_unit = total_material_cost_per_batch / effective_units
-        overhead_cost_per_unit = overhead_rate.rate_per_unit
+        overhead_cost_per_unit, overhead_allocation_method = (
+            self._compute_overhead_cost_per_unit(overhead_rate, effective_units)
+        )
         total_standard_cost_per_unit = material_cost_per_unit + overhead_cost_per_unit
 
         standard_cost = StandardCost.objects.create(
@@ -77,6 +81,7 @@ class StandardCostEngine:
             overhead_rate=overhead_rate,
             material_cost_per_unit=material_cost_per_unit,
             overhead_cost_per_unit=overhead_cost_per_unit,
+            overhead_allocation_method=overhead_allocation_method,
             total_standard_cost_per_unit=total_standard_cost_per_unit,
             batch_size_used=Decimal(str(self.formula.batch_size)),
             yield_percentage_used=Decimal(str(self.formula.yield_percentage)),
@@ -122,6 +127,29 @@ class StandardCostEngine:
             for line in self.formula.lines.all()
             if line.line_type == "MATERIAL" and line.product_id is not None
         ]
+
+    def _effective_units(self) -> Decimal:
+        effective_units = Decimal(str(self.formula.batch_size)) * (
+            Decimal(str(self.formula.yield_percentage)) / Decimal("100")
+        )
+        if effective_units <= 0:
+            raise InvalidFormulaCostingError(
+                "Formula effective units must be greater than zero for costing."
+            )
+        return effective_units
+
+    def _compute_overhead_cost_per_unit(self, overhead_rate, effective_units):
+        labor_minutes = self.formula.labor_minutes_per_batch
+        labor_rate = overhead_rate.rate_per_labor_minute
+
+        if labor_minutes is not None and labor_rate is not None:
+            labor_minutes_per_unit = Decimal(str(labor_minutes)) / effective_units
+            return (
+                labor_minutes_per_unit * labor_rate,
+                "labor_minutes",
+            )
+
+        return overhead_rate.rate_per_unit, "unit_rate"
 
     def _compute_line_costs(self, material_lines: list) -> list:
         """

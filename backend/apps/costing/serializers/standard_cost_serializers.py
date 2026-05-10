@@ -44,6 +44,7 @@ class StandardCostSerializer(serializers.ModelSerializer):
             "overhead_rate",
             "material_cost_per_unit",
             "overhead_cost_per_unit",
+            "overhead_allocation_method",
             "total_standard_cost_per_unit",
             "batch_size_used",
             "yield_percentage_used",
@@ -72,6 +73,7 @@ class StandardCostListSerializer(serializers.ModelSerializer):
             "total_standard_cost_per_unit",
             "material_cost_per_unit",
             "overhead_cost_per_unit",
+            "overhead_allocation_method",
             "currency",
             "computed_at",
         ]

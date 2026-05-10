@@ -34,6 +34,7 @@ def on_formula_activated(sender, instance, **kwargs):
             StandardCostEngine,
             NoOverheadRateError,
             NoPricedIngredientError,
+            InvalidFormulaCostingError,
         )
 
         # Attempt to find a warehouse from a linked production order
@@ -52,7 +53,7 @@ def on_formula_activated(sender, instance, **kwargs):
                     computed_by=_system_user(),
                 )
             engine.run()
-        except (NoOverheadRateError, NoPricedIngredientError) as exc:
+        except (NoOverheadRateError, NoPricedIngredientError, InvalidFormulaCostingError) as exc:
             # Re-raise as ValidationError so the save is blocked with a clear message
             from django.core.exceptions import ValidationError
             raise ValidationError(str(exc)) from exc

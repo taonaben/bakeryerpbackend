@@ -37,6 +37,7 @@ class FormulaModuleTests(TestCase):
                 "product": str(self.finished_product.id),
                 "batch_size": 100,
                 "yield_percentage": 95,
+                "labor_minutes_per_batch": "45.0000",
                 "status": "draft",
                 "lines": [
                     {
@@ -58,9 +59,32 @@ class FormulaModuleTests(TestCase):
         formula = serializer.save()
 
         self.assertEqual(formula.revision, 1)
+        self.assertEqual(str(formula.labor_minutes_per_batch), "45.0000")
         self.assertTrue(formula.is_active)
         self.assertFalse(formula.on_hold)
         self.assertEqual(formula.lines.count(), 2)
+
+    def test_formula_rejects_non_positive_labor_minutes(self):
+        serializer = FormulaWriteSerializer(
+            data={
+                "name": "Bread Formula",
+                "product": str(self.finished_product.id),
+                "batch_size": 100,
+                "yield_percentage": 95,
+                "labor_minutes_per_batch": "0",
+                "lines": [
+                    {
+                        "sequence": 1,
+                        "line_type": "MATERIAL",
+                        "product": str(self.flour.id),
+                        "quantity": 60,
+                    },
+                ],
+            }
+        )
+
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("labor_minutes_per_batch", serializer.errors)
 
     def test_create_formula_assigns_next_product_revision(self):
         Formula.objects.create(
@@ -166,6 +190,7 @@ class FormulaModuleTests(TestCase):
             revision=1,
             batch_size=100,
             yield_percentage=95,
+            labor_minutes_per_batch=45,
             status="active",
             is_active=True,
         )
@@ -257,6 +282,7 @@ class FormulaModuleTests(TestCase):
         self.assertEqual(revised_formula.revision, 2)
         self.assertEqual(revised_formula.name, "Bread Formula Rev 2")
         self.assertEqual(revised_formula.batch_size, 120)
+        self.assertEqual(str(revised_formula.labor_minutes_per_batch), "45.0000")
         self.assertEqual(revised_formula.status, "draft")
         self.assertFalse(revised_formula.is_active)
 

@@ -42,11 +42,16 @@ class OverheadRateViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
         return qs.order_by("-period_start")
 
     def update(self, request, *args, **kwargs):
-        # Block updates if CostingEntries already reference this rate
+        # Block updates if historical costing records already reference this rate.
         instance = self.get_object()
-        if instance.costing_entries.exists():
+        if instance.costing_entries.exists() or instance.standard_costs.exists():
             return Response(
-                {"detail": "Cannot modify an OverheadRate that has been used in CostingEntries."},
+                {
+                    "detail": (
+                        "Cannot modify an OverheadRate that has been used in "
+                        "StandardCost or CostingEntry records."
+                    )
+                },
                 status=status.HTTP_409_CONFLICT,
             )
         return super().update(request, *args, **kwargs)

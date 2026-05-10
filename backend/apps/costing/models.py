@@ -26,6 +26,22 @@ class OverheadRate(models.Model):
     planned_production_units = models.DecimalField(max_digits=14, decimal_places=4)
     # Stored computed field: total_overhead_budgeted / planned_production_units
     rate_per_unit = models.DecimalField(max_digits=14, decimal_places=6)
+    planned_labor_minutes = models.DecimalField(
+        max_digits=14,
+        decimal_places=4,
+        null=True,
+        blank=True,
+        help_text=(
+            "Total planned facility labor driver capacity for this warehouse "
+            "and period, not per-product labor usage."
+        ),
+    )
+    rate_per_labor_minute = models.DecimalField(
+        max_digits=14,
+        decimal_places=6,
+        null=True,
+        blank=True,
+    )
     currency = models.CharField(max_length=10)
     notes = models.TextField(blank=True)
     created_by = models.ForeignKey(
@@ -46,6 +62,10 @@ class OverheadRate(models.Model):
     def save(self, *args, **kwargs):
         if self.planned_production_units and self.planned_production_units != 0:
             self.rate_per_unit = self.total_overhead_budgeted / self.planned_production_units
+        if self.planned_labor_minutes and self.planned_labor_minutes != 0:
+            self.rate_per_labor_minute = self.total_overhead_budgeted / self.planned_labor_minutes
+        else:
+            self.rate_per_labor_minute = None
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -76,6 +96,14 @@ class StandardCost(models.Model):
     )
     material_cost_per_unit = models.DecimalField(max_digits=14, decimal_places=6)
     overhead_cost_per_unit = models.DecimalField(max_digits=14, decimal_places=6)
+    overhead_allocation_method = models.CharField(
+        max_length=30,
+        choices=[
+            ("labor_minutes", "Labor Minutes"),
+            ("unit_rate", "Unit Rate"),
+        ],
+        default="unit_rate",
+    )
     total_standard_cost_per_unit = models.DecimalField(max_digits=14, decimal_places=6)
     # Snapshot of formula state at computation time
     batch_size_used = models.DecimalField(max_digits=14, decimal_places=4)
@@ -180,6 +208,14 @@ class CostingEntry(models.Model):
     )
     total_material_cost = models.DecimalField(max_digits=14, decimal_places=2)
     overhead_cost = models.DecimalField(max_digits=14, decimal_places=2)
+    overhead_allocation_method = models.CharField(
+        max_length=30,
+        choices=[
+            ("labor_minutes", "Labor Minutes"),
+            ("unit_rate", "Unit Rate"),
+        ],
+        default="unit_rate",
+    )
     total_cost = models.DecimalField(max_digits=14, decimal_places=2)
     actual_output_quantity = models.DecimalField(max_digits=14, decimal_places=4)
     actual_waste_quantity = models.DecimalField(max_digits=14, decimal_places=4, default=0)

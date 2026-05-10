@@ -175,8 +175,11 @@ class VarianceEngine:
         OV = (standard_overhead_per_unit - actual_overhead_per_unit) × actual_output
         Positive = favourable (absorbed more overhead than actually incurred).
         """
+        if actual_output == 0:
+            return Decimal("0")
+
         standard_overhead_per_unit = self.standard_cost.overhead_cost_per_unit
-        actual_overhead_per_unit = self.entry.overhead_rate.rate_per_unit
+        actual_overhead_per_unit = self.entry.overhead_cost / actual_output
         return (standard_overhead_per_unit - actual_overhead_per_unit) * actual_output
 
     # ------------------------------------------------------------------ #

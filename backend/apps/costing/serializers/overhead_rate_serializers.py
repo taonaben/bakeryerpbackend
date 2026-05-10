@@ -17,6 +17,8 @@ class OverheadRateSerializer(serializers.ModelSerializer):
             "total_overhead_budgeted",
             "planned_production_units",
             "rate_per_unit",
+            "planned_labor_minutes",
+            "rate_per_labor_minute",
             "currency",
             "notes",
             "created_by",
@@ -24,7 +26,14 @@ class OverheadRateSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "rate_per_unit", "created_by", "created_at", "updated_at"]
+        read_only_fields = [
+            "id",
+            "rate_per_unit",
+            "rate_per_labor_minute",
+            "created_by",
+            "created_at",
+            "updated_at",
+        ]
 
     def validate(self, attrs):
         start = attrs.get("period_start")
@@ -37,6 +46,11 @@ class OverheadRateSerializer(serializers.ModelSerializer):
         if units is not None and units <= 0:
             raise serializers.ValidationError(
                 {"planned_production_units": "planned_production_units must be greater than zero."}
+            )
+        labor_minutes = attrs.get("planned_labor_minutes")
+        if labor_minutes is not None and labor_minutes <= 0:
+            raise serializers.ValidationError(
+                {"planned_labor_minutes": "planned_labor_minutes must be greater than zero."}
             )
         return attrs
 

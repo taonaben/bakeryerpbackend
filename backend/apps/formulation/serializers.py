@@ -101,6 +101,7 @@ class FormulaSerializer(serializers.ModelSerializer):
             "revision",
             "batch_size",
             "yield_percentage",
+            "labor_minutes_per_batch",
             "status",
             "is_active",
             "on_hold",
@@ -128,6 +129,7 @@ class FormulaWriteSerializer(serializers.ModelSerializer):
             "product",
             "batch_size",
             "yield_percentage",
+            "labor_minutes_per_batch",
             "status",
             "is_active",
             "lines",
@@ -155,9 +157,19 @@ class FormulaWriteSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         product = attrs.get("product") or getattr(self.instance, "product", None)
         lines = attrs.get("lines")
+        labor_minutes = attrs.get("labor_minutes_per_batch")
 
         if self.instance is None and lines is None:
             raise serializers.ValidationError({"lines": "This field is required."})
+
+        if labor_minutes is not None and labor_minutes <= 0:
+            raise serializers.ValidationError(
+                {
+                    "labor_minutes_per_batch": (
+                        "This field must be greater than zero when provided."
+                    )
+                }
+            )
 
         if request and product and product.company_id != getattr(
             request.user, "company_id", None

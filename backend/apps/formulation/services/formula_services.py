@@ -10,6 +10,7 @@ FORMULA_UPDATABLE_FIELDS = (
     "product",
     "batch_size",
     "yield_percentage",
+    "labor_minutes_per_batch",
     "is_active",
 )
 
@@ -98,6 +99,10 @@ class FormulaService:
             yield_percentage=data.get(
                 "yield_percentage",
                 source_formula.yield_percentage,
+            ),
+            labor_minutes_per_batch=data.get(
+                "labor_minutes_per_batch",
+                source_formula.labor_minutes_per_batch,
             ),
             status="draft",
             is_active=False,

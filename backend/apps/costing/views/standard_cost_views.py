@@ -80,6 +80,7 @@ class StandardCostViewSet(CompanyScopedMixin, viewsets.ReadOnlyModelViewSet):
             WarehouseStandardCostEngine,
             NoOverheadRateError,
             NoPricedIngredientError,
+            InvalidFormulaCostingError,
         )
 
         formula = Formula.objects.get(pk=serializer.validated_data["formula_id"])
@@ -92,7 +93,7 @@ class StandardCostViewSet(CompanyScopedMixin, viewsets.ReadOnlyModelViewSet):
                 warehouse=warehouse,
             )
             standard_cost = engine.run()
-        except (NoOverheadRateError, NoPricedIngredientError) as exc:
+        except (NoOverheadRateError, NoPricedIngredientError, InvalidFormulaCostingError) as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except DjangoValidationError as exc:
             return Response({"detail": exc.messages}, status=status.HTTP_400_BAD_REQUEST)

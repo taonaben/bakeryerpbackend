@@ -19,6 +19,12 @@ class Formula(models.Model):
     revision = models.PositiveIntegerField()
     batch_size = models.FloatField()
     yield_percentage = models.FloatField()
+    labor_minutes_per_batch = models.DecimalField(
+        max_digits=14,
+        decimal_places=4,
+        null=True,
+        blank=True,
+    )
     status = models.CharField(
         max_length=50, choices=formula_status_choices, default="draft"
     )

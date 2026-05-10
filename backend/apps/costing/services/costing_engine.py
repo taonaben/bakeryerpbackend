@@ -67,7 +67,10 @@ class CostingEngine:
         line_costs, requires_review = self._compute_line_costs()
 
         total_material_cost = sum(lc["actual_cost"] for lc in line_costs)
-        overhead_cost = actual_output * overhead_rate.rate_per_unit
+        overhead_cost, overhead_allocation_method = self._compute_overhead_cost(
+            overhead_rate,
+            actual_output,
+        )
         total_cost = total_material_cost + overhead_cost
         cost_per_unit = total_cost / actual_output
         actual_waste = self._actual_waste()
@@ -82,6 +85,7 @@ class CostingEngine:
             overhead_rate=overhead_rate,
             total_material_cost=total_material_cost.quantize(Decimal("0.01")),
             overhead_cost=overhead_cost.quantize(Decimal("0.01")),
+            overhead_allocation_method=overhead_allocation_method,
             total_cost=total_cost.quantize(Decimal("0.01")),
             actual_output_quantity=actual_output,
             actual_waste_quantity=actual_waste,
@@ -140,6 +144,28 @@ class CostingEngine:
                 f"on {reference_date}. Cannot cost batch {self.batch.batch_number}."
             )
         return rate
+
+    def _compute_overhead_cost(self, overhead_rate, actual_output):
+        formula = self.batch.production_order.formula
+        labor_minutes = formula.labor_minutes_per_batch
+        labor_rate = overhead_rate.rate_per_labor_minute
+
+        if labor_minutes is not None and labor_rate is not None:
+            effective_units = Decimal(str(formula.batch_size)) * (
+                Decimal(str(formula.yield_percentage)) / Decimal("100")
+            )
+            if effective_units <= 0:
+                raise CostingEngineError(
+                    "Formula effective units must be greater than zero for costing."
+                )
+
+            labor_minutes_per_unit = Decimal(str(labor_minutes)) / effective_units
+            return (
+                actual_output * labor_minutes_per_unit * labor_rate,
+                "labor_minutes",
+            )
+
+        return actual_output * overhead_rate.rate_per_unit, "unit_rate"
 
     def _compute_line_costs(self):
         """
