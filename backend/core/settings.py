@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     "apps.costing",
     "apps.sales",
     "apps.finance",
+    "apps.mail",
     "central",
 ]
 

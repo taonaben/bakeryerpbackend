@@ -39,6 +39,7 @@ from health.urls import urlpatterns as health_urls
 from apps.costing.urls import urlpatterns as costing_urls
 from apps.sales.urls import urlpatterns as sales_urls
 from apps.finance.urls import urlpatterns as finance_urls
+from apps.mail.urls import urlpatterns as mail_urls
 
 app_urlpatterns = [
     # path("auth/", include(auth_urls)),
@@ -53,6 +54,7 @@ app_urlpatterns = [
     path("costing/", include(costing_urls)),
     path("sales/", include(sales_urls)),
     path("finance/", include(finance_urls)),
+    path("mail/", include(mail_urls)),
 ]
 
 third_party_urlpatterns = [
