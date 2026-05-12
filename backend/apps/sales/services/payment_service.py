@@ -6,8 +6,9 @@ Rules:
   - Amount must be > 0.
   - Overpayment is flagged and blocked — requires explicit confirmation.
   - After each payment, invoice status is recomputed.
-  - Posts a cash/AR journal entry on every payment.
+    - Delegates finance journal posting and AR reconciliation to ARService.
 """
+
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
@@ -15,12 +16,14 @@ from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 
-from apps.accounting.models import Account, JournalEntry, JournalEntryLine
+from apps.accounting.models import BankAccount
+from apps.finance.services.ar_service import ARService
 from apps.sales.models import Invoice, Payment
 
 
 class OverpaymentError(ValidationError):
     """Raised when a payment would exceed the invoice total."""
+
     pass
 
 
@@ -33,6 +36,7 @@ class PaymentService:
         amount: Decimal,
         payment_method: str,
         received_by,
+        bank_account_id=None,
         reference: str = "",
         notes: str = "",
         allow_overpayment: bool = False,
@@ -59,17 +63,42 @@ class PaymentService:
                 code="overpayment",
             )
 
+        bank_account = PaymentService._resolve_bank_account(invoice, bank_account_id)
+
         payment = Payment(
             invoice=invoice,
             customer=invoice.sales_order.customer,
             amount=amount,
             payment_method=payment_method,
+            bank_account=bank_account,
             payment_date=timezone.now(),
             reference=reference,
             received_by=received_by,
             notes=notes,
         )
         payment.save()
+
+        # Ensure AR exists for older invoices and keep finance ledger in sync.
+        ar_record = (
+            invoice.ar_record
+            if hasattr(invoice, "ar_record")
+            else ARService.create_from_invoice(
+                invoice=invoice,
+                created_by=received_by,
+            )
+        )
+        ARService.record_payment(
+            ar=ar_record,
+            amount=amount,
+            payment_method=payment_method,
+            received_by=received_by,
+            reference=reference,
+            notes=notes,
+            payment_date=payment.payment_date,
+            sales_payment=payment,
+            bank_account=bank_account,
+            create_finance_payment=True,
+        )
 
         # Recompute invoice status
         new_sum = existing_sum + amount
@@ -85,9 +114,6 @@ class PaymentService:
         if new_status == "paid":
             invoice.sales_order.status = "paid"
             invoice.sales_order.save(update_fields=["status", "updated_at"])
-
-        # Post journal entry
-        PaymentService._post_payment_journal(invoice, payment, received_by)
 
         return payment
 
@@ -119,53 +145,19 @@ class PaymentService:
         return result or Decimal("0")
 
     @staticmethod
-    def _post_payment_journal(
-        invoice: Invoice,
-        payment: Payment,
-        received_by,
-    ) -> None:
-        """
-        Debit Cash/Bank account, Credit Accounts Receivable.
-        Silently skips if accounts are not configured.
-        """
-        method_to_account = {
-            "cash": "1100",
-            "mobile_money": "1100",
-            "bank_transfer": "1110",
-            "cheque": "1110",
-        }
-        cash_code = method_to_account.get(payment.payment_method, "1100")
+    def _resolve_bank_account(invoice: Invoice, bank_account_id):
+        if not bank_account_id:
+            return None
 
+        company = invoice.sales_order.warehouse.company
         try:
-            company = invoice.sales_order.warehouse.company
-            cash_account = Account.objects.get(company=company, code=cash_code)
-            ar_account = Account.objects.get(company=company, code="1300")  # AR
-        except Account.DoesNotExist:
-            return
-
-        je = JournalEntry.objects.create(
-            company=company,
-            entry_date=timezone.now().date(),
-            reference=invoice.invoice_number,
-            description=(
-                f"Payment received — {invoice.invoice_number} "
-                f"({payment.payment_method})"
-            ),
-            source_type="Payment",
-            source_id=payment.id,
-            created_by=received_by,
-        )
-        JournalEntryLine.objects.create(
-            journal_entry=je,
-            account=cash_account,
-            debit=payment.amount,
-            credit=Decimal("0"),
-            description="Cash/bank received",
-        )
-        JournalEntryLine.objects.create(
-            journal_entry=je,
-            account=ar_account,
-            debit=Decimal("0"),
-            credit=payment.amount,
-            description="AR cleared",
-        )
+            return BankAccount.objects.get(
+                pk=bank_account_id,
+                company=company,
+                is_active=True,
+            )
+        except BankAccount.DoesNotExist as exc:
+            raise ValidationError(
+                "Selected bank_account was not found or is inactive for this company.",
+                code="invalid_bank_account",
+            ) from exc

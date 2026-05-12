@@ -4,17 +4,19 @@ Finance module models.
 AccountsReceivable  — tracks customer debt (one per sales invoice)
 AccountsPayable     — tracks supplier debt (one per supplier invoice)
 SupplierPayment     — records money going out to suppliers
+CustomerPayment     — mirrors sales payments for finance audit + GL linkage
 
-All three are created/updated automatically by their respective modules.
+All records are created/updated automatically by their respective modules.
 No manual creation by users.
 """
+
 import uuid
 from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
 
-from apps.accounting.models import JournalEntry
+from apps.accounting.models import BankAccount, JournalEntry
 from apps.purchasing.models import Supplier, SupplierInvoice
 from apps.sales.models import Customer, Invoice as SalesInvoice
 
@@ -49,7 +51,8 @@ class AccountsReceivable(models.Model):
         JournalEntry,
         on_delete=models.PROTECT,
         related_name="ar_records",
-        null=True, blank=True,
+        null=True,
+        blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -63,7 +66,9 @@ class AccountsReceivable(models.Model):
         ]
 
     def __str__(self):
-        return f"AR — {self.customer.name} | {self.invoice.invoice_number} | {self.status}"
+        return (
+            f"AR — {self.customer.name} | {self.invoice.invoice_number} | {self.status}"
+        )
 
 
 class AccountsPayable(models.Model):
@@ -96,7 +101,8 @@ class AccountsPayable(models.Model):
         JournalEntry,
         on_delete=models.PROTECT,
         related_name="ap_records",
-        null=True, blank=True,
+        null=True,
+        blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -134,12 +140,20 @@ class SupplierPayment(models.Model):
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     payment_date = models.DateTimeField()
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
+    bank_account = models.ForeignKey(
+        BankAccount,
+        on_delete=models.PROTECT,
+        related_name="supplier_payments",
+        null=True,
+        blank=True,
+    )
     reference = models.CharField(max_length=255, blank=True)
     journal_entry = models.ForeignKey(
         JournalEntry,
         on_delete=models.PROTECT,
         related_name="supplier_payments",
-        null=True, blank=True,
+        null=True,
+        blank=True,
     )
     paid_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -153,11 +167,80 @@ class SupplierPayment(models.Model):
         verbose_name = "Supplier Payment"
         verbose_name_plural = "Supplier Payments"
         indexes = [
-            models.Index(fields=["accounts_payable", "payment_date"], name="sp_ap_date_idx"),
+            models.Index(
+                fields=["accounts_payable", "payment_date"], name="sp_ap_date_idx"
+            ),
         ]
 
     def __str__(self):
         return (
             f"Payment {self.amount} to "
             f"{self.accounts_payable.supplier.name} on {self.payment_date:%Y-%m-%d}"
+        )
+
+
+class CustomerPayment(models.Model):
+    """
+    Finance-side mirror of customer payments recorded by the sales module.
+    Stores the journal link used to clear AR and provides an audit trail.
+    """
+
+    PAYMENT_METHOD_CHOICES = [
+        ("cash", "Cash"),
+        ("bank_transfer", "Bank Transfer"),
+        ("cheque", "Cheque"),
+        ("mobile_money", "Mobile Money"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    accounts_receivable = models.ForeignKey(
+        AccountsReceivable,
+        on_delete=models.PROTECT,
+        related_name="customer_payments",
+    )
+    sales_payment = models.OneToOneField(
+        "sales.Payment",
+        on_delete=models.PROTECT,
+        related_name="finance_payment",
+    )
+    amount = models.DecimalField(max_digits=14, decimal_places=2)
+    payment_date = models.DateTimeField()
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
+    bank_account = models.ForeignKey(
+        BankAccount,
+        on_delete=models.PROTECT,
+        related_name="customer_payments",
+        null=True,
+        blank=True,
+    )
+    reference = models.CharField(max_length=255, blank=True)
+    journal_entry = models.ForeignKey(
+        JournalEntry,
+        on_delete=models.PROTECT,
+        related_name="customer_payments",
+        null=True,
+        blank=True,
+    )
+    received_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="customer_payments_received",
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Customer Payment"
+        verbose_name_plural = "Customer Payments"
+        indexes = [
+            models.Index(
+                fields=["accounts_receivable", "payment_date"],
+                name="cp_ar_date_idx",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"Payment {self.amount} from "
+            f"{self.accounts_receivable.customer.name} on {self.payment_date:%Y-%m-%d}"
         )

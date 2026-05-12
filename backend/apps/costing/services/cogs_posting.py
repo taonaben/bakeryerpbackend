@@ -15,14 +15,15 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 
-from apps.accounting.services import post_journal_entry
+from apps.accounting.models import SYSTEM_KEY_COGS, SYSTEM_KEY_INVENTORY_RAW
 from apps.costing.models import CostingEntry, StandardCost
+from apps.finance.services.journal_service import JournalLine, JournalService
 
 logger = logging.getLogger(__name__)
 
-# Account codes — must exist (or be auto-created) in the accounting module
-ACCOUNT_COGS = "5100"       # Expense: Cost of Goods Sold
-ACCOUNT_INVENTORY = "1200"  # Asset:   Inventory
+# Account code fallback values if system-key lookup is unavailable.
+ACCOUNT_COGS = "5000"
+ACCOUNT_INVENTORY = "1200"
 
 
 class COGSPostingError(Exception):
@@ -150,38 +151,46 @@ class COGSPostingService:
     def _post_journal(self, line, cogs: Decimal, warehouse):
         """
         Post a balanced journal entry:
-          Dr  COGS (5100)       cogs
+          Dr  COGS (5000)       cogs
           Cr  Inventory (1200)  cogs
         """
         product = line.product
         company = product.company
-
-        reference = f"COGS-{self.order.pk}"
         description = (
             f"COGS for {product.name} × {line.quantity} "
             f"on order {getattr(self.order, 'order_number', self.order.pk)}"
         )
 
-        return post_journal_entry(
+        cogs_account = JournalService.get_account(
+            company=company,
+            system_key=SYSTEM_KEY_COGS,
+            fallback_code=ACCOUNT_COGS,
+        )
+        inventory_account = JournalService.get_account(
+            company=company,
+            system_key=SYSTEM_KEY_INVENTORY_RAW,
+            fallback_code=ACCOUNT_INVENTORY,
+        )
+
+        return JournalService.post(
             company=company,
             entry_date=timezone.now().date(),
-            reference=reference,
             description=description,
-            source_type="sales_order_line",
-            source_id=line.id,
+            reference_type="sales_order_line",
+            reference_id=line.id,
             lines=[
-                {
-                    "account_code": ACCOUNT_COGS,
-                    "debit": cogs,
-                    "credit": Decimal("0"),
-                    "description": description,
-                },
-                {
-                    "account_code": ACCOUNT_INVENTORY,
-                    "debit": Decimal("0"),
-                    "credit": cogs,
-                    "description": description,
-                },
+                JournalLine(
+                    account_code=cogs_account.code,
+                    type="debit",
+                    amount=cogs,
+                    description=description,
+                ),
+                JournalLine(
+                    account_code=inventory_account.code,
+                    type="credit",
+                    amount=cogs,
+                    description=description,
+                ),
             ],
             created_by=self.posted_by,
         )

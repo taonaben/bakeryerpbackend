@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -19,11 +20,53 @@ class JournalEntryListView(APIView):
     GET  /finance/journal-entries       list
     POST /finance/journal-entries       create manual entry
     """
+
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Finance - Journals"],
+        summary="List journal entries",
+        description="Returns journal entries with optional date, type, and reference filters.",
+        parameters=[
+            OpenApiParameter(
+                name="date_from",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Inclusive start date (YYYY-MM-DD).",
+            ),
+            OpenApiParameter(
+                name="date_to",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Inclusive end date (YYYY-MM-DD).",
+            ),
+            OpenApiParameter(
+                name="entry_type",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Filter by entry type.",
+                enum=["manual", "automated", "reversal"],
+            ),
+            OpenApiParameter(
+                name="reference_type",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Filter by source reference type.",
+            ),
+            OpenApiParameter(
+                name="fiscal_period_id",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Filter by fiscal period UUID.",
+            ),
+        ],
+        responses={200: JournalEntryListSerializer(many=True)},
+    )
     def get(self, request):
         company = request.user.company
-        qs = JournalEntry.objects.filter(company=company).order_by("-entry_date", "-created_at")
+        qs = JournalEntry.objects.filter(company=company).order_by(
+            "-entry_date", "-created_at"
+        )
 
         date_from = request.query_params.get("date_from")
         date_to = request.query_params.get("date_to")
@@ -44,6 +87,13 @@ class JournalEntryListView(APIView):
 
         return Response(JournalEntryListSerializer(qs, many=True).data)
 
+    @extend_schema(
+        tags=["Finance - Journals"],
+        summary="Create manual journal entry",
+        description="Creates a balanced manual journal entry in an open fiscal period.",
+        request=ManualJournalEntrySerializer,
+        responses={201: JournalEntryDetailSerializer},
+    )
     def post(self, request):
         serializer = ManualJournalEntrySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -67,13 +117,22 @@ class JournalEntryListView(APIView):
             entry_type="manual",
             created_by=request.user,
         )
-        return Response(JournalEntryDetailSerializer(entry).data, status=status.HTTP_201_CREATED)
+        return Response(
+            JournalEntryDetailSerializer(entry).data, status=status.HTTP_201_CREATED
+        )
 
 
 class JournalEntryDetailView(APIView):
     """GET /finance/journal-entries/{id}"""
+
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Finance - Journals"],
+        summary="Get journal entry",
+        description="Returns one journal entry with full lines.",
+        responses={200: JournalEntryDetailSerializer},
+    )
     def get(self, request, pk):
         entry = get_object_or_404(
             JournalEntry.objects.prefetch_related("lines__account"),
@@ -85,8 +144,16 @@ class JournalEntryDetailView(APIView):
 
 class JournalEntryReverseView(APIView):
     """POST /finance/journal-entries/{id}/reverse"""
+
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Finance - Journals"],
+        summary="Reverse journal entry",
+        description="Creates an equal-and-opposite reversal entry for the selected journal.",
+        request=ReverseJournalSerializer,
+        responses={201: JournalEntryDetailSerializer},
+    )
     def post(self, request, pk):
         entry = get_object_or_404(JournalEntry, pk=pk, company=request.user.company)
         serializer = ReverseJournalSerializer(data=request.data)
@@ -96,4 +163,6 @@ class JournalEntryReverseView(APIView):
             reversed_by=request.user,
             reason=serializer.validated_data.get("reason", ""),
         )
-        return Response(JournalEntryDetailSerializer(reversal).data, status=status.HTTP_201_CREATED)
+        return Response(
+            JournalEntryDetailSerializer(reversal).data, status=status.HTTP_201_CREATED
+        )

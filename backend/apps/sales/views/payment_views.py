@@ -6,7 +6,10 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 
 from apps.sales.models import Customer, Invoice, Payment
-from apps.sales.serializers.payment_serializers import PaymentSerializer, RecordPaymentSerializer
+from apps.sales.serializers.payment_serializers import (
+    PaymentSerializer,
+    RecordPaymentSerializer,
+)
 from apps.sales.services.payment_service import PaymentService
 
 
@@ -18,9 +21,9 @@ class PaymentViewSet(ViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        qs = Payment.objects.select_related(
-            "invoice", "customer"
-        ).order_by("-payment_date")
+        qs = Payment.objects.select_related("invoice", "customer").order_by(
+            "-payment_date"
+        )
 
         customer_id = request.query_params.get("customer_id")
         payment_method = request.query_params.get("payment_method")
@@ -62,6 +65,7 @@ class InvoicePaymentView(APIView):
             amount=d["amount"],
             payment_method=d["payment_method"],
             received_by=request.user,
+            bank_account_id=d.get("bank_account"),
             reference=d.get("reference", ""),
             notes=d.get("notes", ""),
             allow_overpayment=d.get("allow_overpayment", False),

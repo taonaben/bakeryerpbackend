@@ -8,15 +8,15 @@ Rules:
   - Once issued, amounts are immutable — cancel and reissue to correct.
   - Overdue detection is a scheduled job (mark_overdue_invoices).
 """
+
 from datetime import date, timedelta
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Sum
 from django.utils import timezone
 
-from apps.accounting.models import Account, JournalEntry, JournalEntryLine
+from apps.finance.services.ar_service import ARService
 from apps.sales.models import Invoice, SalesOrder
 
 
@@ -74,6 +74,9 @@ class InvoiceService:
         order.status = "invoiced"
         order.save(update_fields=["status", "updated_at"])
 
+        # Create finance AR mirror and invoice journal posting.
+        ARService.create_from_invoice(invoice=invoice, created_by=created_by)
+
         return invoice
 
     # ------------------------------------------------------------------ #
@@ -105,7 +108,7 @@ class InvoiceService:
         invoice.status = "cancelled"
         invoice.save(update_fields=["status"])
 
-        InvoiceService._reverse_ar_journal(invoice, cancelled_by, reason)
+        ARService.reverse_from_invoice(invoice, cancelled_by, reason)
 
         return invoice
 
@@ -137,39 +140,3 @@ class InvoiceService:
         if payment_terms == "net_60":
             return issued_date + timedelta(days=60)
         return issued_date  # cash
-
-    @staticmethod
-    def _reverse_ar_journal(invoice: Invoice, cancelled_by, reason: str) -> None:
-        """
-        Post a reversing journal entry for the AR entry created at invoice issuance.
-        Silently skips if accounts are not configured.
-        """
-        try:
-            company = invoice.sales_order.warehouse.company
-            ar_account = Account.objects.get(company=company, code="1300")      # Accounts Receivable
-            revenue_account = Account.objects.get(company=company, code="4000") # Revenue
-        except Account.DoesNotExist:
-            return
-
-        je = JournalEntry.objects.create(
-            company=company,
-            entry_date=timezone.now().date(),
-            reference=invoice.invoice_number,
-            description=f"Reversal — cancelled invoice {invoice.invoice_number}. {reason}",
-            source_type="Invoice",
-            source_id=invoice.id,
-            created_by=cancelled_by,
-        )
-        # Reverse: Credit AR, Debit Revenue
-        JournalEntryLine.objects.create(
-            journal_entry=je,
-            account=ar_account,
-            debit=Decimal("0"),
-            credit=invoice.total_amount,
-        )
-        JournalEntryLine.objects.create(
-            journal_entry=je,
-            account=revenue_account,
-            debit=invoice.total_amount,
-            credit=Decimal("0"),
-        )

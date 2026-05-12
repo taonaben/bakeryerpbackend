@@ -7,6 +7,7 @@ Rules enforced here (not in models):
   3. Immutability: entries are never edited; corrections go through reversals
   4. Traceability: every entry carries reference_type + reference_id
 """
+
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Optional
@@ -18,6 +19,7 @@ from django.utils import timezone
 
 from apps.accounting.models import (
     Account,
+    ChartOfAccounts,
     FiscalPeriod,
     JournalEntry,
     JournalEntryLine,
@@ -28,12 +30,49 @@ from central.models import Company
 @dataclass
 class JournalLine:
     account_code: str
-    type: str          # "debit" or "credit"
+    type: str  # "debit" or "credit"
     amount: Decimal
     description: str = ""
 
 
 class JournalService:
+
+    @staticmethod
+    def get_account(
+        company: Company, system_key: str, fallback_code: str | None = None
+    ) -> Account:
+        """Resolve an active account by system key first, then optional fallback code."""
+        if system_key:
+            coa = ChartOfAccounts.objects.filter(
+                company=company,
+                system_key=system_key,
+                is_active=True,
+            ).first()
+            if coa:
+                account = Account.objects.filter(
+                    company=company,
+                    code=coa.code,
+                    is_active=True,
+                ).first()
+                if account:
+                    return account
+
+        if fallback_code:
+            account = Account.objects.filter(
+                company=company,
+                code=fallback_code,
+                is_active=True,
+            ).first()
+            if account:
+                return account
+
+        raise ValidationError(
+            (
+                f"Could not resolve account for system_key '{system_key}'"
+                f" (fallback='{fallback_code}') in company '{company.name}'."
+            ),
+            code="unknown_account",
+        )
 
     @staticmethod
     @transaction.atomic
@@ -175,7 +214,9 @@ class JournalService:
     @staticmethod
     def _resolve_accounts(company: Company, lines: list[JournalLine]) -> dict:
         codes = {line.account_code for line in lines}
-        accounts = Account.objects.filter(company=company, code__in=codes, is_active=True)
+        accounts = Account.objects.filter(
+            company=company, code__in=codes, is_active=True
+        )
         account_map = {a.code: a for a in accounts}
         missing = codes - set(account_map.keys())
         if missing:

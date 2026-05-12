@@ -30,7 +30,9 @@ class FiscalPeriod(models.Model):
     STATUS_CHOICES = [("open", "Open"), ("closed", "Closed")]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="fiscal_periods")
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name="fiscal_periods"
+    )
     name = models.CharField(max_length=100)  # e.g. "January 2025"
     period_start = models.DateField()
     period_end = models.DateField()
@@ -39,7 +41,8 @@ class FiscalPeriod(models.Model):
     closed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        null=True,
+        blank=True,
         related_name="closed_fiscal_periods",
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -50,7 +53,9 @@ class FiscalPeriod(models.Model):
         ordering = ["period_start"]
         indexes = [
             models.Index(fields=["company", "status"], name="fp_company_status_idx"),
-            models.Index(fields=["company", "period_start"], name="fp_company_start_idx"),
+            models.Index(
+                fields=["company", "period_start"], name="fp_company_start_idx"
+            ),
         ]
 
     def __str__(self):
@@ -85,11 +90,15 @@ class ChartOfAccounts(models.Model):
     NORMAL_BALANCE_CHOICES = [("debit", "Debit"), ("credit", "Credit")]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="chart_of_accounts")
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name="chart_of_accounts"
+    )
     code = models.CharField(max_length=20)
     name = models.CharField(max_length=255)
     account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES)
-    account_subtype = models.CharField(max_length=30, choices=ACCOUNT_SUBTYPE_CHOICES, blank=True)
+    account_subtype = models.CharField(
+        max_length=30, choices=ACCOUNT_SUBTYPE_CHOICES, blank=True
+    )
     normal_balance = models.CharField(max_length=6, choices=NORMAL_BALANCE_CHOICES)
     # Internal key used by other modules — stable even if code/name changes
     system_key = models.CharField(max_length=50, blank=True, db_index=True)
@@ -103,8 +112,12 @@ class ChartOfAccounts(models.Model):
         verbose_name_plural = "Chart of Accounts"
         unique_together = [("company", "code")]
         indexes = [
-            models.Index(fields=["company", "account_type"], name="coa_company_type_idx"),
-            models.Index(fields=["company", "is_active"], name="coa_company_active_idx"),
+            models.Index(
+                fields=["company", "account_type"], name="coa_company_type_idx"
+            ),
+            models.Index(
+                fields=["company", "is_active"], name="coa_company_active_idx"
+            ),
         ]
 
     def __str__(self):
@@ -127,7 +140,9 @@ class Account(models.Model):
     code = models.CharField(max_length=20)
     name = models.CharField(max_length=255)
     account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="accounts")
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name="accounts"
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -137,6 +152,53 @@ class Account(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.name}"
+
+
+class BankAccount(models.Model):
+    """Represents a physical cash/bank account mapped to a ledger account."""
+
+    ACCOUNT_TYPE_CHOICES = [
+        ("current", "Current"),
+        ("savings", "Savings"),
+        ("cash", "Cash"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name="bank_accounts",
+    )
+    name = models.CharField(max_length=255)
+    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES)
+    currency = models.CharField(max_length=3)
+    coa_account = models.ForeignKey(
+        ChartOfAccounts,
+        on_delete=models.PROTECT,
+        related_name="bank_accounts",
+    )
+    current_balance = models.DecimalField(
+        max_digits=14, decimal_places=2, default=Decimal("0")
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Bank Account"
+        verbose_name_plural = "Bank Accounts"
+        indexes = [
+            models.Index(fields=["company", "is_active"], name="ba_company_active_idx"),
+            models.Index(
+                fields=["company", "currency"], name="ba_company_currency_idx"
+            ),
+        ]
+
+    def clean(self):
+        if self.coa_account and self.coa_account.company_id != self.company_id:
+            raise ValidationError("coa_account must belong to the same company.")
+
+    def __str__(self):
+        return f"{self.name} ({self.currency})"
 
 
 class JournalEntry(models.Model):
@@ -152,16 +214,23 @@ class JournalEntry(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="journal_entries")
-    entry_number = models.CharField(max_length=20, unique=True, editable=False, null=True, blank=True)
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name="journal_entries"
+    )
+    entry_number = models.CharField(
+        max_length=20, unique=True, editable=False, null=True, blank=True
+    )
     fiscal_period = models.ForeignKey(
         FiscalPeriod,
         on_delete=models.PROTECT,
         related_name="journal_entries",
-        null=True, blank=True,  # resolved at posting time
+        null=True,
+        blank=True,  # resolved at posting time
     )
     entry_date = models.DateField()
-    entry_type = models.CharField(max_length=10, choices=ENTRY_TYPE_CHOICES, default="automated")
+    entry_type = models.CharField(
+        max_length=10, choices=ENTRY_TYPE_CHOICES, default="automated"
+    )
     # Source traceability
     reference_type = models.CharField(max_length=50, blank=True)  # e.g. "SalesOrder"
     reference_id = models.UUIDField(null=True, blank=True)
@@ -175,13 +244,15 @@ class JournalEntry(models.Model):
     reversed_by = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        null=True,
+        blank=True,
         related_name="reverses",
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        null=True,
+        blank=True,
         related_name="journal_entries",
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -199,6 +270,7 @@ class JournalEntry(models.Model):
     def save(self, *args, **kwargs):
         if not self.entry_number:
             from apps.accounting.utils import generate_entry_number
+
             self.entry_number = generate_entry_number(self.company)
         super().save(*args, **kwargs)
 
@@ -215,8 +287,12 @@ class JournalEntryLine(models.Model):
     LINE_TYPE_CHOICES = [("debit", "Debit"), ("credit", "Credit")]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    journal_entry = models.ForeignKey(JournalEntry, on_delete=models.CASCADE, related_name="lines")
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="journal_lines")
+    journal_entry = models.ForeignKey(
+        JournalEntry, on_delete=models.CASCADE, related_name="lines"
+    )
+    account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name="journal_lines"
+    )
     type = models.CharField(max_length=6, choices=LINE_TYPE_CHOICES)
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     # Legacy debit/credit fields — kept for backward compat

@@ -11,6 +11,7 @@ Responsibilities:
   - Updates SalesOrderLine.quantity_dispatched
   - Advances SalesOrder status
 """
+
 from datetime import datetime
 from decimal import Decimal
 
@@ -19,8 +20,9 @@ from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 
-from apps.accounting.models import Account, JournalEntry, JournalEntryLine
+from apps.accounting.models import SYSTEM_KEY_COGS, SYSTEM_KEY_INVENTORY_RAW
 from apps.costing.models import CostingEntry
+from apps.finance.services.journal_service import JournalLine, JournalService
 from apps.inventory.models import Batch, Stock, StockMovement, StockMovementBatch
 from apps.sales.models import Delivery, DeliveryLine, SalesOrder, SalesOrderLine
 from central.models import Product, Warehouse
@@ -84,8 +86,7 @@ class DispatchService:
 
         # Advance order status
         all_dispatched = all(
-            ln.quantity_dispatched >= ln.quantity
-            for ln in order.lines.all()
+            ln.quantity_dispatched >= ln.quantity for ln in order.lines.all()
         )
         order.status = "dispatched" if all_dispatched else "confirmed"
         order.save(update_fields=["status", "updated_at"])
@@ -107,7 +108,9 @@ class DispatchService:
         Allocate qty_to_dispatch across FEFO batches, create DeliveryLines,
         post StockMovements, snapshot cost, and update quantity_dispatched.
         """
-        batches = DispatchService._fefo_batches(warehouse, line.product, qty_to_dispatch)
+        batches = DispatchService._fefo_batches(
+            warehouse, line.product, qty_to_dispatch
+        )
 
         cost_per_unit = DispatchService._resolve_cost(line.product, warehouse)
 
@@ -146,11 +149,12 @@ class DispatchService:
             batch.quantity -= allocated
             batch.save(update_fields=["quantity"])
 
-            Stock.objects.filter(
-                product=line.product, warehouse=warehouse
-            ).update(quantity_on_hand=Stock.objects.filter(
-                product=line.product, warehouse=warehouse
-            ).values_list("quantity_on_hand", flat=True)[0] - allocated)
+            Stock.objects.filter(product=line.product, warehouse=warehouse).update(
+                quantity_on_hand=Stock.objects.filter(
+                    product=line.product, warehouse=warehouse
+                ).values_list("quantity_on_hand", flat=True)[0]
+                - allocated
+            )
 
             remaining -= allocated
 
@@ -185,14 +189,13 @@ class DispatchService:
         Return a list of (batch, quantity) tuples ordered by earliest expiry.
         Splits across multiple batches if needed.
         """
-        batches = (
-            Batch.objects.filter(
-                product=product,
-                warehouse=warehouse,
-                quantity__gt=0,
-            )
-            .order_by("expiry_date")  # nulls last by default — treat no-expiry as last
-        )
+        batches = Batch.objects.filter(
+            product=product,
+            warehouse=warehouse,
+            quantity__gt=0,
+        ).order_by(
+            "expiry_date"
+        )  # nulls last by default — treat no-expiry as last
 
         allocations = []
         remaining = qty_needed
@@ -242,39 +245,41 @@ class DispatchService:
     ) -> None:
         """
         Debit COGS account, Credit Inventory account.
-        Accounts are looked up by code on the company attached to the warehouse.
-        Silently skips if accounts are not configured.
+        Uses JournalService for period validation and balancing guarantees.
         """
-        try:
-            company = order.warehouse.company
-            cogs_account = Account.objects.get(company=company, code="5000")   # COGS
-            inventory_account = Account.objects.get(company=company, code="1200")  # Inventory
-        except Account.DoesNotExist:
-            # Accounting chart not yet configured — skip silently
-            return
+        company = order.warehouse.company
+        cogs_account = JournalService.get_account(
+            company=company,
+            system_key=SYSTEM_KEY_COGS,
+            fallback_code="5000",
+        )
+        inventory_account = JournalService.get_account(
+            company=company,
+            system_key=SYSTEM_KEY_INVENTORY_RAW,
+            fallback_code="1200",
+        )
 
-        je = JournalEntry.objects.create(
+        JournalService.post(
             company=company,
             entry_date=timezone.now().date(),
-            reference=order.order_number,
             description=f"COGS — {product.name} dispatched on {order.order_number}",
-            source_type="SalesOrder",
-            source_id=order.id,
+            lines=[
+                JournalLine(
+                    account_code=cogs_account.code,
+                    type="debit",
+                    amount=cogs_amount,
+                    description=f"COGS {product.name}",
+                ),
+                JournalLine(
+                    account_code=inventory_account.code,
+                    type="credit",
+                    amount=cogs_amount,
+                    description=f"Inventory reduction {product.name}",
+                ),
+            ],
+            reference_type="SalesOrder",
+            reference_id=order.id,
             created_by=created_by,
-        )
-        JournalEntryLine.objects.create(
-            journal_entry=je,
-            account=cogs_account,
-            debit=cogs_amount,
-            credit=Decimal("0"),
-            description=f"COGS {product.name}",
-        )
-        JournalEntryLine.objects.create(
-            journal_entry=je,
-            account=inventory_account,
-            debit=Decimal("0"),
-            credit=cogs_amount,
-            description=f"Inventory reduction {product.name}",
         )
 
     # ------------------------------------------------------------------ #
@@ -284,6 +289,8 @@ class DispatchService:
     @staticmethod
     def _available_stock(warehouse: Warehouse, product: Product) -> Decimal:
         try:
-            return Stock.objects.get(product=product, warehouse=warehouse).quantity_on_hand
+            return Stock.objects.get(
+                product=product, warehouse=warehouse
+            ).quantity_on_hand
         except Stock.DoesNotExist:
             return Decimal("0")
