@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 
 from .views.goods_receipt_views import GoodsReceiptViewSet
@@ -59,18 +59,18 @@ document_detail = SupplierDocumentViewSet.as_view(
 )
 
 urlpatterns = [
-    path(
-        "overview/summary",
+    re_path(
+        r"^overview/summary/?$",
         PurchasingOverviewSummaryView.as_view(),
         name="purchasing-overview-summary",
     ),
-    path(
-        "overview/trends",
+    re_path(
+        r"^overview/trends/?$",
         PurchasingOverviewTrendsView.as_view(),
         name="purchasing-overview-trends",
     ),
-    path(
-        "overview/supplier-performance",
+    re_path(
+        r"^overview/supplier-performance/?$",
         PurchasingSupplierPerformanceView.as_view(),
         name="purchasing-overview-supplier-performance",
     ),
