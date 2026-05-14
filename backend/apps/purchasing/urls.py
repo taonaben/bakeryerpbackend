@@ -3,6 +3,11 @@ from rest_framework.routers import DefaultRouter
 
 from .views.goods_receipt_views import GoodsReceiptViewSet
 from .views.invoice_views import SupplierInvoiceViewSet
+from .views.overview_views import (
+    PurchasingOverviewSummaryView,
+    PurchasingOverviewTrendsView,
+    PurchasingSupplierPerformanceView,
+)
 from .views.purchasing_order_views import (
     PurchaseOrderLineItemViewSet,
     PurchaseOrderViewSet,
@@ -54,6 +59,21 @@ document_detail = SupplierDocumentViewSet.as_view(
 )
 
 urlpatterns = [
+    path(
+        "overview/summary",
+        PurchasingOverviewSummaryView.as_view(),
+        name="purchasing-overview-summary",
+    ),
+    path(
+        "overview/trends",
+        PurchasingOverviewTrendsView.as_view(),
+        name="purchasing-overview-trends",
+    ),
+    path(
+        "overview/supplier-performance",
+        PurchasingSupplierPerformanceView.as_view(),
+        name="purchasing-overview-supplier-performance",
+    ),
     path("", include(router.urls)),
     path(
         "suppliers/<uuid:supplier_pk>/contacts/",
