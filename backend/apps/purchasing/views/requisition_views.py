@@ -11,6 +11,7 @@ from apps.purchasing.models import PurchaseRequisition, PurchaseRequisitionLineI
 from apps.purchasing.serializers.requisition_serilalizer import (
     PurchaseRequisitionApproveSerializer,
     PurchaseRequisitionConvertSerializer,
+    PurchaseRequisitionCreateAndSubmitSerializer,
     PurchaseRequisitionCreateSerializer,
     PurchaseRequisitionLineItemSerializer,
     PurchaseRequisitionRejectSerializer,
@@ -23,6 +24,7 @@ from apps.purchasing.serializers.purchase_order_serializers import (
 from apps.purchasing.services.requisition_service import (
     approve_requisition,
     convert_to_purchase_order,
+    create_and_submit_requisition,
     create_requisition,
     reject_requisition,
     submit_requisition,
@@ -76,7 +78,11 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
             )
         except DjangoValidationError as exc:
             return Response(
-                {"errors": exc.message_dict or exc.messages},
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -97,6 +103,42 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
         return super().update(request, *args, **kwargs)
 
     @extend_schema(
+        request=PurchaseRequisitionCreateAndSubmitSerializer,
+        responses=PurchaseRequisitionSerializer,
+    )
+    @action(detail=False, methods=["post"], url_path="create-and-submit")
+    def create_and_submit(self, request):
+        serializer = PurchaseRequisitionCreateAndSubmitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        payload = serializer.validated_data
+
+        try:
+            requisition = create_and_submit_requisition(
+                requested_by=request.user,
+                submitted_by=payload["submitted_by"],
+                warehouse_id=payload["warehouse_id"],
+                title=payload["title"],
+                lines=payload["lines"],
+                description=payload.get("description", ""),
+            )
+        except DjangoValidationError as exc:
+            return Response(
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            PurchaseRequisitionSerializer(
+                requisition, context=self.get_serializer_context()
+            ).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @extend_schema(
         request=PurchaseRequisitionSubmitSerializer,
         responses=PurchaseRequisitionSerializer,
     )
@@ -112,7 +154,11 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
             )
         except DjangoValidationError as exc:
             return Response(
-                {"errors": exc.message_dict or exc.messages},
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -139,7 +185,11 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
             )
         except DjangoValidationError as exc:
             return Response(
-                {"errors": exc.message_dict or exc.messages},
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -168,7 +218,11 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
             )
         except DjangoValidationError as exc:
             return Response(
-                {"errors": exc.message_dict or exc.messages},
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -198,7 +252,11 @@ class PurchaseRequisitionViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
             )
         except DjangoValidationError as exc:
             return Response(
-                {"errors": exc.message_dict or exc.messages},
+                {
+                    "errors": (
+                        exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

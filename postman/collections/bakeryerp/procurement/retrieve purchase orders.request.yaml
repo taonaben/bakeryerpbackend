@@ -1,7 +1,9 @@
 $kind: http-request
 name: retrieve purchase orders
-url: "{{baseurl}}/purchasing/purchase-orders/?warehouse_id={{wh_1_pie_kings}}"
+url: "{{baseurl}}/purchasing/purchase-orders/"
 method: GET
 queryParams:
-  warehouse_id: "{{wh_1_pie_kings}}"
+  - key: warehouse_id
+    value: "{{wh_1_pie_kings}}"
+    disabled: true
 order: 3356529331024382

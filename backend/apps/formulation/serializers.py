@@ -45,10 +45,29 @@ class FormulaLineWriteSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
+        is_partial = getattr(self.root, "partial", False)
+        line_id = attrs.get("id")
         line_type = attrs.get("line_type")
         product = attrs.get("product")
         quantity = attrs.get("quantity")
         text = attrs.get("text")
+
+        if is_partial and line_id and line_type is None:
+            return attrs
+
+        if is_partial and not line_id:
+            missing_fields = [
+                field
+                for field in ("sequence", "line_type")
+                if field not in attrs
+            ]
+            if missing_fields:
+                raise serializers.ValidationError(
+                    {
+                        field: "This field is required for new lines."
+                        for field in missing_fields
+                    }
+                )
 
         if line_type in {"MATERIAL", "BYPRODUCT"} and not product:
             raise serializers.ValidationError(
@@ -82,6 +101,7 @@ class FormulaSerializer(serializers.ModelSerializer):
             "revision",
             "batch_size",
             "yield_percentage",
+            "labor_minutes_per_batch",
             "status",
             "is_active",
             "on_hold",
@@ -107,9 +127,9 @@ class FormulaWriteSerializer(serializers.ModelSerializer):
         fields = [
             "name",
             "product",
-            "revision",
             "batch_size",
             "yield_percentage",
+            "labor_minutes_per_batch",
             "status",
             "is_active",
             "lines",
@@ -123,7 +143,7 @@ class FormulaWriteSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("At least one line is required.")
 
-        sequences = [line["sequence"] for line in value]
+        sequences = [line["sequence"] for line in value if "sequence" in line]
         if len(sequences) != len(set(sequences)):
             raise serializers.ValidationError("Line sequence values must be unique.")
 
@@ -135,11 +155,21 @@ class FormulaWriteSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         request = self.context.get("request")
-        product = attrs.get("product")
+        product = attrs.get("product") or getattr(self.instance, "product", None)
         lines = attrs.get("lines")
+        labor_minutes = attrs.get("labor_minutes_per_batch")
 
         if self.instance is None and lines is None:
             raise serializers.ValidationError({"lines": "This field is required."})
+
+        if labor_minutes is not None and labor_minutes <= 0:
+            raise serializers.ValidationError(
+                {
+                    "labor_minutes_per_batch": (
+                        "This field must be greater than zero when provided."
+                    )
+                }
+            )
 
         if request and product and product.company_id != getattr(
             request.user, "company_id", None
@@ -174,7 +204,18 @@ class FormulaWriteSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         from .services.formula_services import FormulaService
 
-        return FormulaService.update_with_lines(instance, validated_data)
+        if instance.status != "draft":
+            return FormulaService.revise_with_lines(
+                instance,
+                validated_data,
+                replace_lines=not self.partial,
+            )
+
+        return FormulaService.update_with_lines(
+            instance,
+            validated_data,
+            replace_lines=not self.partial,
+        )
 
 
 class FormulaHoldSerializer(serializers.Serializer):

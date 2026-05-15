@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Account, JournalEntry, JournalEntryLine
+from .models import Account, BankAccount, JournalEntry, JournalEntryLine
 
 
 class JournalEntryLineInline(admin.TabularInline):
@@ -13,6 +13,20 @@ class AccountAdmin(admin.ModelAdmin):
     list_display = ("code", "name", "account_type", "company", "is_active")
     list_filter = ("account_type", "is_active", "company")
     search_fields = ("code", "name")
+
+
+@admin.register(BankAccount)
+class BankAccountAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "company",
+        "currency",
+        "account_type",
+        "coa_account",
+        "is_active",
+    )
+    list_filter = ("company", "currency", "account_type", "is_active")
+    search_fields = ("name", "currency", "coa_account__code", "coa_account__name")
 
 
 @admin.register(JournalEntry)

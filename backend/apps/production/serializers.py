@@ -33,6 +33,12 @@ class ProductionOrderSerializer(serializers.ModelSerializer):
     planned_order_status = serializers.CharField(
         source="planned_order.status", read_only=True
     )
+    formula_name = serializers.SerializerMethodField()
+
+    def get_formula_name(self, obj):
+        if obj.formula:
+            return obj.formula.name
+        return None
 
     class Meta:
         model = ProductionOrder
@@ -47,11 +53,12 @@ class ProductionOrderSerializer(serializers.ModelSerializer):
             "warehouse",
             "warehouse_name",
             "formula",
+            "formula_name",
             "planned_order",
             "planned_order_status",
         ]
 
-        read_only_fields = ["id", "status", "planned_order_status"]
+        read_only_fields = ["id", "status", "planned_order_status", "formula_name"]
 
 
 class SelectedBatchAllocationSerializer(serializers.Serializer):
@@ -373,3 +380,159 @@ class ReworkOrderDetailSerializer(serializers.ModelSerializer):
             "outputs",
         ]
         read_only_fields = fields
+
+
+class ProductionCountByStatusSerializer(serializers.Serializer):
+    scheduled = serializers.IntegerField()
+    in_progress = serializers.IntegerField()
+    completed = serializers.IntegerField()
+    cancelled = serializers.IntegerField()
+
+
+class ProductionExpectedActualSerializer(serializers.Serializer):
+    expected_output = serializers.DecimalField(max_digits=18, decimal_places=6)
+    actual_output = serializers.DecimalField(max_digits=18, decimal_places=6)
+
+
+class ProductionWasteSummarySerializer(serializers.Serializer):
+    quantity = serializers.DecimalField(max_digits=18, decimal_places=6)
+    waste_rate = serializers.DecimalField(
+        max_digits=9, decimal_places=4, allow_null=True
+    )
+
+
+class ProductionVarianceSummarySerializer(serializers.Serializer):
+    quantity = serializers.DecimalField(max_digits=18, decimal_places=6)
+    variance_rate = serializers.DecimalField(
+        max_digits=9, decimal_places=4, allow_null=True
+    )
+
+
+class ProductionProductQuantitySerializer(serializers.Serializer):
+    product_id = serializers.UUIDField()
+    product_name = serializers.CharField()
+    total_quantity = serializers.DecimalField(max_digits=18, decimal_places=6)
+    batch_count = serializers.IntegerField()
+
+
+class ProductionOverviewSummarySerializer(serializers.Serializer):
+    as_of_date = serializers.DateField()
+    date_from = serializers.DateField(allow_null=True, required=False)
+    date_to = serializers.DateField(allow_null=True, required=False)
+    warehouse_id = serializers.UUIDField(allow_null=True, required=False)
+    production_order_counts_by_status = ProductionCountByStatusSerializer()
+    rework_order_counts_by_status = ProductionCountByStatusSerializer()
+    wip_order_count = serializers.IntegerField()
+    in_progress_batch_count = serializers.IntegerField()
+    scheduled_orders_overdue_to_start = serializers.IntegerField()
+    completed_quantity = serializers.DecimalField(max_digits=18, decimal_places=6)
+    expected_vs_actual_output = ProductionExpectedActualSerializer()
+    waste = ProductionWasteSummarySerializer()
+    variance = ProductionVarianceSummarySerializer()
+    top_products_produced = ProductionProductQuantitySerializer(many=True)
+
+
+class ProductionOverviewOrderSerializer(serializers.Serializer):
+    order_id = serializers.UUIDField()
+    product_id = serializers.UUIDField()
+    product_name = serializers.CharField()
+    warehouse_id = serializers.UUIDField()
+    warehouse_name = serializers.CharField()
+    quantity = serializers.DecimalField(max_digits=18, decimal_places=6)
+    status = serializers.ChoiceField(
+        choices=["scheduled", "in_progress", "completed", "cancelled"]
+    )
+    scheduled_start = serializers.DateTimeField()
+    scheduled_end = serializers.DateTimeField()
+    formula_id = serializers.UUIDField()
+    formula_name = serializers.CharField(allow_null=True)
+
+
+class ProductionBlockedOrderSerializer(ProductionOverviewOrderSerializer):
+    blocking_reasons = serializers.ListField(child=serializers.CharField())
+
+
+class ProductionOverviewBatchSerializer(serializers.Serializer):
+    batch_id = serializers.UUIDField()
+    batch_number = serializers.CharField()
+    order_id = serializers.UUIDField()
+    product_id = serializers.UUIDField()
+    product_name = serializers.CharField()
+    warehouse_id = serializers.UUIDField()
+    warehouse_name = serializers.CharField()
+    quantity_produced = serializers.DecimalField(max_digits=18, decimal_places=6)
+    status = serializers.ChoiceField(choices=["in_progress", "completed", "failed"])
+    started_at = serializers.DateTimeField()
+    completed_at = serializers.DateTimeField(allow_null=True)
+
+
+class ProductionOverviewWIPSerializer(serializers.Serializer):
+    as_of_date = serializers.DateField()
+    warehouse_id = serializers.UUIDField(allow_null=True, required=False)
+    in_progress_orders = ProductionOverviewOrderSerializer(many=True)
+    in_progress_batches = ProductionOverviewBatchSerializer(many=True)
+    scheduled_orders_due_today = ProductionOverviewOrderSerializer(many=True)
+    scheduled_orders_overdue = ProductionOverviewOrderSerializer(many=True)
+    orders_blocked_by_unavailable_formula = ProductionBlockedOrderSerializer(
+        many=True
+    )
+
+
+class ProductionYieldTrendOutputRowSerializer(serializers.Serializer):
+    period = serializers.DateTimeField()
+    expected_output = serializers.DecimalField(max_digits=18, decimal_places=6)
+    actual_output = serializers.DecimalField(max_digits=18, decimal_places=6)
+    variance = serializers.DecimalField(max_digits=18, decimal_places=6)
+    completed_orders = serializers.IntegerField()
+
+
+class ProductionWasteTrendRowSerializer(serializers.Serializer):
+    period = serializers.DateTimeField()
+    quantity = serializers.DecimalField(max_digits=18, decimal_places=6)
+    line_count = serializers.IntegerField()
+
+
+class ProductionVarianceByProductSerializer(serializers.Serializer):
+    product_id = serializers.UUIDField()
+    product_name = serializers.CharField()
+    expected_output = serializers.DecimalField(max_digits=18, decimal_places=6)
+    actual_output = serializers.DecimalField(max_digits=18, decimal_places=6)
+    variance = serializers.DecimalField(max_digits=18, decimal_places=6)
+    completed_orders = serializers.IntegerField()
+
+
+class ProductionYieldTrendsSerializer(serializers.Serializer):
+    date_from = serializers.DateField(allow_null=True, required=False)
+    date_to = serializers.DateField(allow_null=True, required=False)
+    warehouse_id = serializers.UUIDField(allow_null=True, required=False)
+    interval = serializers.ChoiceField(choices=["day", "week", "month"])
+    output = ProductionYieldTrendOutputRowSerializer(many=True)
+    waste = ProductionWasteTrendRowSerializer(many=True)
+    variance_by_product = ProductionVarianceByProductSerializer(many=True)
+
+
+class ProductionScheduleAdherenceOrderSerializer(serializers.Serializer):
+    order_id = serializers.UUIDField()
+    product_id = serializers.UUIDField()
+    product_name = serializers.CharField()
+    warehouse_id = serializers.UUIDField()
+    warehouse_name = serializers.CharField()
+    scheduled_start = serializers.DateTimeField()
+    scheduled_end = serializers.DateTimeField()
+    first_batch_started_at = serializers.DateTimeField(allow_null=True)
+    last_batch_completed_at = serializers.DateTimeField(allow_null=True)
+    start_delay_minutes = serializers.FloatField(allow_null=True)
+    finish_delay_minutes = serializers.FloatField(allow_null=True)
+
+
+class ProductionScheduleAdherenceSerializer(serializers.Serializer):
+    date_from = serializers.DateField(allow_null=True, required=False)
+    date_to = serializers.DateField(allow_null=True, required=False)
+    warehouse_id = serializers.UUIDField(allow_null=True, required=False)
+    on_time_start_rate = serializers.DecimalField(
+        max_digits=9, decimal_places=4, allow_null=True
+    )
+    on_time_finish_rate = serializers.DecimalField(
+        max_digits=9, decimal_places=4, allow_null=True
+    )
+    orders = ProductionScheduleAdherenceOrderSerializer(many=True)

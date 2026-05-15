@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from central.models import Company, Warehouse, Product
 from apps.formulation.models import Formula, FormulaLine
+from apps.formulation.services.formula_services import FormulaService
 from apps.inventory.models import Batch, StockMovement, StockMovementBatch
 
 from .models import (
@@ -51,14 +52,14 @@ class ProductionEngineTests(TestCase):
             status="active",
         )
 
-        FormulaLine.objects.create(
+        self.material_line = FormulaLine.objects.create(
             formula=self.formula,
             sequence=1,
             line_type="MATERIAL",
             product=self.material_product,
             quantity=2,
         )
-        FormulaLine.objects.create(
+        self.instruction_line = FormulaLine.objects.create(
             formula=self.formula,
             sequence=2,
             line_type="INSTRUCTION",
@@ -94,6 +95,43 @@ class ProductionEngineTests(TestCase):
 
         batch = result["batch"]
         self.assertEqual(batch.quantity_produced, 20)
+
+        stock_batch = Batch.objects.first()
+        stock_batch.refresh_from_db()
+        self.assertEqual(stock_batch.quantity, Decimal("6"))
+
+    def test_start_production_uses_order_formula_after_new_revision_is_created(self):
+        revised_formula = FormulaService.revise_with_lines(
+            self.formula,
+            {
+                "lines": [
+                    {
+                        "id": self.material_line.id,
+                        "quantity": 4,
+                    },
+                ],
+            },
+            replace_lines=False,
+        )
+
+        Batch.objects.create(
+            product=self.material_product,
+            warehouse=self.warehouse,
+            quantity=10,
+        )
+
+        result = ProductionEngine.start_production(order_id=self.order.id)
+
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.formula_id, self.formula.id)
+        self.assertNotEqual(revised_formula.id, self.formula.id)
+
+        batch = result["batch"]
+        material_line = ProductionBatchLine.objects.get(
+            production_batch=batch,
+            line_type="MATERIAL",
+        )
+        self.assertEqual(material_line.quantity, 4)
 
         stock_batch = Batch.objects.first()
         stock_batch.refresh_from_db()

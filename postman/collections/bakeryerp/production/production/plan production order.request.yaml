@@ -1,4 +1,5 @@
 $kind: http-request
-url: "{{baseurl}}/production/orders/a0076fdd-a5a8-4cef-be7c-1bebc93fd9a2/plan"
+name: plan production order
+url: "{{baseurl}}/production/orders/c4e00c8f-1892-49cf-bc0d-ffdb9d4bbf10/plan"
 method: POST
 order: 2000

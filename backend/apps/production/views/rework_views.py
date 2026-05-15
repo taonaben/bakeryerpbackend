@@ -51,8 +51,13 @@ class ReworkStartAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return StartReworkSerializer
+        return None
+
     def post(self, request, order_id):
-        serializer = StartReworkSerializer(data=request.data)
+        serializer = self.get_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         try:
@@ -89,9 +94,14 @@ class ReworkFinishAPIView(APIView):
     """API view to handle finishing a rework order by producing outputs and updating inventory"""
 
     permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return FinishReworkSerializer
+        return None
 
     def post(self, request, order_id):
-        serializer = FinishReworkSerializer(data=request.data)
+        serializer = self.get_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         try:

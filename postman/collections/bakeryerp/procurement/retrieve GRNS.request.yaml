@@ -1,5 +1,5 @@
 $kind: http-request
 name: retrieve GRNS
-url: ""
+url: "{{baseurl}}/purchasing/goods-receipts/"
 method: GET
 order: 3659498165479633

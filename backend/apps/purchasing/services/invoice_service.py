@@ -5,8 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
 
-from apps.accounting.models import ACCOUNT_AP, ACCOUNT_BANK, ACCOUNT_INVENTORY
-from apps.accounting.services import post_journal_entry
+from apps.finance.services.ap_service import APService
 from apps.purchasing.models import (
     PurchaseOrder,
     PurchasingConfig,
@@ -248,30 +247,7 @@ def approve_invoice(invoice_id, approved_by):
         invoice.approved_by = approved_by
         invoice.save(update_fields=["status", "approved_by", "updated_at"])
 
-        # Post journal entry: Dr Accounts Payable / Cr Inventory
-        post_journal_entry(
-            company=company,
-            entry_date=invoice.invoice_date,
-            reference=invoice.invoice_number,
-            description=f"Supplier invoice {invoice.invoice_number} approved",
-            source_type="supplier_invoice",
-            source_id=invoice.id,
-            lines=[
-                {
-                    "account_code": ACCOUNT_AP,
-                    "debit": invoice.total_amount,
-                    "credit": Decimal("0"),
-                    "description": "Accounts Payable",
-                },
-                {
-                    "account_code": ACCOUNT_INVENTORY,
-                    "debit": Decimal("0"),
-                    "credit": invoice.total_amount,
-                    "description": "Inventory",
-                },
-            ],
-            created_by=approved_by,
-        )
+        APService.create_from_supplier_invoice(invoice, created_by=approved_by)
 
         return invoice, match_result
 
@@ -327,29 +303,17 @@ def mark_paid(invoice_id, paid_by, payment_reference=""):
             ]
         )
 
-        # Post journal entry: Dr Accounts Payable / Cr Bank
-        post_journal_entry(
-            company=company,
-            entry_date=invoice.invoice_date,
-            reference=invoice.invoice_number,
-            description=f"Payment for invoice {invoice.invoice_number}",
-            source_type="supplier_invoice_payment",
-            source_id=invoice.id,
-            lines=[
-                {
-                    "account_code": ACCOUNT_AP,
-                    "debit": invoice.total_amount,
-                    "credit": Decimal("0"),
-                    "description": "Accounts Payable",
-                },
-                {
-                    "account_code": ACCOUNT_BANK,
-                    "debit": Decimal("0"),
-                    "credit": invoice.total_amount,
-                    "description": "Bank",
-                },
-            ],
-            created_by=paid_by,
+        ap_record = (
+            invoice.ap_record
+            if hasattr(invoice, "ap_record")
+            else APService.create_from_supplier_invoice(invoice, created_by=paid_by)
+        )
+        APService.record_payment(
+            ap=ap_record,
+            amount=invoice.total_amount,
+            payment_method="bank_transfer",
+            paid_by=paid_by,
+            reference=payment_reference,
         )
 
         return invoice

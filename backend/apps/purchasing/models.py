@@ -266,7 +266,12 @@ class PurchaseOrder(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     po_number = models.CharField(max_length=20, unique=True, blank=True)
     supplier = models.ForeignKey(
-        Supplier, on_delete=models.CASCADE, related_name="purchase_orders"
+        Supplier,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="purchase_orders",
+        help_text="Optional primary/default supplier for this PO. Each line item carries its own supplier.",
     )
     warehouse = models.ForeignKey(
         Warehouse,
@@ -354,7 +359,13 @@ class PurchaseOrder(models.Model):
 
 
 class PurchaseOrderLineItem(models.Model):
-    """Line items for a purchase order, detailing the specific products or services being ordered, along with quantities, agreed prices, and any relevant notes."""
+    """Line items for a purchase order, detailing the specific products or services being ordered, along with quantities, agreed prices, and any relevant notes.
+
+    Each line carries its own supplier so a single PO can consolidate items from
+    multiple vendors.  ``quoted_price`` is the price on record in SupplierProduct
+    (auto-filled by the frontend); ``unit_price`` is the price agreed on the day
+    (editable, e.g. to reflect a discount).
+    """
 
     unit_of_measure_choices = Product.UNIT_CHOICES
 
@@ -364,6 +375,14 @@ class PurchaseOrderLineItem(models.Model):
         on_delete=models.CASCADE,
         related_name="line_items",
     )
+    supplier = models.ForeignKey(
+        Supplier,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="purchase_order_line_items",
+        help_text="The supplier providing this specific line item.",
+    )
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
@@ -371,7 +390,18 @@ class PurchaseOrderLineItem(models.Model):
     )
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     unit_of_measure = models.CharField(max_length=50, choices=unit_of_measure_choices)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    quoted_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Supplier's catalogue/quoted price (auto-filled from SupplierProduct).",
+    )
+    unit_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Agreed price for this order (may differ from quoted price due to discounts, etc.).",
+    )
     total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     quantity_received = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     description = models.TextField(blank=True)
@@ -383,7 +413,8 @@ class PurchaseOrderLineItem(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.product.name} - {self.quantity} {self.unit_of_measure} at {self.unit_price} each"
+        supplier_name = self.supplier.name if self.supplier else "No supplier"
+        return f"{self.product.name} - {self.quantity} {self.unit_of_measure} at {self.unit_price} each ({supplier_name})"
 
 
 class GoodsReceipt(models.Model):

@@ -60,7 +60,7 @@ class FormulaViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
         if on_hold is not None:
             queryset = queryset.filter(on_hold=on_hold.lower() == "true")
 
-        return queryset
+        return queryset.order_by("-created_at")
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -70,15 +70,23 @@ class FormulaViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         formula = self.get_object()
+        partial = kwargs.get("partial", False)
         serializer = self.get_serializer(
             formula,
             data=request.data,
-            partial=kwargs.get("partial", False),
+            partial=partial,
         )
         serializer.is_valid(raise_exception=True)
-        # Increment revision before saving
-        revision = getattr(formula, "revision", 0) + 1
-        formula = serializer.save(revision=revision)
+
+        if formula.status == "draft":
+            formula = serializer.save()
+        else:
+            formula = FormulaService.revise_with_lines(
+                formula,
+                serializer.validated_data,
+                replace_lines=not partial,
+            )
+
         return Response(FormulaSerializer(formula).data)
 
     def partial_update(self, request, *args, **kwargs):
@@ -87,6 +95,8 @@ class FormulaViewSet(CompanyScopedMixin, viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         try:
+            if self.get_object().status == "draft":
+                return super().destroy(request, *args, **kwargs)
             formula = FormulaService.deactivate_formula(self.get_object())
         except DjangoValidationError as exc:
             return self._validation_error_response(exc)

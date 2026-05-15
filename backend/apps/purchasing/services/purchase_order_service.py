@@ -10,53 +10,92 @@ from apps.purchasing.models import (
     PurchaseOrder,
     PurchaseOrderLineItem,
     Supplier,
+    SupplierProduct,
 )
 from central.models import Product, Warehouse
 
 
 def create_purchase_order(
-    supplier_id,
     warehouse_id,
     lines,
     created_by,
+    supplier_id=None,
     pr_id=None,
     currency=None,
     description="",
     expected_delivery_date=None,
 ):
+    """Create a Purchase Order.
+
+    Each line must specify its own ``supplier_id``.  The top-level ``supplier_id``
+    is optional and can be used to record a primary/default supplier on the header
+    (e.g. when all lines come from the same vendor), but it is no longer required.
+
+    ``quoted_price`` on each line is the supplier's catalogue price (sourced from
+    SupplierProduct and pre-filled by the frontend).  ``unit_price`` is the price
+    agreed for this specific order and may be adjusted by the user.
+    """
     if not lines:
         raise ValidationError("Purchase order requires at least one line item.")
 
     with transaction.atomic():
-        supplier = Supplier.objects.select_for_update().get(id=supplier_id)
-        if not supplier.is_active:
-            raise ValidationError("Supplier must be active to create a purchase order.")
-        if supplier.on_hold:
-            raise ValidationError(
-                f"Supplier '{supplier.name}' is on hold and cannot receive new purchase orders. "
-                f"Reason: {supplier.on_hold_reason or 'No reason given.'}"
-            )
-
         warehouse = Warehouse.objects.select_for_update().get(id=warehouse_id)
 
+        # Validate the optional header-level supplier
+        header_supplier = None
+        if supplier_id:
+            header_supplier = Supplier.objects.select_for_update().get(id=supplier_id)
+            if not header_supplier.is_active:
+                raise ValidationError(
+                    "Header supplier must be active to create a purchase order."
+                )
+            if header_supplier.on_hold:
+                raise ValidationError(
+                    f"Supplier '{header_supplier.name}' is on hold and cannot receive new purchase orders. "
+                    f"Reason: {header_supplier.on_hold_reason or 'No reason given.'}"
+                )
+
+        # Resolve currency: explicit > header supplier > first line supplier
+        resolved_currency = currency
+
         po = PurchaseOrder.objects.create(
-            supplier=supplier,
+            supplier=header_supplier,
             warehouse=warehouse,
             purchase_requisition_id=pr_id,
             created_by=created_by,
-            currency=currency or supplier.currency,
+            currency=resolved_currency or "",  # filled below once lines are validated
             description=description or "",
             expected_delivery_date=expected_delivery_date,
             status="Draft",
         )
 
         line_items = []
+        first_line_currency = None
+
         for line in lines:
             product_id = line.get("product_id")
             if not product_id:
                 raise ValidationError("Each line must include a product.")
 
+            line_supplier_id = line.get("supplier_id")
+            if not line_supplier_id:
+                raise ValidationError(
+                    "Each line must include a supplier_id for the supplier providing that item."
+                )
+
             product = Product.objects.get(id=product_id)
+            line_supplier = Supplier.objects.get(id=line_supplier_id)
+
+            if not line_supplier.is_active:
+                raise ValidationError(
+                    f"Supplier '{line_supplier.name}' on line for product "
+                    f"'{product.name}' is not active."
+                )
+            if line_supplier.on_hold:
+                raise ValidationError(
+                    f"Supplier '{line_supplier.name}' is on hold. "
+                    f"Reason: {line_supplier.on_hold_reason or 'No reason given.'}"
+                )
 
             quantity = Decimal(str(line.get("quantity", 0)))
             unit_price = Decimal(str(line.get("unit_price", 0)))
@@ -66,16 +105,31 @@ def create_purchase_order(
                     "Line quantity and unit price must be greater than zero."
                 )
 
-            unit_of_measure = line.get("unit_of_measure") or product.unit_of_measure
+            # quoted_price: use the value passed in (pre-filled from SupplierProduct
+            # by the frontend), or look it up automatically as a fallback.
+            quoted_price_raw = line.get("quoted_price")
+            if quoted_price_raw is not None:
+                quoted_price = Decimal(str(quoted_price_raw))
+            else:
+                sp = SupplierProduct.objects.filter(
+                    supplier=line_supplier, product=product, is_active=True
+                ).first()
+                quoted_price = sp.price if sp else None
 
+            unit_of_measure = line.get("unit_of_measure") or product.unit_of_measure
             total_price = quantity * unit_price
+
+            if first_line_currency is None:
+                first_line_currency = line_supplier.currency
 
             line_items.append(
                 PurchaseOrderLineItem(
                     purchase_order=po,
+                    supplier=line_supplier,
                     product=product,
                     quantity=quantity,
                     unit_of_measure=unit_of_measure,
+                    quoted_price=quoted_price,
                     unit_price=unit_price,
                     total_price=total_price,
                     description=line.get("description", ""),
@@ -83,6 +137,16 @@ def create_purchase_order(
             )
 
         PurchaseOrderLineItem.objects.bulk_create(line_items)
+
+        # Resolve currency now that we have line data
+        if not po.currency:
+            po.currency = (
+                (header_supplier.currency if header_supplier else None)
+                or first_line_currency
+                or ""
+            )
+            po.save(update_fields=["currency", "updated_at"])
+
         recalculate_total(po.id)
 
         return po
@@ -95,11 +159,23 @@ def submit_po(po_id, submitted_by):
         if po.status != "Draft":
             raise ValidationError("Only Draft purchase orders can be submitted.")
 
-        if not po.supplier.is_active:
-            raise ValidationError("Supplier must be active to submit a purchase order.")
-
         if not po.line_items.exists():
             raise ValidationError("Purchase order must have at least one line item.")
+
+        # Validate that every line has an active, non-held supplier
+        for line in po.line_items.select_related("supplier"):
+            if not line.supplier:
+                raise ValidationError(
+                    f"Line for product '{line.product_id}' is missing a supplier."
+                )
+            if not line.supplier.is_active:
+                raise ValidationError(
+                    f"Supplier '{line.supplier.name}' on a line item is not active."
+                )
+            if line.supplier.on_hold:
+                raise ValidationError(
+                    f"Supplier '{line.supplier.name}' is on hold."
+                )
 
         invalid_line_exists = (
             po.line_items.filter(quantity__lte=0).exists()

@@ -73,6 +73,10 @@ INSTALLED_APPS = [
     "apps.orders",
     "apps.production",
     "apps.purchasing",
+    "apps.costing",
+    "apps.sales",
+    "apps.finance",
+    "apps.mail",
     "central",
 ]
 
@@ -238,7 +242,31 @@ SIMPLE_JWT = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "BakeryERP API",
-    "DESCRIPTION": "API for BakeryERP Application",
+    "DESCRIPTION": """
+BakeryERP is a modular, warehouse-aware Enterprise Resource Planning system designed for 
+multi-warehouse bakery manufacturing operations. It provides a unified backend for managing 
+the full operational lifecycle; from raw material procurement through production execution 
+to sales fulfillment; with strict inventory traceability and auditable financial integration.
+
+## Core Modules
+
+- **Inventory** : Stock movement-driven ledger with batch tracking, multi-warehouse balances, and full audit trail
+- **Formulation** : Versioned recipe management with structured formula lines (materials, instructions, byproducts)
+- **Production** : Order-based production execution with batch snapshots, material consumption, and output recording
+- **Purchasing** : Supplier and procurement lifecycle management including requisitions, purchase orders, goods receipts, and supplier invoices
+- **Costing** : Standard costing, actual cost capture, overhead absorption, variance analysis, and pricing rules
+- **Sales & Distribution** : Customer order management and fulfillment workflows
+
+## Design Principles
+
+- **Stock movements are the single source of truth** : inventory balances are always derived from movement records and never manually overridden
+- **Formula revisions are immutable snapshots** : production batches capture the formula at execution time, preserving historical accuracy
+- **Strict module boundaries** : each module owns its domain; cross-module interaction occurs only through well-defined service interfaces
+- **Warehouse-aware throughout** : every operational event is anchored to a physical warehouse
+
+## Authentication
+All endpoints require token-based authentication unless otherwise noted.
+""",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }

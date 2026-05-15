@@ -19,6 +19,12 @@ class Formula(models.Model):
     revision = models.PositiveIntegerField()
     batch_size = models.FloatField()
     yield_percentage = models.FloatField()
+    labor_minutes_per_batch = models.DecimalField(
+        max_digits=14,
+        decimal_places=4,
+        null=True,
+        blank=True,
+    )
     status = models.CharField(
         max_length=50, choices=formula_status_choices, default="draft"
     )
@@ -26,6 +32,14 @@ class Formula(models.Model):
     on_hold = models.BooleanField(default=False)
     on_hold_reason = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product", "revision"],
+                name="unique_formula_product_revision",
+            )
+        ]
 
     def __str__(self):
         return f"{self.product.name} - Revision {self.revision}"
