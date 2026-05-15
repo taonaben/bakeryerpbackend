@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 from .views.stock_views import StockViewSet
 from .views.stock_movement_views import StockMovementViewSet
@@ -18,13 +18,13 @@ router.register(r"alerts", InventoryAlertViewSet, basename="inventory_alert")
 
 
 urlpatterns = [
-    path(
-        "overview/summary",
+    re_path(
+        r"^overview/summary/?$",
         InventoryOverviewSummaryView.as_view(),
         name="inventory-overview-summary",
     ),
-    path(
-        "overview/movement-trends",
+    re_path(
+        r"^overview/movement-trends/?$",
         InventoryMovementTrendsView.as_view(),
         name="inventory-overview-movement-trends",
     ),

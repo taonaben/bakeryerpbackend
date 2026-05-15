@@ -11,6 +11,12 @@ from .views.batch_views import (
     ProductionBatchDetailView,
 )
 from .views.planning_views import ProductionPlanAPIView
+from .views.overview_views import (
+    ProductionOverviewSummaryView,
+    ProductionOverviewWIPView,
+    ProductionScheduleAdherenceView,
+    ProductionYieldTrendsView,
+)
 from .views.rework_views import (
     ReworkOrderViewSet,
     ReworkStartAPIView,
@@ -22,6 +28,26 @@ router.register(r"orders", ProductionOrderViewSet, basename="production_order")
 router.register(r"rework", ReworkOrderViewSet, basename="rework_order")
 
 urlpatterns = [
+    path(
+        "overview/summary",
+        ProductionOverviewSummaryView.as_view(),
+        name="production_overview_summary",
+    ),
+    path(
+        "overview/wip",
+        ProductionOverviewWIPView.as_view(),
+        name="production_overview_wip",
+    ),
+    path(
+        "overview/yield-trends",
+        ProductionYieldTrendsView.as_view(),
+        name="production_overview_yield_trends",
+    ),
+    path(
+        "overview/schedule-adherence",
+        ProductionScheduleAdherenceView.as_view(),
+        name="production_overview_schedule_adherence",
+    ),
     path(
         "orders/<uuid:order_id>/plan",
         ProductionPlanAPIView.as_view(),
