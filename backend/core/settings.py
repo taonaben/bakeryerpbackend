@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     "apps.sales",
     "apps.finance",
     "apps.mail",
+    "apps.dashboard",
     "central",
 ]
 
