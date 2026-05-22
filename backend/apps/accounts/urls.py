@@ -6,6 +6,7 @@ router = DefaultRouter(trailing_slash=False)
 router.register(r"users", views.UserViewSet, basename="user")
 
 urlpatterns = [
+    path("users/me", views.UserViewSet.as_view({"get": "me"}), name="user-me"),
     path("", include(router.urls)),
     path("login", views.LoginView.as_view(), name="login_user"),
     path("logout", views.LogoutView.as_view(), name="logout"),

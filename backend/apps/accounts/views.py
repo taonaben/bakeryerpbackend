@@ -101,6 +101,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.action == "list" and not self.request.user.is_authenticated:
             return User.objects.none()
+        if self.action == "me":
+            return User.objects.select_related("company").filter(pk=self.request.user.pk)
         if self.action in ["create", "register"]:
             return self.queryset
         return get_company_user_queryset(self.request.user)
@@ -130,7 +132,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated()]
         return [IsAuthenticated(), UsersPermission()]
 
-    @action(detail=False, methods=["get"])
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def me(self, request):
         """Retrieve details of the currently authenticated user"""
         serializer = self.get_serializer(request.user)
