@@ -6,9 +6,9 @@ from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated,
     BasePermission,
-    IsAdminUser,
 )
 from django.contrib.auth import get_user_model, authenticate
+from drf_spectacular.utils import extend_schema
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from .serializers import (
@@ -16,10 +16,21 @@ from .serializers import (
     UserCreateSerializer,
     LoginSerializer,
     LogoutSerializer,
+    PasswordChangeSerializer,
+    PasswordResetResponseSerializer,
+    StaffPasswordResetSerializer,
 )
 from rest_framework.parsers import JSONParser
 from .permissions import (
     ModulePermission,
+)
+from .services import (
+    change_own_password,
+    delete_user,
+    get_company_user_queryset,
+    is_self_edit,
+    override_user_password,
+    update_user,
 )
 
 
@@ -56,28 +67,39 @@ class UserViewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = UserSerializer
+    queryset = User.objects.select_related("company").all()
     # permission_classes = [IsAuthenticatedOrCreate]
 
     def get_queryset(self):
         if self.action == "list" and not self.request.user.is_authenticated:
             return User.objects.none()
-        return User.objects.all()
+        if self.action in ["create", "register"]:
+            return self.queryset
+        return get_company_user_queryset(self.request.user)
 
     def get_serializer_class(self):
         if self.action in ["create", "register"]:
             return UserCreateSerializer
+        if self.action == "change_password":
+            return PasswordChangeSerializer
+        if self.action == "reset_password":
+            return StaffPasswordResetSerializer
         return UserSerializer
 
     def get_permissions(self):
         if self.action in ["create", "register"]:
             return [AllowAny()]
-        elif self.action == "list":
-            # return [ UsersPermission()]
-            return [AllowAny()]  # Temporary open list view
-        elif self.action in ["destroy", "update", "partial_update"]:
+        elif self.action in [
+            "list",
+            "retrieve",
+            "me",
+            "change_password",
+            "destroy",
+            "update",
+            "partial_update",
+            "reset_password",
+        ]:
             return [IsAuthenticated()]
-        elif self.action == "retrieve":
-            return [IsAuthenticated(), UsersPermission()]
         return [IsAuthenticated(), UsersPermission()]
 
     @action(detail=False, methods=["get"])
@@ -105,6 +127,69 @@ class UserViewSet(viewsets.ModelViewSet):
             f"Registration failed for email: {request.data.get('email', 'unknown')} - {serializer.errors}"
         )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        """Update a user through the account service rules."""
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        if is_self_edit(request.user, instance):
+            partial = True
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        user = update_user(request.user, instance, serializer.validated_data)
+        return Response(UserSerializer(user, context=self.get_serializer_context()).data)
+
+    def destroy(self, request, *args, **kwargs):
+        """Delete a user through the account service rules."""
+        instance = self.get_object()
+        delete_user(request.user, instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        request=PasswordChangeSerializer,
+        responses=PasswordResetResponseSerializer,
+    )
+    @action(detail=False, methods=["post"], url_path="change-password")
+    def change_password(self, request):
+        """Change the current user's password after checking the old password."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        change_own_password(
+            request.user,
+            old_password=serializer.validated_data["old_password"],
+            new_password=serializer.validated_data["new_password"],
+        )
+        return Response(
+            {
+                "detail": "Password changed successfully.",
+                "user_id": request.user.id,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        request=StaffPasswordResetSerializer,
+        responses=PasswordResetResponseSerializer,
+    )
+    @action(detail=True, methods=["post"], url_path="reset-password")
+    def reset_password(self, request, pk=None):
+        """Override a company user's password for IT/account admins."""
+        target_user = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        override_user_password(
+            request.user,
+            target_user,
+            serializer.validated_data["new_password"],
+        )
+        return Response(
+            {
+                "detail": "Password reset successfully.",
+                "user_id": target_user.id,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 #! AUTHENTICATION VIEWS
