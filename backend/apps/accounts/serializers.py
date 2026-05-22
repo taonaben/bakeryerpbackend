@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from django.utils.text import slugify
 from apps.accounts import models
 import uuid
@@ -110,3 +111,43 @@ class LogoutSerializer(serializers.Serializer):
     """Serializer for user logout"""
 
     refresh = serializers.CharField(required=True)
+
+
+class PasswordChangeSerializer(serializers.Serializer):
+    """Serializer for users changing their own password"""
+
+    old_password = serializers.CharField(write_only=True, required=True)
+    new_password = serializers.CharField(write_only=True, required=True, min_length=8)
+    new_password2 = serializers.CharField(write_only=True, required=True, min_length=8)
+
+    def validate(self, data):
+        if data["new_password"] != data["new_password2"]:
+            raise serializers.ValidationError(
+                {"new_password": "Passwords do not match."}
+            )
+
+        validate_password(data["new_password"], self.context.get("request").user)
+        return data
+
+
+class StaffPasswordResetSerializer(serializers.Serializer):
+    """Serializer for IT/admin password override"""
+
+    new_password = serializers.CharField(write_only=True, required=True, min_length=8)
+    new_password2 = serializers.CharField(write_only=True, required=True, min_length=8)
+
+    def validate(self, data):
+        if data["new_password"] != data["new_password2"]:
+            raise serializers.ValidationError(
+                {"new_password": "Passwords do not match."}
+            )
+
+        validate_password(data["new_password"])
+        return data
+
+
+class PasswordResetResponseSerializer(serializers.Serializer):
+    """Response contract for password reset actions"""
+
+    detail = serializers.CharField()
+    user_id = serializers.UUIDField()
