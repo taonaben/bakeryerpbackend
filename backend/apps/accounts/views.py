@@ -1,5 +1,6 @@
 import logging
 from rest_framework import viewsets, status, generics
+from rest_framework import filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import (
@@ -21,6 +22,8 @@ from .serializers import (
     StaffPasswordResetSerializer,
 )
 from rest_framework.parsers import JSONParser
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import UserFilter
 from .permissions import (
     ModulePermission,
 )
@@ -68,6 +71,31 @@ class UserViewSet(viewsets.ModelViewSet):
 
     serializer_class = UserSerializer
     queryset = User.objects.select_related("company").all()
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+        filters.SearchFilter,
+    ]
+    filterset_class = UserFilter
+    ordering_fields = [
+        "emp_code",
+        "email",
+        "first_name",
+        "last_name",
+        "username",
+        "role",
+        "is_active",
+        "is_staff",
+        "date_joined",
+    ]
+    search_fields = [
+        "emp_code",
+        "email",
+        "first_name",
+        "last_name",
+        "username",
+        "role",
+    ]
     # permission_classes = [IsAuthenticatedOrCreate]
 
     def get_queryset(self):
